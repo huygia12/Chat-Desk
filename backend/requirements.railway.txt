@@ -1,0 +1,29 @@
+# Optimized requirements for Railway deployment
+# Reduces Docker image from 8.3GB to ~2GB
+
+fastapi==0.115.*
+uvicorn[standard]==0.34.*
+sqlalchemy[asyncio]==2.0.*
+asyncpg==0.30.*
+alembic==1.14.*
+python-jose[cryptography]==3.3.*
+passlib[bcrypt]==1.7.*
+python-multipart==0.0.*
+pydantic==2.10.*
+pydantic-settings==2.7.*
+email-validator==2.2.*
+httpx==0.28.*
+groq==0.15.*
+python-dotenv==1.0.*
+bcrypt==4.2.*
+
+# PyTorch CPU-only (reduces from 2.5GB to 700MB)
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.5.1+cpu
+torchvision==0.20.1+cpu
+
+# Sentence-transformers (will use CPU torch above)
+sentence-transformers==3.3.*
+
+# Milvus (use lite version to reduce size)
+pymilvus==2.5.*

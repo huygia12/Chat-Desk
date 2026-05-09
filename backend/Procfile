@@ -1,0 +1,2 @@
+# Railway deployment - auto-run migrations before starting server
+web: sh start.sh

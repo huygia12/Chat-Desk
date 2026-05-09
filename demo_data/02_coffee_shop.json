@@ -1,0 +1,79 @@
+{
+  "company": {
+    "business_name": "Nhà Cà Phê - Specialty Coffee",
+    "business_description": "Quán cà phê specialty đặc sản, rang xay thủ công tại Đà Lạt. Chuyên cung cấp hạt cà phê Arabica, Robusta chất lượng cao và đồ uống pha chế đặc biệt. Có giao hàng nội thành qua GrabFood/ShopeeFood, ship hạt cà phê toàn quốc.",
+    "phone": "0912345678"
+  },
+  "products": [
+    {
+      "name": "Cà phê sữa đá truyền thống",
+      "description": "Cà phê phin truyền thống pha với sữa đặc, đá viên. Dùng hạt Robusta Buôn Ma Thuột rang đậm, vị đắng đầm, hậu ngọt. Size: M (300ml) / L (450ml).",
+      "price": 35000,
+      "status": "available",
+      "extra_info": {"category": "Đồ uống", "size_M": 35000, "size_L": 45000, "type": "Cà phê"}
+    },
+    {
+      "name": "Bạc xỉu",
+      "description": "Cà phê pha sữa tươi nhiều hơn, vị ngọt nhẹ, thơm béo. Phù hợp cho người mới bắt đầu uống cà phê hoặc thích vị nhẹ nhàng. Có thể chọn nóng hoặc đá.",
+      "price": 39000,
+      "status": "available",
+      "extra_info": {"category": "Đồ uống", "type": "Cà phê", "hot_or_iced": true}
+    },
+    {
+      "name": "Espresso Shot đơn",
+      "description": "Shot espresso đơn (30ml) từ hạt Arabica Cầu Đất, Đà Lạt. Rang medium-dark, chiết xuất bằng máy La Marzocca 9 bar. Vị chua nhẹ, body dày, hương chocolate và mật ong.",
+      "price": 39000,
+      "status": "available",
+      "extra_info": {"category": "Đồ uống", "type": "Specialty Coffee"}
+    },
+    {
+      "name": "Cappuccino",
+      "description": "Espresso kết hợp sữa tươi đánh foam mịn. Tỉ lệ 1:1:1 hoàn hảo. Latte art thủ công. Có thể thêm syrup Vanilla, Caramel, Hazelnut (+10.000đ). Size: M/L.",
+      "price": 55000,
+      "status": "available",
+      "extra_info": {"category": "Đồ uống", "type": "Specialty Coffee", "add_syrup": 10000}
+    },
+    {
+      "name": "Trà đào cam sả",
+      "description": "Trà oolong pha cùng đào ngâm, cam tươi và sả nướng thơm. Vị ngọt tự nhiên, thanh mát, không dùng đường hóa học. Topping: thạch đào. Size M (400ml) / L (600ml).",
+      "price": 45000,
+      "status": "available",
+      "extra_info": {"category": "Đồ uống", "type": "Trà trái cây", "size_M": 45000, "size_L": 55000}
+    },
+    {
+      "name": "Matcha Latte",
+      "description": "Bột matcha Nhật Bản (Uji, Kyoto) đánh cùng sữa tươi. Vị thanh, chát nhẹ, béo hài hòa. Chọn: đá hoặc nóng. Có phiên bản ít đường cho người ăn kiêng.",
+      "price": 59000,
+      "status": "available",
+      "extra_info": {"category": "Đồ uống", "type": "Matcha", "hot_or_iced": true}
+    },
+    {
+      "name": "Hạt cà phê Arabica Cầu Đất - 250g",
+      "description": "Hạt cà phê Arabica 100% từ Cầu Đất, Đà Lạt. Rang medium, phù hợp pha pour over, drip, espresso. Profile: chocolate, mật ong, chua nhẹ. Đóng gói valve 1 chiều giữ tươi.",
+      "price": 180000,
+      "status": "available",
+      "extra_info": {"category": "Hạt cà phê", "weight": "250g", "origin": "Cầu Đất, Đà Lạt", "roast": "Medium"}
+    },
+    {
+      "name": "Hạt cà phê Robusta Honey - 500g",
+      "description": "Robusta Buôn Ma Thuột chế biến honey process. Rang đậm vừa, vị đắng đầm, body dày, hậu vị socola đen. Phù hợp pha phin, moka pot, cold brew. Đóng gói 500g, bảo quản 6 tháng.",
+      "price": 220000,
+      "status": "available",
+      "extra_info": {"category": "Hạt cà phê", "weight": "500g", "origin": "Buôn Ma Thuột", "roast": "Medium-Dark"}
+    },
+    {
+      "name": "Bánh croissant bơ Pháp",
+      "description": "Croissant nướng tại chỗ mỗi sáng với bơ Président nhập khẩu Pháp. Lớp vỏ giòn, ruột mềm xốp, thơm bơ. Kết hợp hoàn hảo với espresso hoặc cappuccino.",
+      "price": 45000,
+      "status": "available",
+      "extra_info": {"category": "Bánh ngọt", "type": "Pastry"}
+    },
+    {
+      "name": "Cold Brew 12h - chai 500ml",
+      "description": "Cà phê cold brew ngâm lạnh 12 tiếng, dùng hạt Arabica đặc biệt. Vị smooth, ít acid, hương trái cây. Đóng chai thủy tinh 500ml, bảo quản lạnh 5 ngày. Uống trực tiếp hoặc pha thêm sữa.",
+      "price": 89000,
+      "status": "available",
+      "extra_info": {"category": "Đồ uống đóng chai", "volume": "500ml", "shelf_life": "5 ngày (bảo quản lạnh)"}
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "company": {
+    "business_name": "TechMobile Việt Nam",
+    "business_description": "Cửa hàng chuyên kinh doanh điện thoại, máy tính bảng, phụ kiện chính hãng. Cam kết giá tốt nhất, bảo hành 12 tháng, đổi trả trong 7 ngày. Giao hàng toàn quốc, thanh toán COD hoặc chuyển khoản.",
+    "phone": "0901234567"
+  },
+  "products": [
+    {
+      "name": "iPhone 15 Pro Max 256GB",
+      "description": "Điện thoại Apple iPhone 15 Pro Max, chip A17 Pro, camera 48MP, Dynamic Island, khung Titanium. Màu: Titan Tự nhiên, Titan Xanh, Titan Trắng, Titan Đen. Màn hình 6.7 inch Super Retina XDR, pin cả ngày.",
+      "price": 29990000,
+      "status": "available",
+      "extra_info": {"brand": "Apple", "warranty": "12 tháng", "colors": ["Titan Tự nhiên", "Titan Xanh", "Titan Trắng", "Titan Đen"]}
+    },
+    {
+      "name": "Samsung Galaxy S24 Ultra 256GB",
+      "description": "Samsung Galaxy S24 Ultra, chip Snapdragon 8 Gen 3, camera 200MP, tích hợp bút S-Pen, khung Titanium. AI Galaxy tích hợp, dịch realtime, chỉnh ảnh AI. Màn hình 6.8 inch QHD+ Dynamic AMOLED 2X.",
+      "price": 27990000,
+      "status": "available",
+      "extra_info": {"brand": "Samsung", "warranty": "12 tháng", "colors": ["Xám Titanium", "Vàng Titanium", "Tím Titanium"]}
+    },
+    {
+      "name": "Xiaomi 14 Ultra 512GB",
+      "description": "Xiaomi 14 Ultra, chip Snapdragon 8 Gen 3, camera Leica 50MP, ống kính quang học biến đổi. Pin 5000mAh, sạc nhanh 90W. Thiết kế cao cấp, khung nhôm, mặt lưng da thuần chay.",
+      "price": 19990000,
+      "status": "available",
+      "extra_info": {"brand": "Xiaomi", "warranty": "12 tháng"}
+    },
+    {
+      "name": "OPPO Find X7 Ultra",
+      "description": "OPPO Find X7 Ultra, hệ thống 4 camera Hasselblad, chip Dimensity 9300. Camera chụp đêm xuất sắc, quay video 4K Dolby Vision. Pin 5400mAh, sạc nhanh 100W SUPERVOOC.",
+      "price": 22990000,
+      "status": "available",
+      "extra_info": {"brand": "OPPO", "warranty": "12 tháng"}
+    },
+    {
+      "name": "iPhone 15 128GB",
+      "description": "iPhone 15 tiêu chuẩn, chip A16 Bionic, Dynamic Island, camera 48MP, sạc USB-C. Thiết kế mới, mặt lưng kính nhám. Màu: Xanh, Hồng, Vàng, Đen, Trắng.",
+      "price": 19490000,
+      "status": "available",
+      "extra_info": {"brand": "Apple", "warranty": "12 tháng", "colors": ["Xanh", "Hồng", "Vàng", "Đen", "Trắng"]}
+    },
+    {
+      "name": "Samsung Galaxy A55 5G 128GB",
+      "description": "Samsung Galaxy A55 5G, chip Exynos 1480, camera 50MP OIS, chống nước IP67. Thiết kế Key Island đặc trưng. Màn hình 6.6 inch Super AMOLED, 120Hz. Phù hợp tầm trung, pin 5000mAh.",
+      "price": 7990000,
+      "status": "available",
+      "extra_info": {"brand": "Samsung", "warranty": "12 tháng"}
+    },
+    {
+      "name": "Sạc nhanh Apple 20W USB-C",
+      "description": "Adapter sạc nhanh Apple 20W USB-C chính hãng, tương thích iPhone 15/14/13/12 series, iPad. Sạc nhanh lên 50% trong 30 phút (kèm cáp Lightning/USB-C).",
+      "price": 490000,
+      "status": "available",
+      "extra_info": {"brand": "Apple", "warranty": "6 tháng", "category": "Phụ kiện"}
+    },
+    {
+      "name": "Ốp lưng iPhone 15 Pro Max MagSafe",
+      "description": "Ốp lưng silicon chính hãng Apple có MagSafe cho iPhone 15 Pro Max. Chất liệu silicon mềm mại, bảo vệ cạnh và mặt lưng. Tương thích sạc không dây MagSafe.",
+      "price": 390000,
+      "status": "available",
+      "extra_info": {"brand": "Apple", "warranty": "3 tháng", "category": "Phụ kiện"}
+    },
+    {
+      "name": "AirPods Pro 2 (USB-C)",
+      "description": "Tai nghe Apple AirPods Pro 2 phiên bản USB-C. Chống ồn chủ động ANC, Transparency Mode, Adaptive Audio. Âm thanh không gian cá nhân hóa. Pin: 6h (case: 30h). Chống nước IPX4.",
+      "price": 5490000,
+      "status": "available",
+      "extra_info": {"brand": "Apple", "warranty": "12 tháng", "category": "Phụ kiện"}
+    },
+    {
+      "name": "Samsung Galaxy Tab S9 FE WiFi",
+      "description": "Máy tính bảng Samsung Galaxy Tab S9 FE, chip Exynos 1380, màn hình 10.9 inch TFT LCD 90Hz. Kèm bút S-Pen, chống nước IP68. RAM 6GB, ROM 128GB. Lý tưởng cho giải trí và làm việc nhẹ.",
+      "price": 8490000,
+      "status": "out_of_stock",
+      "extra_info": {"brand": "Samsung", "warranty": "12 tháng", "category": "Máy tính bảng"}
+    }
+  ]
+}

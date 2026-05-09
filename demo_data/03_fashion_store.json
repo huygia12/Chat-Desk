@@ -1,0 +1,79 @@
+{
+  "company": {
+    "business_name": "MODA Fashion Store",
+    "business_description": "Thời trang nam nữ cao cấp, phong cách Hàn Quốc. Cam kết chất liệu tốt, form chuẩn, đổi size miễn phí trong 3 ngày. Freeship đơn từ 500K nội thành HCM. Nhận đặt sỉ từ 10 sản phẩm.",
+    "phone": "0987654321"
+  },
+  "products": [
+    {
+      "name": "Áo thun Oversize Basic Cotton",
+      "description": "Áo thun unisex form oversize, chất cotton 100% co giãn 4 chiều, dày dặn 250GSM, không xù lông sau giặt. Size: S/M/L/XL. Màu: Đen, Trắng, Be, Xám, Xanh navy.",
+      "price": 189000,
+      "status": "available",
+      "extra_info": {"category": "Áo", "gender": "Unisex", "sizes": ["S", "M", "L", "XL"], "colors": ["Đen", "Trắng", "Be", "Xám", "Xanh navy"], "material": "Cotton 100%"}
+    },
+    {
+      "name": "Quần jean baggy nữ lưng cao",
+      "description": "Quần jean nữ dáng baggy, lưng cao tôn dáng, chất vải denim dày có co giãn nhẹ. Wash xanh vintage, đường may chắc chắn. Size: 25-31 (tương đương S-XL). Dài 95cm.",
+      "price": 359000,
+      "status": "available",
+      "extra_info": {"category": "Quần", "gender": "Nữ", "sizes": ["25", "26", "27", "28", "29", "30", "31"], "material": "Denim"}
+    },
+    {
+      "name": "Áo sơ mi nam Oxford Slim Fit",
+      "description": "Áo sơ mi nam form slim fit, vải Oxford 100% cotton thấm hút mồ hôi tốt. Cổ button-down, tay dài có thể xắn. Phù hợp đi làm, đi chơi. Size: M/L/XL/2XL. Màu: Trắng, Xanh nhạt, Hồng nhạt.",
+      "price": 289000,
+      "status": "available",
+      "extra_info": {"category": "Áo", "gender": "Nam", "sizes": ["M", "L", "XL", "2XL"], "colors": ["Trắng", "Xanh nhạt", "Hồng nhạt"]}
+    },
+    {
+      "name": "Váy midi xếp ly chiffon",
+      "description": "Váy midi xếp ly nhỏ, chất vải chiffon cao cấp, lót lụa mát. Lưng thun co giãn thoải mái. Phù hợp đi làm, đi tiệc, dạo phố. Dài 75cm. Size: S/M/L. Màu: Đen, Be, Nâu đất.",
+      "price": 329000,
+      "status": "available",
+      "extra_info": {"category": "Váy", "gender": "Nữ", "sizes": ["S", "M", "L"], "colors": ["Đen", "Be", "Nâu đất"]}
+    },
+    {
+      "name": "Quần short kaki nam",
+      "description": "Quần short kaki nam, form regular thoải mái, chất vải kaki cotton pha spandex co giãn. Túi chéo 2 bên, túi sau nắp cúc. Dài đến gối. Size: 29-36. Màu: Be, Đen, Xanh rêu, Nâu.",
+      "price": 219000,
+      "status": "available",
+      "extra_info": {"category": "Quần", "gender": "Nam", "sizes": ["29", "30", "31", "32", "34", "36"]}
+    },
+    {
+      "name": "Áo khoác blazer nữ 1 lớp",
+      "description": "Blazer nữ 1 lớp, form suông Hàn Quốc. Chất vải tuyết mưa mịn, nhẹ, ít nhăn. Phù hợp mix đồ công sở hoặc casual. Size: S/M/L. Màu: Đen, Trắng kem, Xám. Kèm túi giả và khuy 1 nút.",
+      "price": 399000,
+      "status": "available",
+      "extra_info": {"category": "Áo khoác", "gender": "Nữ", "sizes": ["S", "M", "L"], "colors": ["Đen", "Trắng kem", "Xám"]}
+    },
+    {
+      "name": "Áo hoodie nỉ bông Oversize",
+      "description": "Hoodie unisex form oversize, chất nỉ bông dày 350GSM, mặt trong lót lông mịn giữ ấm. Có mũ trùm đầu, túi kanguroo. Size: M/L/XL. Màu: Đen, Xám đậm, Be, Xanh dương.",
+      "price": 299000,
+      "status": "available",
+      "extra_info": {"category": "Áo khoác", "gender": "Unisex", "sizes": ["M", "L", "XL"], "colors": ["Đen", "Xám đậm", "Be", "Xanh dương"]}
+    },
+    {
+      "name": "Set bộ pijama lụa nữ",
+      "description": "Set bộ pijama lụa nữ gồm áo cộc tay + quần dài. Chất lụa satin mát lạnh, mềm mượt. Thiết kế cổ viền, bo chun quần thoải mái. Size: S/M/L/XL. Màu: Hồng, Trắng, Xanh mint, Đen.",
+      "price": 259000,
+      "status": "available",
+      "extra_info": {"category": "Đồ ngủ", "gender": "Nữ", "sizes": ["S", "M", "L", "XL"]}
+    },
+    {
+      "name": "Túi tote vải canvas",
+      "description": "Túi tote unisex vải canvas 12oz dày dặn, in logo MODA thêu tay. Kích thước 40x35x10cm, có ngăn trong zip. Đựng được laptop 13 inch. Phù hợp đi học, đi làm, dạo phố.",
+      "price": 149000,
+      "status": "available",
+      "extra_info": {"category": "Phụ kiện", "gender": "Unisex", "material": "Canvas 12oz"}
+    },
+    {
+      "name": "Quần tây âu nam Slim Fit",
+      "description": "Quần tây âu nam form slim fit, chất vải polyester pha viscose chống nhăn, giữ form tốt. Lưng có hook và khóa kéo. Phù hợp đi làm, sự kiện. Size: 29-34. Màu: Đen, Xám, Xanh navy.",
+      "price": 349000,
+      "status": "out_of_stock",
+      "extra_info": {"category": "Quần", "gender": "Nam", "sizes": ["29", "30", "31", "32", "34"], "colors": ["Đen", "Xám", "Xanh navy"]}
+    }
+  ]
+}

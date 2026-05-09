@@ -8,6 +8,7 @@ import Channels from "./pages/Channels";
 import Products from "./pages/Products";
 import Settings from "./pages/Settings";
 import AdminDashboard from "./pages/AdminDashboard";
+import WidgetPage from "./pages/WidgetPage";
 
 function PrivateRoute({ children }) {
   const token = useAuthStore((state) => state.token);
@@ -29,6 +30,9 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
+      {/* Widget Page (Public, no auth required) */}
+      <Route path="/widget" element={<WidgetPage />} />
 
       {/* Admin Routes */}
       <Route

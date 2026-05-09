@@ -13,7 +13,7 @@ class Conversation(Base):
     business_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     channel_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("channels.id"), nullable=False)
     contact_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("contacts.id"), nullable=False)
-    platform: Mapped[str] = mapped_column(SAEnum("facebook", "instagram", "telegram", name="platform_type", create_type=False), nullable=False)
+    platform: Mapped[str] = mapped_column(SAEnum("facebook", "instagram", "telegram", "widget", name="platform_type", create_type=False), nullable=False)
     last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     is_ai_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

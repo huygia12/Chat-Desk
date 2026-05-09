@@ -11,10 +11,13 @@ class Contact(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     business_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    platform: Mapped[str] = mapped_column(SAEnum("facebook", "instagram", "telegram", name="platform_type", create_type=False), nullable=False)
+    platform: Mapped[str] = mapped_column(SAEnum("facebook", "instagram", "telegram", "widget", name="platform_type", create_type=False), nullable=False)
     platform_user_id: Mapped[str] = mapped_column(String(255), nullable=False)
     display_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     profile_pic_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Widget visitor info
+    visitor_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    visitor_phone: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships

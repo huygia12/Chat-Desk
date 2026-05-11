@@ -20,6 +20,9 @@ export default function WidgetChat({
   const [loading, setLoading] = useState(false);
   const [visitorInfo, setVisitorInfo] = useState(null);
   const [conversationId, setConversationId] = useState(null);
+  // true only when visitorInfo was restored from localStorage (returning visitor)
+  // false when the form was just submitted for the first time → no history fetch
+  const [isReturningVisitor, setIsReturningVisitor] = useState(false);
   // Form state for visitor info (replaces prompt() which is blocked in cross-origin iframes)
   const [nameInput, setNameInput] = useState("");
   const [emailInput, setEmailInput] = useState("");
@@ -40,21 +43,23 @@ export default function WidgetChat({
         name: savedName,
         email: localStorage.getItem("widget_visitor_email") || null,
       });
+      // This is a returning visitor — will trigger history fetch
+      setIsReturningVisitor(true);
     }
   }, []);
 
-  // Handle visitor form submit
+  // Handle visitor form submit — always treated as a new session, no history
   const handleVisitorSubmit = () => {
     const trimmedName = nameInput.trim();
     if (!trimmedName) return;
 
-    let id = localStorage.getItem("widget_visitor_id");
-    if (!id) {
-      id = "visitor_" + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem("widget_visitor_id", id);
-    }
+    // Generate a fresh visitor_id so this session is isolated
+    // (even if localStorage had a leftover id from a previous browser session)
+    const id = "visitor_" + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem("widget_visitor_id", id);
     localStorage.setItem("widget_visitor_name", trimmedName);
     localStorage.setItem("widget_visitor_email", emailInput.trim() || "");
+    // isReturningVisitor stays false → no history fetch
     setVisitorInfo({ id, name: trimmedName, email: emailInput.trim() || null });
   };
 
@@ -126,10 +131,9 @@ export default function WidgetChat({
     };
   }, [conversationId, widgetId, widgetSecret]);
 
-  // Fetch full conversation history after conversationId is set
-  // This recovers messages sent while widget was not connected
+  // On mount: if returning visitor, fetch history by visitor_id from backend
   useEffect(() => {
-    if (!conversationId || !widgetId || !widgetSecret) return;
+    if (!isReturningVisitor || !visitorInfo || !widgetId || !widgetSecret) return;
 
     const apiUrl =
       window.__chatdesk_api_url__ ||
@@ -137,22 +141,30 @@ export default function WidgetChat({
       `${window.location.protocol}//${window.location.host}`;
 
     fetch(
-      `${apiUrl}/api/widgets/${widgetId}/messages?widget_secret=${encodeURIComponent(widgetSecret)}&conversation_id=${conversationId}`
+      `${apiUrl}/api/widgets/${widgetId}/history` +
+        `?widget_secret=${encodeURIComponent(widgetSecret)}` +
+        `&visitor_id=${encodeURIComponent(visitorInfo.id)}`
     )
       .then((r) => r.json())
-      .then((history) => {
-        if (!Array.isArray(history)) return;
-        setMessages(
-          history.map((m) => ({
-            id: m.id,
-            content: m.content,
-            sender: m.sender_type === "contact" ? "customer" : m.sender_type,
-            timestamp: new Date(m.created_at),
-          }))
-        );
+      .then((data) => {
+        if (!data || !Array.isArray(data.messages)) return;
+        if (data.conversation_id) {
+          setConversationId(data.conversation_id);
+          localStorage.setItem("widget_conversation_id", data.conversation_id);
+        }
+        if (data.messages.length > 0) {
+          setMessages(
+            data.messages.map((m) => ({
+              id: m.id,
+              content: m.content,
+              sender: m.sender_type === "contact" ? "customer" : m.sender_type,
+              timestamp: new Date(m.created_at),
+            }))
+          );
+        }
       })
       .catch(() => {});
-  }, [conversationId]);
+  }, [isReturningVisitor, visitorInfo]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || !visitorInfo) return;
@@ -191,6 +203,7 @@ export default function WidgetChat({
 
       const result = await response.json();
       setConversationId(result.conversation_id);
+      localStorage.setItem("widget_conversation_id", result.conversation_id);
 
       setMessages((prev) => [
         ...prev,

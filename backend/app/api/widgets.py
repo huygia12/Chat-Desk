@@ -128,6 +128,70 @@ async def create_widget(
     }
 
 
+@router.get("/{widget_id}/history")
+async def get_widget_history(
+    widget_id: str,
+    widget_secret: str,
+    visitor_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Public endpoint for the widget iframe to restore conversation history on reload.
+    Lookup is based on visitor_id (from localStorage), NOT email.
+    Returns empty list if no conversation exists for this visitor_id.
+    """
+    # Validate widget credentials (skip origin check — internal call)
+    channel = await validate_widget_request(widget_id, widget_secret, "*", db)
+    if not channel:
+        raise HTTPException(status_code=401, detail="Invalid widget credentials")
+
+    # Find contact by visitor_id tied to this widget's channel/business
+    contact_result = await db.execute(
+        select(Contact).where(
+            Contact.business_id == channel.business_id,
+            Contact.platform == "widget",
+            Contact.platform_user_id == visitor_id,
+        )
+    )
+    contact = contact_result.scalar_one_or_none()
+
+    if not contact:
+        return {"conversation_id": None, "messages": []}
+
+    # Find conversation for this contact + channel
+    conv_result = await db.execute(
+        select(Conversation).where(
+            Conversation.channel_id == channel.id,
+            Conversation.contact_id == contact.id,
+        )
+    )
+    conversation = conv_result.scalar_one_or_none()
+
+    if not conversation:
+        return {"conversation_id": None, "messages": []}
+
+    # Fetch messages ordered by created_at
+    msg_result = await db.execute(
+        select(Message)
+        .where(Message.conversation_id == conversation.id)
+        .order_by(Message.created_at.asc())
+    )
+    msgs = msg_result.scalars().all()
+
+    return {
+        "conversation_id": str(conversation.id),
+        "messages": [
+            {
+                "id": str(m.id),
+                "sender_type": m.sender_type,
+                "content": m.content,
+                "created_at": m.created_at.isoformat(),
+            }
+            for m in msgs
+        ],
+    }
+
+
 @router.get("/{widget_id}/messages")
 async def get_widget_messages(
     widget_id: str,

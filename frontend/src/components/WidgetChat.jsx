@@ -24,6 +24,7 @@ export default function WidgetChat({
   const [nameInput, setNameInput] = useState("");
   const [emailInput, setEmailInput] = useState("");
   const messagesEndRef = useRef(null);
+  const wsRef = useRef(null);
 
   // Load visitor info from localStorage on mount (no prompt)
   useEffect(() => {
@@ -65,6 +66,93 @@ export default function WidgetChat({
       setIsOpen(false);
     }
   };
+
+  // Connect WebSocket to receive real-time replies from business/admin
+  // Only after we have a conversationId (i.e., first message sent)
+  useEffect(() => {
+    if (!conversationId || !widgetId || !widgetSecret) return;
+
+    const apiUrl =
+      window.__chatdesk_api_url__ ||
+      import.meta.env.VITE_API_URL ||
+      `${window.location.protocol}//${window.location.host}`;
+    const wsBase = apiUrl.replace(/^http:/, "ws:").replace(/^https:/, "wss:");
+    const wsUrl = `${wsBase}/ws/widget/${widgetId}?widget_secret=${encodeURIComponent(widgetSecret)}`;
+
+    let ws;
+    let reconnectTimer;
+    let destroyed = false;
+
+    const connect = () => {
+      if (destroyed) return;
+      ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "new_message") {
+            const msg = data.message;
+            setMessages((prev) => {
+              if (prev.some((m) => m.id === msg.id)) return prev;
+              return [
+                ...prev,
+                {
+                  id: msg.id,
+                  content: msg.content,
+                  sender: msg.sender_type === "contact" ? "customer" : msg.sender_type,
+                  timestamp: new Date(msg.created_at),
+                },
+              ];
+            });
+          }
+        } catch (e) {
+          console.error("Widget WS parse error:", e);
+        }
+      };
+
+      ws.onclose = () => {
+        if (destroyed) return;
+        reconnectTimer = setTimeout(connect, 3000);
+      };
+    };
+
+    connect();
+
+    return () => {
+      destroyed = true;
+      clearTimeout(reconnectTimer);
+      if (wsRef.current) wsRef.current.close();
+    };
+  }, [conversationId, widgetId, widgetSecret]);
+
+  // Fetch full conversation history after conversationId is set
+  // This recovers messages sent while widget was not connected
+  useEffect(() => {
+    if (!conversationId || !widgetId || !widgetSecret) return;
+
+    const apiUrl =
+      window.__chatdesk_api_url__ ||
+      import.meta.env.VITE_API_URL ||
+      `${window.location.protocol}//${window.location.host}`;
+
+    fetch(
+      `${apiUrl}/api/widgets/${widgetId}/messages?widget_secret=${encodeURIComponent(widgetSecret)}&conversation_id=${conversationId}`
+    )
+      .then((r) => r.json())
+      .then((history) => {
+        if (!Array.isArray(history)) return;
+        setMessages(
+          history.map((m) => ({
+            id: m.id,
+            content: m.content,
+            sender: m.sender_type === "contact" ? "customer" : m.sender_type,
+            timestamp: new Date(m.created_at),
+          }))
+        );
+      })
+      .catch(() => {});
+  }, [conversationId]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || !visitorInfo) return;

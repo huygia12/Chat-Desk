@@ -128,6 +128,47 @@ async def create_widget(
     }
 
 
+@router.get("/{widget_id}/messages")
+async def get_widget_messages(
+    widget_id: str,
+    widget_secret: str,
+    conversation_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Public endpoint for the widget iframe to fetch conversation history."""
+    # Validate widget credentials
+    channel = await validate_widget_request(widget_id, widget_secret, "*", db)
+    if not channel:
+        raise HTTPException(status_code=401, detail="Invalid widget credentials")
+
+    # Validate conversation belongs to this widget's channel
+    conv_result = await db.execute(
+        select(Conversation).where(
+            Conversation.id == conversation_id,
+            Conversation.channel_id == channel.id,
+        )
+    )
+    conversation = conv_result.scalar_one_or_none()
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    msg_result = await db.execute(
+        select(Message)
+        .where(Message.conversation_id == conversation_id)
+        .order_by(Message.created_at.asc())
+    )
+    msgs = msg_result.scalars().all()
+    return [
+        {
+            "id": str(m.id),
+            "sender_type": m.sender_type,
+            "content": m.content,
+            "created_at": m.created_at.isoformat(),
+        }
+        for m in msgs
+    ]
+
+
 @router.get("/{widget_id}")
 async def get_widget_config(
     widget_id: str,

@@ -34,7 +34,12 @@ export const useChatStore = create((set, get) => ({
   sendMessage: async (conversationId, content) => {
     try {
       const res = await client.post(`/api/conversations/${conversationId}/messages`, { content })
-      set((state) => ({ messages: [...state.messages, res.data] }))
+      // Dedup check: WS push from backend may have already added this message
+      set((state) => {
+        const exists = state.messages.some((m) => String(m.id) === String(res.data.id))
+        if (exists) return state
+        return { messages: [...state.messages, res.data] }
+      })
       // Refresh conversations to update last_message_at
       get().fetchConversations()
     } catch (err) {
@@ -46,9 +51,9 @@ export const useChatStore = create((set, get) => ({
   addMessage: (message) => {
     set((state) => {
       // Only add if it's for the active conversation
-      if (message.conversation_id === state.activeConversationId) {
-        // Avoid duplicates
-        const exists = state.messages.some((m) => m.id === message.id)
+      if (String(message.conversation_id) === String(state.activeConversationId)) {
+        // Avoid duplicates (use String() to safely compare UUIDs from different sources)
+        const exists = state.messages.some((m) => String(m.id) === String(message.id))
         if (!exists) {
           return { messages: [...state.messages, message] }
         }

@@ -45,8 +45,8 @@ async def validate_widget_request(
     if not channel or channel.widget_secret != widget_secret:
         return None
 
-    # Check origin whitelist
-    if channel.allowed_origins:
+    # Check origin whitelist (skip check for internal calls using "*")
+    if origin != "*" and channel.allowed_origins:
         try:
             allowed_origins_list = json.loads(channel.allowed_origins)
             if origin not in allowed_origins_list:

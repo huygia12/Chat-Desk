@@ -72,7 +72,7 @@ app.include_router(widgets.router)
 app.include_router(admin.router)
 
 
-# WebSocket endpoint
+# WebSocket endpoint (admin/business dashboard)
 @app.websocket("/ws/{business_id}")
 async def websocket_endpoint(websocket: WebSocket, business_id: str):
     await manager.connect(business_id, websocket)
@@ -83,6 +83,45 @@ async def websocket_endpoint(websocket: WebSocket, business_id: str):
             logger.debug(f"WS received from {business_id}: {data}")
     except WebSocketDisconnect:
         manager.disconnect(business_id, websocket)
+
+
+# WebSocket endpoint for embedded widget clients (public, validated by widget_secret)
+@app.websocket("/ws/widget/{widget_id}")
+async def widget_websocket_endpoint(
+    websocket: WebSocket,
+    widget_id: str,
+    widget_secret: str,
+):
+    from sqlalchemy import select
+    from app.database import async_session
+    from app.models.channel import Channel
+
+    async with async_session() as db:
+        result = await db.execute(
+            select(Channel).where(
+                Channel.widget_id == widget_id,
+                Channel.widget_secret == widget_secret,
+                Channel.is_active == True,
+            )
+        )
+        channel = result.scalar_one_or_none()
+
+    if not channel:
+        logger.warning(f"Widget WS rejected: invalid widget_id={widget_id}")
+        await websocket.close(code=4001)
+        return
+
+    ws_key = f"widget:{widget_id}"
+    await manager.connect(ws_key, websocket)
+    logger.info(f"Widget WebSocket connected: {widget_id}")
+    try:
+        while True:
+            # Keep alive — widget may send ping text
+            data = await websocket.receive_text()
+            logger.debug(f"Widget WS ping from {widget_id}: {data}")
+    except WebSocketDisconnect:
+        manager.disconnect(ws_key, websocket)
+        logger.info(f"Widget WebSocket disconnected: {widget_id}")
 
 
 @app.get("/")

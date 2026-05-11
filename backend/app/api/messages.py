@@ -1,17 +1,19 @@
 import uuid
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.database import get_db
 from app.models.user import User
 from app.models.conversation import Conversation
 from app.models.message import Message
+from app.models.channel import Channel
 from app.schemas.message import MessageCreate, MessageOut
 from app.api.deps import get_current_business
 from app.services.facebook_service import send_facebook_message
 from app.services.instagram_service import send_instagram_message
 from app.services.telegram_service import send_telegram_message
+from app.websocket.manager import manager
 
 router = APIRouter(prefix="/api/conversations", tags=["messages"])
 
@@ -103,4 +105,35 @@ async def send_message(
     await db.flush()
     await db.refresh(message)
 
+    # Push to admin dashboard WebSocket
+    await manager.send_message(
+        str(conversation.business_id),
+        {
+            "type": "new_message",
+            "conversation_id": str(conversation_id),
+            "message": {
+                "id": str(message.id),
+                "sender_type": "business",
+                "content": message.content,
+                "created_at": message.created_at.isoformat(),
+            },
+        },
+    )
+
+    # For widget conversations, also push to the widget client WebSocket
+    if conversation.platform == "widget" and conversation.channel and conversation.channel.widget_id:
+        await manager.send_message(
+            f"widget:{conversation.channel.widget_id}",
+            {
+                "type": "new_message",
+                "message": {
+                    "id": str(message.id),
+                    "sender_type": "business",
+                    "content": message.content,
+                    "created_at": message.created_at.isoformat(),
+                },
+            },
+        )
+
+    await db.commit()
     return message

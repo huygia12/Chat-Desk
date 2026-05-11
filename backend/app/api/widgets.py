@@ -2,7 +2,9 @@ import json
 import logging
 import uuid
 from datetime import datetime, timezone
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Header
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
@@ -24,9 +26,70 @@ router = APIRouter(prefix="/api/widgets", tags=["widgets"])
 settings = get_settings()
 
 
+class CreateWidgetRequest(BaseModel):
+    allowed_origins: List[str]
+    widget_name: Optional[str] = None
+
+
+class SendMessageRequest(BaseModel):
+    visitor_id: str
+    visitor_name: str
+    visitor_email: Optional[str] = None
+    visitor_phone: Optional[str] = None
+    message_text: str
+
+
+@router.get("/list")
+async def list_widgets(
+    current_user: User = Depends(get_current_business),
+    db: AsyncSession = Depends(get_db),
+):
+    """List all widgets for the current business."""
+    result = await db.execute(
+        select(Channel).where(
+            Channel.business_id == current_user.id,
+            Channel.platform == "widget",
+        )
+    )
+    channels = result.scalars().all()
+    return [
+        {
+            "widget_id": ch.widget_id,
+            "widget_secret": ch.widget_secret,
+            "page_name": ch.page_name,
+            "allowed_origins": ch.allowed_origins,
+            "is_active": ch.is_active,
+            "created_at": ch.created_at,
+        }
+        for ch in channels
+    ]
+
+
+@router.delete("/{widget_id}")
+async def delete_widget(
+    widget_id: str,
+    current_user: User = Depends(get_current_business),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a widget (business owner only)."""
+    result = await db.execute(
+        select(Channel).where(
+            Channel.widget_id == widget_id,
+            Channel.business_id == current_user.id,
+        )
+    )
+    channel = result.scalar_one_or_none()
+    if not channel:
+        raise HTTPException(status_code=404, detail="Widget not found")
+
+    await db.delete(channel)
+    await db.commit()
+    return {"status": "deleted", "widget_id": widget_id}
+
+
 @router.post("/create")
 async def create_widget(
-    allowed_origins: list[str],
+    body: CreateWidgetRequest,
     current_user: User = Depends(get_current_business),
     db: AsyncSession = Depends(get_db),
 ):
@@ -40,11 +103,11 @@ async def create_widget(
         business_id=current_user.id,
         platform="widget",
         platform_page_id=widget_id,
-        page_name="Widget",
+        page_name=body.widget_name or "Widget",
         access_token="",  # Not used for widget
         widget_id=widget_id,
         widget_secret=widget_secret,
-        allowed_origins=json.dumps(allowed_origins),
+        allowed_origins=json.dumps(body.allowed_origins),
         is_active=True,
     )
 
@@ -57,7 +120,10 @@ async def create_widget(
     return {
         "widget_id": widget_id,
         "widget_secret": widget_secret,
-        "allowed_origins": allowed_origins,
+        "page_name": channel.page_name,
+        "allowed_origins": channel.allowed_origins,
+        "is_active": channel.is_active,
+        "created_at": channel.created_at,
         "embed_script_url": f"{settings.API_URL}/static/embed.js?id={widget_id}",
     }
 
@@ -99,27 +165,23 @@ async def get_widget_config(
 
 @router.post("/send")
 async def send_widget_message(
+    body: SendMessageRequest,
     widget_id: str = Header(...),
     widget_secret: str = Header(...),
-    origin: str = Header(...),
-    visitor_id: str,
-    visitor_name: str,
-    visitor_email: str | None = None,
-    visitor_phone: str | None = None,
-    message_text: str = "",
+    x_widget_origin: str = Header(...),
     db: AsyncSession = Depends(get_db),
 ):
     """Public endpoint to receive messages from embedded widget (no auth required)."""
 
     # Validate widget
-    channel = await validate_widget_request(widget_id, widget_secret, origin, db)
+    channel = await validate_widget_request(widget_id, widget_secret, x_widget_origin, db)
     if not channel:
         logger.warning(
-            f"Invalid widget request: id={widget_id}, origin={origin}"
+            f"Invalid widget request: id={widget_id}, origin={x_widget_origin}"
         )
         raise HTTPException(status_code=401, detail="Invalid widget credentials")
 
-    if not message_text.strip():
+    if not body.message_text.strip():
         raise HTTPException(status_code=400, detail="Message text cannot be empty")
 
     business_id = channel.business_id
@@ -129,7 +191,7 @@ async def send_widget_message(
         select(Contact).where(
             Contact.business_id == business_id,
             Contact.platform == "widget",
-            Contact.platform_user_id == visitor_id,
+            Contact.platform_user_id == body.visitor_id,
         )
     )
     contact = contact_result.scalar_one_or_none()
@@ -138,11 +200,11 @@ async def send_widget_message(
         contact = Contact(
             business_id=business_id,
             platform="widget",
-            platform_user_id=visitor_id,
-            display_name=visitor_name,
+            platform_user_id=body.visitor_id,
+            display_name=body.visitor_name,
             profile_pic_url=None,
-            visitor_email=visitor_email,
-            visitor_phone=visitor_phone,
+            visitor_email=body.visitor_email,
+            visitor_phone=body.visitor_phone,
         )
         db.add(contact)
         await db.flush()
@@ -172,7 +234,7 @@ async def send_widget_message(
     message = Message(
         conversation_id=conversation.id,
         sender_type="contact",
-        content=message_text.strip(),
+        content=body.message_text.strip(),
     )
     db.add(message)
     conversation.last_message_at = datetime.now(timezone.utc)
@@ -209,7 +271,7 @@ async def send_widget_message(
             ai_response_text = await generate_ai_response(
                 db=db,
                 conversation=conversation,
-                user_message=message_text.strip(),
+                user_message=body.message_text.strip(),
             )
             logger.info(f"AI response generated: {ai_response_text[:100] if ai_response_text else 'None'}")
 

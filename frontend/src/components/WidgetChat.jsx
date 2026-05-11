@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Input, Button, Spin, Empty, message } from "antd";
+import { Input, Button } from "antd";
 import {
   SendOutlined,
   CloseOutlined,
@@ -11,106 +11,58 @@ export default function WidgetChat({
   widgetId,
   widgetSecret,
   businessName = "Support",
+  embedded = false, // true when rendered inside an iframe via embed.js
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  // In embedded mode the chat panel is always visible (no floating-button toggle)
+  const [isOpen, setIsOpen] = useState(embedded);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [visitorInfo, setVisitorInfo] = useState(null);
   const [conversationId, setConversationId] = useState(null);
+  // Form state for visitor info (replaces prompt() which is blocked in cross-origin iframes)
+  const [nameInput, setNameInput] = useState("");
+  const [emailInput, setEmailInput] = useState("");
   const messagesEndRef = useRef(null);
-  const wsRef = useRef(null);
 
-  // Initialize visitor info from localStorage
+  // Load visitor info from localStorage on mount (no prompt)
   useEffect(() => {
-    const generateVisitorId = () => {
+    const savedName = localStorage.getItem("widget_visitor_name");
+    if (savedName) {
       let id = localStorage.getItem("widget_visitor_id");
       if (!id) {
         id = "visitor_" + Math.random().toString(36).substr(2, 9);
         localStorage.setItem("widget_visitor_id", id);
       }
-      return id;
-    };
-
-    const name =
-      localStorage.getItem("widget_visitor_name") ||
-      prompt("Tên của bạn?", "Khách hàng");
-    const email =
-      localStorage.getItem("widget_visitor_email") ||
-      prompt("Email của bạn? (Tùy chọn)", "");
-
-    if (name) {
-      localStorage.setItem("widget_visitor_name", name);
-      localStorage.setItem("widget_visitor_email", email || "");
-
       setVisitorInfo({
-        id: generateVisitorId(),
-        name: name,
-        email: email || null,
+        id,
+        name: savedName,
+        email: localStorage.getItem("widget_visitor_email") || null,
       });
     }
   }, []);
 
-  // Connect WebSocket when widget opens
-  useEffect(() => {
-    if (isOpen && visitorInfo) {
-      connectWebSocket();
+  // Handle visitor form submit
+  const handleVisitorSubmit = () => {
+    const trimmedName = nameInput.trim();
+    if (!trimmedName) return;
+
+    let id = localStorage.getItem("widget_visitor_id");
+    if (!id) {
+      id = "visitor_" + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem("widget_visitor_id", id);
     }
-    return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
-    };
-  }, [isOpen, visitorInfo]);
+    localStorage.setItem("widget_visitor_name", trimmedName);
+    localStorage.setItem("widget_visitor_email", emailInput.trim() || "");
+    setVisitorInfo({ id, name: trimmedName, email: emailInput.trim() || null });
+  };
 
-  const connectWebSocket = () => {
-    // Extract business_id from window location or use a fallback
-    // In embedded widget context, this will be provided by the parent page
-    const businessId = window.__chatdesk_business_id__ || "default";
-    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${wsProtocol}//${window.location.host}/ws/${businessId}`;
-
-    try {
-      wsRef.current = new WebSocket(wsUrl);
-
-      wsRef.current.onopen = () => {
-        console.log("Widget WebSocket connected");
-      };
-
-      wsRef.current.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (
-            data.type === "new_message" &&
-            data.conversation_id === conversationId
-          ) {
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: data.message.id,
-                content: data.message.content,
-                sender:
-                  data.message.sender_type === "contact"
-                    ? "customer"
-                    : data.message.sender_type,
-                timestamp: new Date(data.message.created_at),
-              },
-            ]);
-          }
-        } catch (e) {
-          console.error("Failed to parse WS message:", e);
-        }
-      };
-
-      wsRef.current.onerror = (error) => {
-        console.error("Widget WebSocket error:", error);
-      };
-
-      wsRef.current.onclose = () => {
-        console.log("Widget WebSocket disconnected");
-      };
-    } catch (error) {
-      console.error("Failed to connect WebSocket:", error);
+  // Handle close: in embedded mode notify parent; otherwise toggle isOpen
+  const handleClose = () => {
+    if (embedded) {
+      window.parent.postMessage({ type: "chatdesk-close-widget" }, "*");
+    } else {
+      setIsOpen(false);
     }
   };
 
@@ -122,8 +74,8 @@ export default function WidgetChat({
     setLoading(true);
 
     try {
-      // Determine API URL from environment or current location
       const apiUrl =
+        window.__chatdesk_api_url__ ||
         import.meta.env.VITE_API_URL ||
         `${window.location.protocol}//${window.location.host}`;
 
@@ -132,7 +84,8 @@ export default function WidgetChat({
         headers: {
           "widget-id": widgetId,
           "widget-secret": widgetSecret,
-          origin: window.location.origin,
+          "x-widget-origin":
+            window.__chatdesk_parent_origin__ || window.location.origin,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -151,7 +104,6 @@ export default function WidgetChat({
       const result = await response.json();
       setConversationId(result.conversation_id);
 
-      // Add customer message to local state
       setMessages((prev) => [
         ...prev,
         {
@@ -162,7 +114,6 @@ export default function WidgetChat({
         },
       ]);
 
-      // Add AI response if available
       if (result.ai_response) {
         setMessages((prev) => [
           ...prev,
@@ -176,7 +127,15 @@ export default function WidgetChat({
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      message.error("Lỗi gửi tin nhắn: " + error.message);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Math.random().toString(36).substr(2, 9),
+          content: `⚠️ Lỗi: ${error.message}`,
+          sender: "system",
+          timestamp: new Date(),
+        },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -193,19 +152,109 @@ export default function WidgetChat({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  if (!visitorInfo) {
+  // --- Visitor form (shown when visitorInfo not yet set) ---
+  const renderVisitorForm = () => (
+    <div className="widget-visitor-form">
+      <div className="widget-visitor-title">Bắt đầu trò chuyện</div>
+      <div className="widget-visitor-subtitle">
+        Vui lòng cho chúng tôi biết về bạn
+      </div>
+      <Input
+        placeholder="Tên của bạn *"
+        value={nameInput}
+        onChange={(e) => setNameInput(e.target.value)}
+        onPressEnter={handleVisitorSubmit}
+        style={{ marginBottom: 12 }}
+      />
+      <Input
+        placeholder="Email (tùy chọn)"
+        value={emailInput}
+        onChange={(e) => setEmailInput(e.target.value)}
+        onPressEnter={handleVisitorSubmit}
+        style={{ marginBottom: 16 }}
+      />
+      <Button
+        type="primary"
+        block
+        onClick={handleVisitorSubmit}
+        disabled={!nameInput.trim()}
+      >
+        Bắt đầu chat
+      </Button>
+    </div>
+  );
+
+  // --- Chat panel (header + messages + input) ---
+  const renderChatPanel = () => (
+    <>
+      <div className="widget-header">
+        <div className="widget-title">{businessName}</div>
+        <button className="widget-close" onClick={handleClose} title="Close chat">
+          <CloseOutlined />
+        </button>
+      </div>
+
+      <div className="widget-messages">
+        {messages.length === 0 ? (
+          <div className="widget-empty-msg">
+            Xin chào! Chúng tôi có thể giúp gì cho bạn? 👋
+          </div>
+        ) : (
+          messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`widget-message widget-message-${msg.sender}`}
+            >
+              <div className="widget-message-bubble">{msg.content}</div>
+              <div className="widget-message-time">
+                {msg.timestamp.toLocaleTimeString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </div>
+            </div>
+          ))
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="widget-input-area">
+        <Input.TextArea
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Nhập tin nhắn..."
+          disabled={loading}
+          rows={1}
+          style={{ resize: "none" }}
+        />
+        <Button
+          type="primary"
+          icon={<SendOutlined />}
+          onClick={handleSendMessage}
+          loading={loading}
+          disabled={!inputValue.trim()}
+        />
+      </div>
+    </>
+  );
+
+  // ============================================================
+  // EMBEDDED MODE: fills the iframe completely, no floating button
+  // ============================================================
+  if (embedded) {
     return (
-      <div className="widget-container">
-        <div className="widget-loading">
-          <Spin />
-        </div>
+      <div className="widget-embedded">
+        {!visitorInfo ? renderVisitorForm() : renderChatPanel()}
       </div>
     );
   }
 
+  // ============================================================
+  // STANDALONE MODE: floating button + toggle (used on /widget page directly)
+  // ============================================================
   return (
     <div className="widget-container">
-      {/* Floating Button */}
       {!isOpen && (
         <button
           className="widget-button"
@@ -216,66 +265,9 @@ export default function WidgetChat({
         </button>
       )}
 
-      {/* Chat Window */}
       {isOpen && (
         <div className="widget-window">
-          {/* Header */}
-          <div className="widget-header">
-            <div className="widget-title">{businessName}</div>
-            <button
-              className="widget-close"
-              onClick={() => setIsOpen(false)}
-              title="Close chat"
-            >
-              <CloseOutlined />
-            </button>
-          </div>
-
-          {/* Messages */}
-          <div className="widget-messages">
-            {messages.length === 0 ? (
-              <Empty
-                description="Chưa có tin nhắn"
-                style={{ marginTop: "50px" }}
-              />
-            ) : (
-              messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`widget-message widget-message-${msg.sender}`}
-                >
-                  <div className="widget-message-bubble">{msg.content}</div>
-                  <div className="widget-message-time">
-                    {msg.timestamp.toLocaleTimeString("vi-VN", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </div>
-                </div>
-              ))
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input */}
-          <div className="widget-input-area">
-            <Input.TextArea
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Nhập tin nhắn..."
-              disabled={loading}
-              rows={1}
-              style={{ resize: "none" }}
-            />
-            <Button
-              type="primary"
-              icon={<SendOutlined />}
-              onClick={handleSendMessage}
-              loading={loading}
-              disabled={!inputValue.trim()}
-            />
-          </div>
+          {!visitorInfo ? renderVisitorForm() : renderChatPanel()}
         </div>
       )}
     </div>

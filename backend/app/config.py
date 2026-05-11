@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     # CORS (comma-separated origins)
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
 
+    # API
+    API_URL : str = "http://localhost:8000"
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 

@@ -10,8 +10,6 @@ import {
   Space,
   Tag,
   Tooltip,
-  Divider,
-  Copy,
   Popconfirm,
   Empty,
 } from "antd";
@@ -65,6 +63,7 @@ export default function Widgets() {
 
       const response = await client.post("/api/widgets/create", {
         allowed_origins: origins,
+        widget_name: values.widget_name || null,
       });
 
       message.success("Tạo widget thành công!");
@@ -166,12 +165,13 @@ export default function Widgets() {
               icon={<CopyOutlined />}
               size="small"
               onClick={() => {
+                const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
                 const embedCode = `<script>
   window.ChatDeskWidget = {
     widgetId: '${record.widget_id}',
     widgetSecret: '${record.widget_secret}',
-    businessName: 'Your Business',
-    apiUrl: '${window.location.origin}',
+    businessName: '${record.page_name || 'Your Business'}',
+    apiUrl: '${backendUrl}',
   };
 </script>
 <script src="${window.location.origin}/embed.js"></script>`;

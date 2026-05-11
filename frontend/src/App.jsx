@@ -9,6 +9,7 @@ import Products from "./pages/Products";
 import Settings from "./pages/Settings";
 import AdminDashboard from "./pages/AdminDashboard";
 import WidgetPage from "./pages/WidgetPage";
+import Widgets from "./pages/Widgets";
 
 function PrivateRoute({ children }) {
   const token = useAuthStore((state) => state.token);
@@ -59,6 +60,7 @@ export default function App() {
         <Route path="chat" element={<Chat />} />
         <Route path="channels" element={<Channels />} />
         <Route path="products" element={<Products />} />
+        <Route path="widgets" element={<Widgets />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>

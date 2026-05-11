@@ -77,3 +77,6 @@ backend/.env.railway
 *.tmp
 *.bak
 *.orig
+
+# Milvus volumes
+milvus-local/volumes/

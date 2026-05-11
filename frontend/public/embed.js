@@ -28,6 +28,19 @@
     return;
   }
 
+  // Detect the origin where embed.js is hosted (frontend) to build the iframe URL.
+  // This is always the frontend origin, separate from the backend apiUrl.
+  function detectWidgetOrigin() {
+    const scripts = document.querySelectorAll("script");
+    for (const script of scripts) {
+      if (script.src && script.src.includes("/embed.js")) {
+        const url = new URL(script.src);
+        return url.origin;
+      }
+    }
+    return window.location.origin;
+  }
+
   function detectApiUrl() {
     // Try to get from script src
     const scripts = document.querySelectorAll("script");
@@ -40,6 +53,8 @@
     // Default fallback
     return window.location.origin;
   }
+
+  const widgetOrigin = detectWidgetOrigin();
 
   // Create container
   const container = document.createElement("div");
@@ -169,8 +184,9 @@
   iframe.id = "chatdesk-widget-iframe";
   iframe.title = "Chat Widget";
 
-  // Build iframe URL
-  const iframeUrl = new URL(`${apiUrl}/widget`);
+  // Build iframe URL using the frontend origin (where embed.js is served from),
+  // NOT apiUrl which points to the backend API.
+  const iframeUrl = new URL(`${widgetOrigin}/widget`);
   iframeUrl.searchParams.append("id", widgetId);
   iframeUrl.searchParams.append("name", businessName);
   iframe.src = iframeUrl.toString();
@@ -194,6 +210,7 @@
           widgetSecret: widgetSecret,
           businessName: businessName,
           apiUrl: apiUrl,
+          parentOrigin: window.location.origin,
         },
         "*",
       );

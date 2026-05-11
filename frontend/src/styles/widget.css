@@ -289,3 +289,61 @@
 .widget-messages {
   scroll-behavior: smooth;
 }
+
+/* ============================================================
+   EMBEDDED MODE – fills the iframe completely (no floating btn)
+   ============================================================ */
+.widget-embedded {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  overflow: hidden;
+}
+
+.widget-embedded .widget-header {
+  border-radius: 0;
+  flex-shrink: 0;
+}
+
+.widget-embedded .widget-messages {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.widget-embedded .widget-input-area {
+  flex-shrink: 0;
+}
+
+/* Empty message placeholder */
+.widget-empty-msg {
+  text-align: center;
+  margin-top: 60px;
+  color: #888;
+  font-size: 14px;
+  padding: 0 20px;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   VISITOR FORM – shown before chat starts
+   ============================================================ */
+.widget-visitor-form {
+  padding: 40px 24px 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.widget-visitor-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1890ff;
+  margin-bottom: 8px;
+}
+
+.widget-visitor-subtitle {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 24px;
+}

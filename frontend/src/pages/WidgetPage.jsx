@@ -24,10 +24,13 @@ export default function WidgetPage() {
     const handleMessage = (event) => {
       if (event.data.type === "chatdesk-config" && !configReceivedRef.current) {
         configReceivedRef.current = true;
-        const { widgetSecret, apiUrl } = event.data;
+        const { widgetSecret, apiUrl, parentOrigin } = event.data;
         setWidgetSecret(widgetSecret);
         if (apiUrl) {
           window.__chatdesk_api_url__ = apiUrl;
+        }
+        if (parentOrigin) {
+          window.__chatdesk_parent_origin__ = parentOrigin;
         }
         window.__chatdesk_widget_id__ = widgetId;
         setLoading(false);
@@ -36,8 +39,13 @@ export default function WidgetPage() {
 
     window.addEventListener("message", handleMessage);
 
-    // Try to get secret from parent window's config
-    const parentConfig = window.parent.ChatDeskWidget;
+    // Try to get secret from parent window's config (same-origin only)
+    let parentConfig = null;
+    try {
+      parentConfig = window.parent.ChatDeskWidget;
+    } catch (_e) {
+      // Cross-origin parent – rely on postMessage instead
+    }
     if (parentConfig && parentConfig.widgetSecret) {
       if (!configReceivedRef.current) {
         configReceivedRef.current = true;
@@ -93,6 +101,7 @@ export default function WidgetPage() {
         widgetId={widgetId}
         widgetSecret={widgetSecret}
         businessName={businessName}
+        embedded={true}
       />
     </div>
   );

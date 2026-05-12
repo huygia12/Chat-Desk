@@ -7,20 +7,21 @@ from app.database import get_db
 from app.models.user import User
 from app.models.conversation import Conversation
 from app.schemas.conversation import ConversationOut, ConversationAIToggle
-from app.api.deps import get_current_business
+from app.api.deps import get_current_business_or_employee, get_effective_business_id
 
 router = APIRouter(prefix="/api/conversations", tags=["conversations"])
 
 
 @router.get("", response_model=list[ConversationOut])
 async def list_conversations(
-    current_user: User = Depends(get_current_business),
+    current_user: User = Depends(get_current_business_or_employee),
     db: AsyncSession = Depends(get_db),
 ):
+    business_id = get_effective_business_id(current_user)
     result = await db.execute(
         select(Conversation)
         .options(joinedload(Conversation.contact))
-        .where(Conversation.business_id == current_user.id)
+        .where(Conversation.business_id == business_id)
         .order_by(Conversation.last_message_at.desc().nullslast())
     )
     return result.unique().scalars().all()
@@ -29,13 +30,14 @@ async def list_conversations(
 @router.get("/{conversation_id}", response_model=ConversationOut)
 async def get_conversation(
     conversation_id: uuid.UUID,
-    current_user: User = Depends(get_current_business),
+    current_user: User = Depends(get_current_business_or_employee),
     db: AsyncSession = Depends(get_db),
 ):
+    business_id = get_effective_business_id(current_user)
     result = await db.execute(
         select(Conversation)
         .options(joinedload(Conversation.contact))
-        .where(Conversation.id == conversation_id, Conversation.business_id == current_user.id)
+        .where(Conversation.id == conversation_id, Conversation.business_id == business_id)
     )
     conversation = result.unique().scalar_one_or_none()
     if not conversation:
@@ -47,13 +49,14 @@ async def get_conversation(
 async def toggle_ai(
     conversation_id: uuid.UUID,
     data: ConversationAIToggle,
-    current_user: User = Depends(get_current_business),
+    current_user: User = Depends(get_current_business_or_employee),
     db: AsyncSession = Depends(get_db),
 ):
+    business_id = get_effective_business_id(current_user)
     result = await db.execute(
         select(Conversation)
         .options(joinedload(Conversation.contact))
-        .where(Conversation.id == conversation_id, Conversation.business_id == current_user.id)
+        .where(Conversation.id == conversation_id, Conversation.business_id == business_id)
     )
     conversation = result.unique().scalar_one_or_none()
     if not conversation:

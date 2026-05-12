@@ -8,6 +8,7 @@ import {
   LogoutOutlined,
   DashboardOutlined,
   CodeOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../store/authStore";
 import { useEffect } from "react";
@@ -21,7 +22,12 @@ const businessMenuItems = [
   { key: "/channels", icon: <ApiOutlined />, label: "Kênh kết nối" },
   { key: "/products", icon: <ShoppingOutlined />, label: "Sản phẩm" },
   { key: "/widgets", icon: <CodeOutlined />, label: "Widgets" },
+  { key: "/employees", icon: <TeamOutlined />, label: "Nhân viên" },
   { key: "/settings", icon: <SettingOutlined />, label: "Cài đặt" },
+];
+
+const employeeMenuItems = [
+  { key: "/chat", icon: <MessageOutlined />, label: "Tin nhắn" },
 ];
 
 const adminMenuItems = [
@@ -36,12 +42,19 @@ export default function Layout() {
   const fetchConversations = useChatStore((s) => s.fetchConversations);
 
   const isAdmin = user?.role === "admin";
-  const menuItems = isAdmin ? adminMenuItems : businessMenuItems;
+  const isEmployee = user?.role === "employee";
+  const isBusiness = user?.role === "business";
+
+  let menuItems = adminMenuItems;
+  if (isBusiness) menuItems = businessMenuItems;
+  else if (isEmployee) menuItems = employeeMenuItems;
+
+  // WebSocket key: employee uses their business_id, business uses own id
+  const wsBusinessId = isEmployee ? user?.business_id : user?.id;
 
   useEffect(() => {
-    // Only connect WebSocket for business users
-    if (user?.id && !isAdmin) {
-      const ws = connectWebSocket(user.id, (data) => {
+    if (wsBusinessId && !isAdmin) {
+      const ws = connectWebSocket(wsBusinessId, (data) => {
         if (data.type === "new_message") {
           addMessage({
             ...data.message,
@@ -52,12 +65,19 @@ export default function Layout() {
       });
       return () => disconnectWebSocket();
     }
-  }, [user?.id, isAdmin]);
+  }, [wsBusinessId, isAdmin]);
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
+
+  // Display name in header
+  const displayName = isEmployee
+    ? (user?.full_name || user?.email)
+    : isAdmin
+    ? "Admin Panel"
+    : (user?.business_name || user?.email);
 
   return (
     <AntLayout style={{ minHeight: "100vh" }}>
@@ -69,6 +89,11 @@ export default function Layout() {
           {isAdmin && (
             <Tag color="gold" style={{ marginTop: 8 }}>
               Admin
+            </Tag>
+          )}
+          {isEmployee && (
+            <Tag color="blue" style={{ marginTop: 8 }}>
+              Nhân viên
             </Tag>
           )}
         </div>
@@ -102,9 +127,7 @@ export default function Layout() {
             borderBottom: "1px solid #f0f0f0",
           }}
         >
-          <Typography.Text strong>
-            {isAdmin ? "Admin Panel" : user?.business_name || user?.email}
-          </Typography.Text>
+          <Typography.Text strong>{displayName}</Typography.Text>
         </Header>
         <Content
           style={{

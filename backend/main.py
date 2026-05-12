@@ -2,7 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import auth, users, channels, contacts, conversations, messages, products, webhooks, admin, widgets
+from app.api import auth, users, channels, contacts, conversations, messages, products, webhooks, admin, widgets, employees
 from app.websocket.manager import manager
 from app.config import get_settings
 
@@ -69,6 +69,7 @@ app.include_router(messages.router)
 app.include_router(products.router)
 app.include_router(webhooks.router)
 app.include_router(widgets.router)
+app.include_router(employees.router)
 app.include_router(admin.router)
 
 

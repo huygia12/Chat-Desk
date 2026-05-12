@@ -25,6 +25,11 @@ export default function WidgetPage() {
       if (event.data.type === "chatdesk-config" && !configReceivedRef.current) {
         configReceivedRef.current = true;
         const { widgetSecret, apiUrl, parentOrigin } = event.data;
+        if (!widgetSecret) {
+          setError("Widget configuration is invalid (missing secret)");
+          setLoading(false);
+          return;
+        }
         setWidgetSecret(widgetSecret);
         if (apiUrl) {
           window.__chatdesk_api_url__ = apiUrl;
@@ -50,28 +55,37 @@ export default function WidgetPage() {
       if (!configReceivedRef.current) {
         configReceivedRef.current = true;
         setWidgetSecret(parentConfig.widgetSecret);
+        if (parentConfig.apiUrl) {
+          window.__chatdesk_api_url__ = parentConfig.apiUrl;
+        }
         window.__chatdesk_widget_id__ = widgetId;
         setLoading(false);
       }
-      return;
+      return () => window.removeEventListener("message", handleMessage);
     }
 
-    // Request config from parent
-    window.parent.postMessage({ type: "chatdesk-request-config" }, "*");
-
-    // Timeout - if no response, proceed anyway
-    const timeout = setTimeout(() => {
-      if (!configReceivedRef.current) {
-        configReceivedRef.current = true;
-        setWidgetSecret("");
-        window.__chatdesk_widget_id__ = widgetId;
-        setLoading(false);
+    // Request config from parent — retry up to 5 times with 400ms interval
+    let attempts = 0;
+    const maxAttempts = 5;
+    const requestConfig = () => {
+      if (configReceivedRef.current) return;
+      window.parent.postMessage({ type: "chatdesk-request-config" }, "*");
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(requestConfig, 400);
+      } else {
+        // All retries exhausted
+        if (!configReceivedRef.current) {
+          configReceivedRef.current = true;
+          setError("Unable to connect to chat support. Please refresh the page.");
+          setLoading(false);
+        }
       }
-    }, 1000);
+    };
+    requestConfig();
 
     return () => {
       window.removeEventListener("message", handleMessage);
-      clearTimeout(timeout);
     };
   }, [widgetId]);
 

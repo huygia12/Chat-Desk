@@ -9,7 +9,7 @@ from app.models.conversation import Conversation
 from app.models.message import Message
 from app.models.channel import Channel
 from app.schemas.message import MessageCreate, MessageOut
-from app.api.deps import get_current_business
+from app.api.deps import get_current_business_or_employee, get_effective_business_id
 from app.services.facebook_service import send_facebook_message
 from app.services.instagram_service import send_instagram_message
 from app.services.telegram_service import send_telegram_message
@@ -21,16 +21,17 @@ router = APIRouter(prefix="/api/conversations", tags=["messages"])
 @router.get("/{conversation_id}/messages", response_model=list[MessageOut])
 async def get_messages(
     conversation_id: uuid.UUID,
-    current_user: User = Depends(get_current_business),
+    current_user: User = Depends(get_current_business_or_employee),
     db: AsyncSession = Depends(get_db),
     limit: int = 50,
     offset: int = 0,
 ):
+    business_id = get_effective_business_id(current_user)
     # Verify conversation belongs to this business
     conv_result = await db.execute(
         select(Conversation).where(
             Conversation.id == conversation_id,
-            Conversation.business_id == current_user.id,
+            Conversation.business_id == business_id,
         )
     )
     conversation = conv_result.scalar_one_or_none()
@@ -51,10 +52,12 @@ async def get_messages(
 async def send_message(
     conversation_id: uuid.UUID,
     data: MessageCreate,
-    current_user: User = Depends(get_current_business),
+    current_user: User = Depends(get_current_business_or_employee),
     db: AsyncSession = Depends(get_db),
 ):
     from sqlalchemy.orm import joinedload
+
+    business_id = get_effective_business_id(current_user)
 
     # Get conversation with channel and contact
     conv_result = await db.execute(
@@ -62,7 +65,7 @@ async def send_message(
         .options(joinedload(Conversation.channel), joinedload(Conversation.contact))
         .where(
             Conversation.id == conversation_id,
-            Conversation.business_id == current_user.id,
+            Conversation.business_id == business_id,
         )
     )
     conversation = conv_result.unique().scalar_one_or_none()
@@ -105,7 +108,7 @@ async def send_message(
     await db.flush()
     await db.refresh(message)
 
-    # Push to admin dashboard WebSocket
+    # Push to admin dashboard WebSocket (keyed by business_id)
     await manager.send_message(
         str(conversation.business_id),
         {

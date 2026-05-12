@@ -236,6 +236,21 @@
       button.style.opacity = "1";
       button.style.pointerEvents = "auto";
     }
+
+    // Respond to iframe requesting config (in case the initial postMessage was missed)
+    if (event.data.type === "chatdesk-request-config" && event.source === iframe.contentWindow) {
+      iframe.contentWindow.postMessage(
+        {
+          type: "chatdesk-config",
+          widgetId: widgetId,
+          widgetSecret: widgetSecret,
+          businessName: businessName,
+          apiUrl: apiUrl,
+          parentOrigin: window.location.origin,
+        },
+        "*",
+      );
+    }
   });
 
   console.log("ChatDesk widget initialized", { widgetId, apiUrl });

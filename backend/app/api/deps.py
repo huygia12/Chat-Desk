@@ -33,7 +33,24 @@ async def get_current_user(
     user = result.scalar_one_or_none()
     if user is None:
         raise credentials_exception
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is disabled",
+        )
     return user
+
+
+def get_effective_business_id(user: User) -> uuid.UUID:
+    """Returns the business_id for data filtering.
+    - For 'business' role: returns user.id
+    - For 'employee' role: returns user.business_id
+    """
+    if user.role == "business":
+        return user.id
+    elif user.role == "employee":
+        return user.business_id
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
 
 
 async def get_current_business(
@@ -43,6 +60,18 @@ async def get_current_business(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only business users can perform this action",
+        )
+    return current_user
+
+
+async def get_current_business_or_employee(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    """Allow both business and employee roles to access chat/conversation features."""
+    if current_user.role not in ("business", "employee"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied",
         )
     return current_user
 
@@ -57,6 +86,7 @@ async def require_admin(
             detail="Admin access required",
         )
     return current_user
+
 
 
 async def get_business_id_filter(

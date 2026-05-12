@@ -273,17 +273,20 @@ async def send_widget_message(
     body: SendMessageRequest,
     widget_id: str = Header(...),
     widget_secret: str = Header(...),
-    x_widget_origin: str = Header(...),
     db: AsyncSession = Depends(get_db),
 ):
-    """Public endpoint to receive messages from embedded widget (no auth required)."""
+    """Public endpoint to receive messages from embedded widget (no auth required).
 
-    # Validate widget
-    channel = await validate_widget_request(widget_id, widget_secret, x_widget_origin, db)
+    Authentication is done solely via widget_id + widget_secret (crypto token).
+    Origin check is intentionally skipped here because the request originates from
+    within an iframe (frontend origin) rather than the customer's site origin.
+    """
+
+    logger.info(f"[Widget /send] widget_id='{widget_id}' secret_len={len(widget_secret)}")
+
+    # Validate widget — pass "*" to skip origin check (secret alone is sufficient)
+    channel = await validate_widget_request(widget_id, widget_secret, "*", db)
     if not channel:
-        logger.warning(
-            f"Invalid widget request: id={widget_id}, origin={x_widget_origin}"
-        )
         raise HTTPException(status_code=401, detail="Invalid widget credentials")
 
     if not body.message_text.strip():

@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from app.database import get_db
 from app.models.user import User
+from app.models.contact import Contact
 from app.models.conversation import Conversation
 from app.schemas.conversation import ConversationOut, ConversationAIToggle
 from app.api.deps import get_current_business_or_employee, get_effective_business_id
@@ -20,7 +21,7 @@ async def list_conversations(
     business_id = get_effective_business_id(current_user)
     result = await db.execute(
         select(Conversation)
-        .options(joinedload(Conversation.contact))
+        .options(joinedload(Conversation.contact).selectinload(Contact.labels))
         .where(Conversation.business_id == business_id)
         .order_by(Conversation.last_message_at.desc().nullslast())
     )
@@ -36,7 +37,7 @@ async def get_conversation(
     business_id = get_effective_business_id(current_user)
     result = await db.execute(
         select(Conversation)
-        .options(joinedload(Conversation.contact))
+        .options(joinedload(Conversation.contact).selectinload(Contact.labels))
         .where(Conversation.id == conversation_id, Conversation.business_id == business_id)
     )
     conversation = result.unique().scalar_one_or_none()
@@ -55,7 +56,7 @@ async def toggle_ai(
     business_id = get_effective_business_id(current_user)
     result = await db.execute(
         select(Conversation)
-        .options(joinedload(Conversation.contact))
+        .options(joinedload(Conversation.contact).selectinload(Contact.labels))
         .where(Conversation.id == conversation_id, Conversation.business_id == business_id)
     )
     conversation = result.unique().scalar_one_or_none()
@@ -64,5 +65,4 @@ async def toggle_ai(
 
     conversation.is_ai_enabled = data.is_ai_enabled
     await db.flush()
-    await db.refresh(conversation)
     return conversation

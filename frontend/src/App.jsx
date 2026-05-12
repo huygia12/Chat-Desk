@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import WidgetPage from "./pages/WidgetPage";
 import Widgets from "./pages/Widgets";
 import Employees from "./pages/Employees";
+import Labels from "./pages/Labels";
 
 function PrivateRoute({ children }) {
   const token = useAuthStore((state) => state.token);
@@ -106,6 +107,14 @@ export default function App() {
           }
         />
         <Route
+          path="labels"
+          element={
+            <BusinessOnlyRoute>
+              <Labels />
+            </BusinessOnlyRoute>
+          }
+        />
+        <Route
           path="settings"
           element={
             <BusinessOnlyRoute>
@@ -117,4 +126,3 @@ export default function App() {
     </Routes>
   );
 }
-

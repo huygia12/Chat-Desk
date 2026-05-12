@@ -28,6 +28,7 @@ class User(Base):
     contacts = relationship("Contact", back_populates="business", cascade="all, delete-orphan")
     conversations = relationship("Conversation", back_populates="business", cascade="all, delete-orphan")
     products = relationship("Product", back_populates="business", cascade="all, delete-orphan")
+    labels = relationship("Label", foreign_keys="Label.business_id", back_populates="business", cascade="all, delete-orphan")
     # Employees belonging to this business (only valid for business role)
     employees = relationship("User", foreign_keys=[business_id], back_populates="employer", cascade="all, delete-orphan")
     employer = relationship("User", foreign_keys=[business_id], back_populates="employees", remote_side=[id])

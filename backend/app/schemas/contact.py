@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from app.schemas.label import LabelOut
 
 
 class ContactOut(BaseModel):
@@ -10,6 +11,9 @@ class ContactOut(BaseModel):
     platform_user_id: str
     display_name: str | None = None
     profile_pic_url: str | None = None
+    visitor_email: str | None = None
+    visitor_phone: str | None = None
+    labels: list[LabelOut] = Field(default_factory=list)
     created_at: datetime
 
     model_config = {"from_attributes": True}

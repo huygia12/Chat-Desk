@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { List, Avatar, Typography, Input, Button, Spin, Switch, Badge, Empty, Divider } from 'antd'
+import { List, Avatar, Typography, Input, Button, Spin, Switch, Badge, Empty, Select, message } from 'antd'
 import {
   SendOutlined,
   FacebookOutlined,
@@ -9,30 +9,36 @@ import {
   ShopOutlined,
 } from '@ant-design/icons'
 import { useChatStore } from '../store/chatStore'
-import { useAuthStore } from '../store/authStore'
+import CustomerLabel from '../components/CustomerLabel'
 import dayjs from 'dayjs'
 
 export default function Chat() {
   const {
     conversations,
+    labels,
+    labelsLoading,
     activeConversationId,
     messages,
     loading,
     fetchConversations,
+    fetchLabels,
     setActiveConversation,
     sendMessage,
     toggleAI,
-    addMessage,
+    assignLabel,
+    removeLabel,
   } = useChatStore()
 
-  const user = useAuthStore((s) => s.user)
   const [inputValue, setInputValue] = useState('')
   const [sending, setSending] = useState(false)
+  const [assigningLabel, setAssigningLabel] = useState(false)
+  const [labelSelectValue, setLabelSelectValue] = useState(undefined)
+  const [labelSearchText, setLabelSearchText] = useState('')
   const messagesEndRef = useRef(null)
 
-  // Fetch conversations on mount (WebSocket is managed by Layout.jsx)
   useEffect(() => {
     fetchConversations()
+    fetchLabels()
   }, [])
 
   useEffect(() => {
@@ -40,6 +46,17 @@ export default function Chat() {
   }, [messages])
 
   const activeConv = conversations.find((c) => c.id === activeConversationId)
+  const activeContactLabels = activeConv?.contact?.labels || []
+  const assignedLabelIds = new Set(activeContactLabels.map((label) => label.id))
+  const labelSelectorKey = `${activeConv?.contact_id || 'no-contact'}:${activeContactLabels
+    .map((label) => label.id)
+    .sort()
+    .join(',')}`
+
+  useEffect(() => {
+    setLabelSelectValue(undefined)
+    setLabelSearchText('')
+  }, [activeConv?.contact_id])
 
   const handleSend = async () => {
     if (!inputValue.trim() || !activeConversationId) return
@@ -51,6 +68,32 @@ export default function Chat() {
       // Error handled in store
     } finally {
       setSending(false)
+    }
+  }
+
+  const handleAssignLabel = async (labelId) => {
+    if (!activeConv?.contact_id || !labelId) return
+    setLabelSelectValue(labelId)
+    setAssigningLabel(true)
+    try {
+      await assignLabel(activeConv.contact_id, labelId)
+    } catch (err) {
+      message.error(err.response?.data?.detail || 'Gán label thất bại')
+    } finally {
+      setLabelSelectValue(undefined)
+      setLabelSearchText('')
+      setAssigningLabel(false)
+    }
+  }
+
+  const handleRemoveLabel = async (label) => {
+    if (!activeConv?.contact_id || !label?.id) return
+    try {
+      await removeLabel(activeConv.contact_id, label.id)
+      setLabelSelectValue(undefined)
+      setLabelSearchText('')
+    } catch (err) {
+      message.error(err.response?.data?.detail || 'Gỡ label thất bại')
     }
   }
 
@@ -76,9 +119,26 @@ export default function Chat() {
     }
   }
 
+  const renderConversationLabels = (conv) => {
+    const convLabels = conv.contact?.labels || []
+    if (convLabels.length === 0) return null
+
+    return (
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4, marginTop: 6 }}>
+        {convLabels.slice(0, 2).map((label) => (
+          <CustomerLabel key={label.id} label={label} size="small" />
+        ))}
+        {convLabels.length > 2 && (
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            +{convLabels.length - 2}
+          </Typography.Text>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - 64px)' }}>
-      {/* Conversation List */}
       <div
         style={{
           width: 320,
@@ -112,12 +172,15 @@ export default function Chat() {
                   }
                   title={conv.contact?.display_name || 'Unknown'}
                   description={
-                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                      {conv.platform} &middot;{' '}
-                      {conv.last_message_at
-                        ? dayjs(conv.last_message_at).format('HH:mm DD/MM')
-                        : 'Mới'}
-                    </Typography.Text>
+                    <div>
+                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        {conv.platform} &middot;{' '}
+                        {conv.last_message_at
+                          ? dayjs(conv.last_message_at).format('HH:mm DD/MM')
+                          : 'Mới'}
+                      </Typography.Text>
+                      {renderConversationLabels(conv)}
+                    </div>
                   }
                 />
               </List.Item>
@@ -126,11 +189,9 @@ export default function Chat() {
         )}
       </div>
 
-      {/* Message Panel */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {activeConversationId ? (
           <>
-            {/* Chat Header */}
             <div
               style={{
                 padding: '12px 16px',
@@ -138,17 +199,52 @@ export default function Chat() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                gap: 16,
               }}
             >
-              <div>
+              <div style={{ minWidth: 0, flex: 1 }}>
                 <Typography.Text strong>
                   {activeConv?.contact?.display_name || 'Unknown'}
                 </Typography.Text>
                 <Typography.Text type="secondary" style={{ marginLeft: 8 }}>
                   {getPlatformIcon(activeConv?.platform)} {activeConv?.platform}
                 </Typography.Text>
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginTop: 8 }}>
+                  {activeContactLabels.map((label) => (
+                    <CustomerLabel
+                      key={label.id}
+                      label={label}
+                      closable
+                      onClose={handleRemoveLabel}
+                    />
+                  ))}
+                  <Select
+                    key={labelSelectorKey}
+                    size="small"
+                    showSearch
+                    placeholder="Thêm label"
+                    value={labelSelectValue}
+                    searchValue={labelSearchText}
+                    optionFilterProp="label"
+                    filterOption={(input, option) =>
+                      String(option?.label || '').toLowerCase().includes(input.toLowerCase())
+                    }
+                    loading={labelsLoading || assigningLabel}
+                    onSearch={setLabelSearchText}
+                    onChange={handleAssignLabel}
+                    onDropdownVisibleChange={(open) => {
+                      if (!open) setLabelSearchText('')
+                    }}
+                    style={{ width: 180 }}
+                    options={labels.map((label) => ({
+                      value: label.id,
+                      label: label.name,
+                      disabled: assignedLabelIds.has(label.id),
+                    }))}
+                  />
+                </div>
               </div>
-              <div>
+              <div style={{ flexShrink: 0 }}>
                 <Typography.Text style={{ marginRight: 8 }}>AI tự động:</Typography.Text>
                 <Switch
                   checked={activeConv?.is_ai_enabled}
@@ -158,7 +254,6 @@ export default function Chat() {
               </div>
             </div>
 
-            {/* Messages */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
               {loading ? (
                 <div style={{ textAlign: 'center', marginTop: 40 }}>
@@ -212,7 +307,6 @@ export default function Chat() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
             <div
               style={{
                 padding: '12px 16px',

@@ -9,6 +9,7 @@ import {
   DashboardOutlined,
   CodeOutlined,
   TeamOutlined,
+  TagsOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../store/authStore";
 import { useEffect } from "react";
@@ -22,6 +23,7 @@ const businessMenuItems = [
   { key: "/channels", icon: <ApiOutlined />, label: "Kênh kết nối" },
   { key: "/products", icon: <ShoppingOutlined />, label: "Sản phẩm" },
   { key: "/widgets", icon: <CodeOutlined />, label: "Widgets" },
+  { key: "/labels", icon: <TagsOutlined />, label: "Labels" },
   { key: "/employees", icon: <TeamOutlined />, label: "Nhân viên" },
   { key: "/settings", icon: <SettingOutlined />, label: "Cài đặt" },
 ];

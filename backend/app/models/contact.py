@@ -4,6 +4,7 @@ from sqlalchemy import String, Text, ForeignKey, Enum as SAEnum, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
+from app.models.label import contact_labels
 
 
 class Contact(Base):
@@ -23,3 +24,4 @@ class Contact(Base):
     # Relationships
     business = relationship("User", back_populates="contacts")
     conversations = relationship("Conversation", back_populates="contact", cascade="all, delete-orphan")
+    labels = relationship("Label", secondary=contact_labels, back_populates="contacts")

@@ -3,9 +3,11 @@ import client from '../api/client'
 
 export const useChatStore = create((set, get) => ({
   conversations: [],
+  labels: [],
   activeConversationId: null,
   messages: [],
   loading: false,
+  labelsLoading: false,
 
   fetchConversations: async () => {
     set({ loading: true })
@@ -16,6 +18,18 @@ export const useChatStore = create((set, get) => ({
       console.error('Failed to fetch conversations:', err)
     } finally {
       set({ loading: false })
+    }
+  },
+
+  fetchLabels: async () => {
+    set({ labelsLoading: true })
+    try {
+      const res = await client.get('/api/labels')
+      set({ labels: res.data })
+    } catch (err) {
+      console.error('Failed to fetch labels:', err)
+    } finally {
+      set({ labelsLoading: false })
     }
   },
 
@@ -75,5 +89,32 @@ export const useChatStore = create((set, get) => ({
     } catch (err) {
       console.error('Failed to toggle AI:', err)
     }
+  },
+
+  setContactLabels: (contactId, labels) => {
+    set((state) => ({
+      conversations: state.conversations.map((conversation) =>
+        String(conversation.contact_id) === String(contactId)
+          ? {
+              ...conversation,
+              contact: conversation.contact
+                ? { ...conversation.contact, labels }
+                : conversation.contact,
+            }
+          : conversation,
+      ),
+    }))
+  },
+
+  assignLabel: async (contactId, labelId) => {
+    const res = await client.post(`/api/contacts/${contactId}/labels`, { label_id: labelId })
+    get().setContactLabels(contactId, res.data.labels || [])
+    return res.data
+  },
+
+  removeLabel: async (contactId, labelId) => {
+    const res = await client.delete(`/api/contacts/${contactId}/labels/${labelId}`)
+    get().setContactLabels(contactId, res.data.labels || [])
+    return res.data
   },
 }))

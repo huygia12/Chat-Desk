@@ -14,6 +14,7 @@ import Employees from "./pages/Employees";
 import Labels from "./pages/Labels";
 import EmployeeSettings from "./pages/EmployeeSettings";
 import SavedReplies from "./pages/SavedReplies";
+import AssignmentSettings from "./pages/AssignmentSettings";
 
 function PrivateRoute({ children }) {
   const token = useAuthStore((state) => state.token);
@@ -151,6 +152,14 @@ export default function App() {
           element={
             <BusinessOnlyRoute>
               <Settings />
+            </BusinessOnlyRoute>
+          }
+        />
+        <Route
+          path="assignment-settings"
+          element={
+            <BusinessOnlyRoute>
+              <AssignmentSettings />
             </BusinessOnlyRoute>
           }
         />

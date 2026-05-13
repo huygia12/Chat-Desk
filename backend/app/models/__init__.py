@@ -6,5 +6,18 @@ from app.models.message import Message
 from app.models.product import Product
 from app.models.label import Label
 from app.models.saved_reply import SavedReply
+from app.models.conversation_assignment import AssignmentSetting, ConversationAssignmentHistory, ConversationLabelHistory
 
-__all__ = ["User", "Channel", "Contact", "Conversation", "Message", "Product", "Label", "SavedReply"]
+__all__ = [
+    "User",
+    "Channel",
+    "Contact",
+    "Conversation",
+    "Message",
+    "Product",
+    "Label",
+    "SavedReply",
+    "AssignmentSetting",
+    "ConversationAssignmentHistory",
+    "ConversationLabelHistory",
+]

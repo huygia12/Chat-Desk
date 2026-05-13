@@ -32,6 +32,7 @@ async def get_messages(
         select(Conversation).where(
             Conversation.id == conversation_id,
             Conversation.business_id == business_id,
+            *((Conversation.assigned_to_id == current_user.id,) if current_user.role == "employee" else ()),
         )
     )
     conversation = conv_result.scalar_one_or_none()
@@ -66,6 +67,7 @@ async def send_message(
         .where(
             Conversation.id == conversation_id,
             Conversation.business_id == business_id,
+            *((Conversation.assigned_to_id == current_user.id,) if current_user.role == "employee" else ()),
         )
     )
     conversation = conv_result.unique().scalar_one_or_none()

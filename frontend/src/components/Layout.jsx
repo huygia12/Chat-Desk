@@ -1,16 +1,19 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { Layout as AntLayout, Menu, Button, Typography, Tag, Modal } from "antd";
+import { Layout as AntLayout, Menu, Button, Typography, Tag, Modal, Tooltip, theme } from "antd";
 import {
   MessageOutlined,
   ApiOutlined,
   ShoppingOutlined,
   SettingOutlined,
   LogoutOutlined,
+  MoonOutlined,
   DashboardOutlined,
   CodeOutlined,
   FileTextOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  PartitionOutlined,
+  SunOutlined,
   TeamOutlined,
   TagsOutlined,
 } from "@ant-design/icons";
@@ -18,6 +21,7 @@ import { useAuthStore } from "../store/authStore";
 import { useEffect, useState } from "react";
 import { connectWebSocket, disconnectWebSocket } from "../utils/websocket";
 import { useChatStore } from "../store/chatStore";
+import { useThemeStore } from "../store/themeStore";
 
 const { Header, Sider, Content } = AntLayout;
 
@@ -28,6 +32,7 @@ const businessMenuItems = [
   { key: "/widgets", icon: <CodeOutlined />, label: "Widgets" },
   { key: "/labels", icon: <TagsOutlined />, label: "Labels" },
   { key: "/saved-replies", icon: <FileTextOutlined />, label: "Saved Replies" },
+  { key: "/assignment-settings", icon: <PartitionOutlined />, label: "Quản lý assign" },
   { key: "/employees", icon: <TeamOutlined />, label: "Nhân viên" },
   { key: "/settings", icon: <SettingOutlined />, label: "Cài đặt" },
 ];
@@ -48,6 +53,9 @@ export default function Layout() {
   const { user, logout } = useAuthStore();
   const addMessage = useChatStore((s) => s.addMessage);
   const fetchConversations = useChatStore((s) => s.fetchConversations);
+  const themeMode = useThemeStore((s) => s.mode);
+  const toggleTheme = useThemeStore((s) => s.toggleMode);
+  const { token } = theme.useToken();
   const [collapsed, setCollapsed] = useState(false);
 
   const isAdmin = user?.role === "admin";
@@ -100,14 +108,14 @@ export default function Layout() {
     : (user?.business_name || user?.email);
 
   return (
-    <AntLayout style={{ minHeight: "100vh" }}>
+    <AntLayout style={{ minHeight: "100vh", background: token.colorBgLayout }}>
       <Sider
-        theme="light"
+        theme={themeMode === "dark" ? "dark" : "light"}
         width={220}
         collapsedWidth={64}
         collapsed={collapsed}
         trigger={null}
-        style={{ position: "relative" }}
+        style={{ position: "relative", background: token.colorBgContainer }}
       >
         <Button
           size="small"
@@ -121,7 +129,7 @@ export default function Layout() {
             width: 28,
             height: 28,
             borderRadius: 14,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+            boxShadow: token.boxShadowSecondary,
           }}
         />
         <div style={{ padding: collapsed ? "16px 8px" : "16px", textAlign: "center" }}>
@@ -176,20 +184,26 @@ export default function Layout() {
       <AntLayout>
         <Header
           style={{
-            background: "#fff",
+            background: token.colorBgContainer,
             padding: "0 24px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            borderBottom: "1px solid #f0f0f0",
+            borderBottom: `1px solid ${token.colorBorderSecondary}`,
           }}
         >
           <Typography.Text strong>{displayName}</Typography.Text>
+          <Tooltip title={themeMode === "dark" ? "Chế độ sáng" : "Chế độ tối"}>
+            <Button
+              icon={themeMode === "dark" ? <SunOutlined /> : <MoonOutlined />}
+              onClick={toggleTheme}
+            />
+          </Tooltip>
         </Header>
         <Content
           style={{
             margin: 0,
-            background: "#fff",
+            background: token.colorBgContainer,
           }}
         >
           <Outlet />

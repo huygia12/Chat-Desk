@@ -27,7 +27,19 @@ if config.config_file_name is not None:
 
 # Import all models so Alembic can detect them
 from app.database import Base
-from app.models import User, Channel, Contact, Conversation, Message, Product, Label, SavedReply
+from app.models import (
+    User,
+    Channel,
+    Contact,
+    Conversation,
+    Message,
+    Product,
+    Label,
+    SavedReply,
+    AssignmentSetting,
+    ConversationAssignmentHistory,
+    ConversationLabelHistory,
+)
 
 target_metadata = Base.metadata
 

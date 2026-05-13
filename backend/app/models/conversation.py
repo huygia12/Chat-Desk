@@ -14,12 +14,15 @@ class Conversation(Base):
     channel_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("channels.id"), nullable=False)
     contact_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("contacts.id"), nullable=False)
     platform: Mapped[str] = mapped_column(SAEnum("facebook", "instagram", "telegram", "widget", name="platform_type", create_type=False), nullable=False)
+    status: Mapped[str] = mapped_column(SAEnum("open", "closed", name="conversation_status"), nullable=False, default="open")
+    assigned_to_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     is_ai_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    business = relationship("User", back_populates="conversations")
+    business = relationship("User", foreign_keys=[business_id], back_populates="conversations")
+    assigned_to = relationship("User", foreign_keys=[assigned_to_id])
     channel = relationship("Channel", back_populates="conversations")
     contact = relationship("Contact", back_populates="conversations")
     messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan", order_by="Message.created_at")

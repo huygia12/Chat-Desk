@@ -26,7 +26,7 @@ class User(Base):
     # Relationships
     channels = relationship("Channel", back_populates="business", cascade="all, delete-orphan")
     contacts = relationship("Contact", back_populates="business", cascade="all, delete-orphan")
-    conversations = relationship("Conversation", back_populates="business", cascade="all, delete-orphan")
+    conversations = relationship("Conversation", foreign_keys="Conversation.business_id", back_populates="business", cascade="all, delete-orphan")
     products = relationship("Product", back_populates="business", cascade="all, delete-orphan")
     labels = relationship("Label", foreign_keys="Label.business_id", back_populates="business", cascade="all, delete-orphan")
     # Employees belonging to this business (only valid for business role)

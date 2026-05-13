@@ -4,10 +4,13 @@ import client from '../api/client'
 export const useChatStore = create((set, get) => ({
   conversations: [],
   labels: [],
+  assignees: [],
+  assignmentSettings: null,
   activeConversationId: null,
   messages: [],
   loading: false,
   labelsLoading: false,
+  assigneesLoading: false,
 
   fetchConversations: async () => {
     set({ loading: true })
@@ -33,7 +36,34 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
+  fetchAssignees: async () => {
+    set({ assigneesLoading: true })
+    try {
+      const res = await client.get('/api/assignments/assignees')
+      set({ assignees: res.data })
+    } catch (err) {
+      console.error('Failed to fetch assignees:', err)
+    } finally {
+      set({ assigneesLoading: false })
+    }
+  },
+
+  fetchAssignmentSettings: async () => {
+    try {
+      const res = await client.get('/api/assignments/settings')
+      set({ assignmentSettings: res.data })
+      return res.data
+    } catch (err) {
+      console.error('Failed to fetch assignment settings:', err)
+      return null
+    }
+  },
+
   setActiveConversation: async (conversationId) => {
+    if (!conversationId) {
+      set({ activeConversationId: null, messages: [] })
+      return
+    }
     set({ activeConversationId: conversationId, messages: [], loading: true })
     try {
       const res = await client.get(`/api/conversations/${conversationId}/messages`)
@@ -91,6 +121,17 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
+  assignConversation: async (conversationId, assignedToId) => {
+    const res = await client.patch(`/api/conversations/${conversationId}/assignee`, {
+      assigned_to_id: assignedToId,
+    })
+    set((state) => ({
+      conversations: state.conversations
+        .map((conversation) => (conversation.id === conversationId ? res.data : conversation)),
+    }))
+    return res.data
+  },
+
   setContactLabels: (contactId, labels) => {
     set((state) => ({
       conversations: state.conversations.map((conversation) =>
@@ -106,14 +147,18 @@ export const useChatStore = create((set, get) => ({
     }))
   },
 
-  assignLabel: async (contactId, labelId) => {
-    const res = await client.post(`/api/contacts/${contactId}/labels`, { label_id: labelId })
+  assignLabel: async (contactId, labelId, conversationId) => {
+    const res = await client.post(`/api/contacts/${contactId}/labels`, {
+      label_id: labelId,
+      conversation_id: conversationId,
+    })
     get().setContactLabels(contactId, res.data.labels || [])
     return res.data
   },
 
-  removeLabel: async (contactId, labelId) => {
-    const res = await client.delete(`/api/contacts/${contactId}/labels/${labelId}`)
+  removeLabel: async (contactId, labelId, conversationId) => {
+    const suffix = conversationId ? `?conversation_id=${conversationId}` : ''
+    const res = await client.delete(`/api/contacts/${contactId}/labels/${labelId}${suffix}`)
     get().setContactLabels(contactId, res.data.labels || [])
     return res.data
   },

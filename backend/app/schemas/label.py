@@ -29,3 +29,4 @@ class LabelOut(BaseModel):
 
 class ContactLabelAssign(BaseModel):
     label_id: uuid.UUID
+    conversation_id: uuid.UUID | None = None

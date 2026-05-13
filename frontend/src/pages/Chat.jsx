@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { List, Avatar, Typography, Input, Button, Spin, Switch, Badge, Empty, Select, message } from 'antd'
+import { List, Avatar, Typography, Input, Button, Spin, Switch, Badge, Empty, Select, message, Segmented, theme } from 'antd'
 import {
   SendOutlined,
   FacebookOutlined,
@@ -9,29 +9,38 @@ import {
   ShopOutlined,
 } from '@ant-design/icons'
 import { useChatStore } from '../store/chatStore'
+import { useAuthStore } from '../store/authStore'
 import CustomerLabel from '../components/CustomerLabel'
 import client from '../api/client'
 import dayjs from 'dayjs'
 
 const CONVERSATION_MIN_WIDTH = 240
 const CONVERSATION_MAX_WIDTH = 420
+const MESSAGE_GROUP_WINDOW_MINUTES = 3
 
 export default function Chat() {
   const {
     conversations,
     labels,
     labelsLoading,
+    assignees,
+    assigneesLoading,
+    assignmentSettings,
     activeConversationId,
     messages,
     loading,
     fetchConversations,
     fetchLabels,
+    fetchAssignees,
+    fetchAssignmentSettings,
     setActiveConversation,
     sendMessage,
     toggleAI,
+    assignConversation,
     assignLabel,
     removeLabel,
   } = useChatStore()
+  const user = useAuthStore((state) => state.user)
 
   const [inputValue, setInputValue] = useState('')
   const [sending, setSending] = useState(false)
@@ -41,6 +50,10 @@ export default function Chat() {
   const [savedReplies, setSavedReplies] = useState([])
   const [replyPickerIndex, setReplyPickerIndex] = useState(0)
   const [conversationWidth, setConversationWidth] = useState(320)
+  const [detailCollapsed, setDetailCollapsed] = useState(false)
+  const [assigningConversation, setAssigningConversation] = useState(false)
+  const [conversationQueue, setConversationQueue] = useState('all')
+  const { token } = theme.useToken()
   const chatContainerRef = useRef(null)
   const resizingConversationRef = useRef(false)
   const messagesEndRef = useRef(null)
@@ -48,6 +61,8 @@ export default function Chat() {
   useEffect(() => {
     fetchConversations()
     fetchLabels()
+    fetchAssignees()
+    fetchAssignmentSettings()
     fetchSavedReplies()
   }, [])
 
@@ -85,6 +100,16 @@ export default function Chat() {
   }, [])
 
   const activeConv = conversations.find((c) => c.id === activeConversationId)
+  const visibleConversations = useMemo(() => {
+    if (user?.role !== 'business') return conversations
+    if (conversationQueue === 'unassigned') {
+      return conversations.filter((conversation) => !conversation.assigned_to_id)
+    }
+    if (conversationQueue === 'assigned') {
+      return conversations.filter((conversation) => conversation.assigned_to_id)
+    }
+    return conversations
+  }, [conversationQueue, conversations, user?.role])
   const activeContactLabels = activeConv?.contact?.labels || []
   const assignedLabelIds = new Set(activeContactLabels.map((label) => label.id))
   const labelSelectorKey = `${activeConv?.contact_id || 'no-contact'}:${activeContactLabels
@@ -108,6 +133,35 @@ export default function Chat() {
       .slice(0, 20)
   }, [quickReplyQuery, savedReplies])
   const isReplyPickerOpen = quickReplyQuery != null && filteredReplies.length > 0
+  const groupedMessages = useMemo(() => {
+    return messages.map((message, index) => {
+      const previous = messages[index - 1]
+      const next = messages[index + 1]
+      const startsTimeBlock =
+        !previous ||
+        dayjs(message.created_at).diff(dayjs(previous.created_at), 'minute', true) >
+          MESSAGE_GROUP_WINDOW_MINUTES
+      const startsGroup =
+        !previous ||
+        previous.sender_type !== message.sender_type ||
+        dayjs(message.created_at).diff(dayjs(previous.created_at), 'minute', true) >
+          MESSAGE_GROUP_WINDOW_MINUTES
+      const endsGroup =
+        !next ||
+        next.sender_type !== message.sender_type ||
+        dayjs(next.created_at).diff(dayjs(message.created_at), 'minute', true) >
+          MESSAGE_GROUP_WINDOW_MINUTES
+
+      return {
+        ...message,
+        startsGroup,
+        endsGroup,
+        showTimeSeparator: startsTimeBlock,
+      }
+    })
+  }, [messages])
+  const employeeAssignmentLocked =
+    user?.role === 'employee' && assignmentSettings?.employee_assignment_locked
 
   useEffect(() => {
     setReplyPickerIndex(0)
@@ -169,7 +223,7 @@ export default function Chat() {
     setLabelSelectValue(labelId)
     setAssigningLabel(true)
     try {
-      await assignLabel(activeConv.contact_id, labelId)
+      await assignLabel(activeConv.contact_id, labelId, activeConversationId)
     } catch (err) {
       message.error(err.response?.data?.detail || 'Gán label thất bại')
     } finally {
@@ -182,13 +236,34 @@ export default function Chat() {
   const handleRemoveLabel = async (label) => {
     if (!activeConv?.contact_id || !label?.id) return
     try {
-      await removeLabel(activeConv.contact_id, label.id)
+      await removeLabel(activeConv.contact_id, label.id, activeConversationId)
       setLabelSelectValue(undefined)
       setLabelSearchText('')
     } catch (err) {
       message.error(err.response?.data?.detail || 'Gỡ label thất bại')
     }
   }
+
+  const handleAssignConversation = async (assignedToId) => {
+    if (!activeConversationId) return
+    setAssigningConversation(true)
+    try {
+      await assignConversation(activeConversationId, assignedToId || null)
+      await fetchConversations()
+      if (user?.role === 'employee' && assignedToId !== user.id) {
+        setActiveConversation(null)
+      }
+    } catch (err) {
+      message.error(err.response?.data?.detail || 'Cập nhật assignee thất bại')
+    } finally {
+      setAssigningConversation(false)
+    }
+  }
+
+  const activeAssigneeName =
+    activeConv?.assigned_to?.full_name ||
+    activeConv?.assigned_to?.email ||
+    'Doanh nghiệp'
 
   const getPlatformIcon = (platform) =>
     platform === 'facebook' ? (
@@ -212,6 +287,36 @@ export default function Chat() {
     }
   }
 
+  const getMessageBubbleRadius = (msg) => {
+    if (msg.startsGroup && msg.endsGroup) return 18
+
+    const isContact = msg.sender_type === 'contact'
+    const compactRadius = 6
+    const fullRadius = 18
+
+    if (isContact) {
+      return {
+        borderTopLeftRadius: msg.startsGroup ? fullRadius : compactRadius,
+        borderTopRightRadius: fullRadius,
+        borderBottomRightRadius: fullRadius,
+        borderBottomLeftRadius: msg.endsGroup ? fullRadius : compactRadius,
+      }
+    }
+
+    return {
+      borderTopLeftRadius: fullRadius,
+      borderTopRightRadius: msg.startsGroup ? fullRadius : compactRadius,
+      borderBottomRightRadius: msg.endsGroup ? fullRadius : compactRadius,
+      borderBottomLeftRadius: fullRadius,
+    }
+  }
+
+  const formatMessageSeparatorTime = (value) => {
+    const timestamp = dayjs(value)
+    if (timestamp.isSame(dayjs(), 'day')) return timestamp.format('HH:mm')
+    return timestamp.format('MMM D, YYYY, HH:mm')
+  }
+
   const renderConversationLabels = (conv) => {
     const convLabels = conv.contact?.labels || []
     if (convLabels.length === 0) return null
@@ -231,7 +336,10 @@ export default function Chat() {
   }
 
   return (
-    <div ref={chatContainerRef} style={{ display: 'flex', height: 'calc(100vh - 64px)' }}>
+    <div
+      ref={chatContainerRef}
+      style={{ display: 'flex', height: 'calc(100vh - 64px)', background: token.colorBgContainer }}
+    >
       <div
         style={{
           width: conversationWidth,
@@ -241,22 +349,37 @@ export default function Chat() {
           overflowY: 'auto',
         }}
       >
-        <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
+        <div style={{ padding: '12px 16px', borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
           <Typography.Text strong>Hội thoại ({conversations.length})</Typography.Text>
         </div>
-        {conversations.length === 0 ? (
+        {user?.role === 'business' && (
+          <div style={{ padding: '10px 16px', borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
+            <Segmented
+              size="small"
+              value={conversationQueue}
+              onChange={setConversationQueue}
+              options={[
+                { label: 'Tất cả', value: 'all' },
+                { label: 'Unassigned', value: 'unassigned' },
+                { label: 'Assigned', value: 'assigned' },
+              ]}
+              block
+            />
+          </div>
+        )}
+        {visibleConversations.length === 0 ? (
           <Empty description="Chưa có hội thoại" style={{ marginTop: 40 }} />
         ) : (
           <List
-            dataSource={conversations}
+            dataSource={visibleConversations}
             renderItem={(conv) => (
               <List.Item
                 onClick={() => setActiveConversation(conv.id)}
                 style={{
                   padding: '12px 16px',
                   cursor: 'pointer',
-                  background: conv.id === activeConversationId ? '#e6f7ff' : 'transparent',
-                  borderBottom: '1px solid #f5f5f5',
+                  background: conv.id === activeConversationId ? token.controlItemBgActive : 'transparent',
+                  borderBottom: `1px solid ${token.colorSplit}`,
                 }}
               >
                 <List.Item.Meta
@@ -297,9 +420,9 @@ export default function Chat() {
           width: 6,
           flex: '0 0 6px',
           cursor: 'col-resize',
-          borderLeft: '1px solid #f0f0f0',
-          borderRight: '1px solid #f0f0f0',
-          background: '#fafafa',
+          borderLeft: `1px solid ${token.colorBorderSecondary}`,
+          borderRight: `1px solid ${token.colorBorderSecondary}`,
+          background: token.colorFillQuaternary,
         }}
       />
 
@@ -309,7 +432,7 @@ export default function Chat() {
             <div
               style={{
                 padding: '12px 16px',
-                borderBottom: '1px solid #f0f0f0',
+                borderBottom: `1px solid ${token.colorBorderSecondary}`,
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -323,40 +446,6 @@ export default function Chat() {
                 <Typography.Text type="secondary" style={{ marginLeft: 8 }}>
                   {getPlatformIcon(activeConv?.platform)} {activeConv?.platform}
                 </Typography.Text>
-                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginTop: 8 }}>
-                  {activeContactLabels.map((label) => (
-                    <CustomerLabel
-                      key={label.id}
-                      label={label}
-                      closable
-                      onClose={handleRemoveLabel}
-                    />
-                  ))}
-                  <Select
-                    key={labelSelectorKey}
-                    size="small"
-                    showSearch
-                    placeholder="Thêm label"
-                    value={labelSelectValue}
-                    searchValue={labelSearchText}
-                    optionFilterProp="label"
-                    filterOption={(input, option) =>
-                      String(option?.label || '').toLowerCase().includes(input.toLowerCase())
-                    }
-                    loading={labelsLoading || assigningLabel}
-                    onSearch={setLabelSearchText}
-                    onChange={handleAssignLabel}
-                    onDropdownVisibleChange={(open) => {
-                      if (!open) setLabelSearchText('')
-                    }}
-                    style={{ width: 180 }}
-                    options={labels.map((label) => ({
-                      value: label.id,
-                      label: label.name,
-                      disabled: assignedLabelIds.has(label.id),
-                    }))}
-                  />
-                </div>
               </div>
               <div style={{ flexShrink: 0 }}>
                 <Typography.Text style={{ marginRight: 8 }}>AI tự động:</Typography.Text>
@@ -368,51 +457,74 @@ export default function Chat() {
               </div>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '16px', background: token.colorBgContainer }}>
               {loading ? (
                 <div style={{ textAlign: 'center', marginTop: 40 }}>
                   <Spin />
                 </div>
               ) : (
-                messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: msg.sender_type === 'contact' ? 'flex-start' : 'flex-end',
-                      marginBottom: 12,
-                    }}
-                  >
+                groupedMessages.map((msg) => (
+                  <div key={msg.id}>
+                    {msg.showTimeSeparator && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          margin: '18px 0 12px',
+                        }}
+                      >
+                        <Typography.Text
+                          type="secondary"
+                          style={{
+                            fontSize: 12,
+                            color: token.colorTextSecondary,
+                            background: token.colorBgContainer,
+                            padding: '0 10px',
+                          }}
+                        >
+                          {formatMessageSeparatorTime(msg.created_at)}
+                        </Typography.Text>
+                      </div>
+                    )}
                     <div
                       style={{
                         display: 'flex',
-                        alignItems: 'flex-end',
-                        gap: 8,
-                        flexDirection: msg.sender_type === 'contact' ? 'row' : 'row-reverse',
+                        justifyContent: msg.sender_type === 'contact' ? 'flex-start' : 'flex-end',
+                        marginTop: msg.startsGroup ? 2 : 2,
+                        marginBottom: msg.endsGroup ? 10 : 2,
                       }}
                     >
-                      {getSenderIcon(msg.sender_type)}
                       <div
                         style={{
-                          maxWidth: '60%',
-                          padding: '8px 12px',
-                          borderRadius: 12,
-                          background:
-                            msg.sender_type === 'contact'
-                              ? '#f0f0f0'
-                              : msg.sender_type === 'ai'
-                                ? '#f3e8ff'
-                                : '#e6f7ff',
+                          display: 'flex',
+                          alignItems: 'flex-end',
+                          gap: 8,
+                          flexDirection: msg.sender_type === 'contact' ? 'row' : 'row-reverse',
                         }}
                       >
-                        <div>{msg.content}</div>
-                        <Typography.Text
-                          type="secondary"
-                          style={{ fontSize: 10, display: 'block', marginTop: 4 }}
+                        {msg.endsGroup ? (
+                          getSenderIcon(msg.sender_type)
+                        ) : (
+                          <div style={{ width: 24, flex: '0 0 24px' }} />
+                        )}
+                        <div
+                          style={{
+                            maxWidth: '60%',
+                            padding: '8px 12px',
+                            borderRadius: 18,
+                            ...getMessageBubbleRadius(msg),
+                            color: token.colorText,
+                            background:
+                              msg.sender_type === 'contact'
+                                ? token.colorFillSecondary
+                                : msg.sender_type === 'ai'
+                                  ? token.colorPrimaryBg
+                                  : token.colorInfoBg,
+                          }}
                         >
-                          {msg.sender_type === 'ai' ? 'AI' : msg.sender_type === 'business' ? 'Bạn' : ''}{' '}
-                          {dayjs(msg.created_at).format('HH:mm')}
-                        </Typography.Text>
+                          <div>{msg.content}</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -424,8 +536,9 @@ export default function Chat() {
             <div
               style={{
                 padding: '12px 16px',
-                borderTop: '1px solid #f0f0f0',
+                borderTop: `1px solid ${token.colorBorderSecondary}`,
                 position: 'relative',
+                background: token.colorBgContainer,
               }}
             >
               {isReplyPickerOpen && (
@@ -533,6 +646,119 @@ export default function Chat() {
           </div>
         )}
       </div>
+      {activeConversationId && (
+        detailCollapsed ? (
+          <div
+            style={{
+              width: 42,
+              flex: '0 0 42px',
+              borderLeft: `1px solid ${token.colorBorderSecondary}`,
+              display: 'flex',
+              justifyContent: 'center',
+              paddingTop: 12,
+              background: token.colorBgContainer,
+            }}
+          >
+            <Button size="small" onClick={() => setDetailCollapsed(false)}>
+              &lt;
+            </Button>
+          </div>
+        ) : (
+          <aside
+            style={{
+              width: 300,
+              flex: '0 0 300px',
+              borderLeft: `1px solid ${token.colorBorderSecondary}`,
+              padding: 16,
+              overflowY: 'auto',
+              background: token.colorBgContainer,
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography.Text strong>Chi tiết</Typography.Text>
+              <Button size="small" onClick={() => setDetailCollapsed(true)}>
+                &gt;
+              </Button>
+            </div>
+
+            <div style={{ marginTop: 18, paddingBottom: 18, borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <Typography.Text strong>Assignee</Typography.Text>
+                {employeeAssignmentLocked && (
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    Đã khóa
+                  </Typography.Text>
+                )}
+              </div>
+              <Select
+                showSearch
+                disabled={employeeAssignmentLocked}
+                loading={assigneesLoading || assigningConversation}
+                value={activeConv?.assigned_to_id || '__business__'}
+                onChange={(value) => handleAssignConversation(value === '__business__' ? null : value)}
+                optionFilterProp="label"
+                style={{ width: '100%' }}
+                options={assignees.map((assignee) => ({
+                  value: assignee.id || '__business__',
+                  label: assignee.name,
+                }))}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
+                <Avatar
+                  size={24}
+                  icon={activeConv?.assigned_to_id ? <UserOutlined /> : <ShopOutlined />}
+                  style={{ background: activeConv?.assigned_to_id ? '#52c41a' : '#1677ff' }}
+                />
+                <Typography.Text>{activeAssigneeName}</Typography.Text>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 18, paddingBottom: 18, borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <Typography.Text strong>Labels</Typography.Text>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+                {activeContactLabels.length === 0 ? (
+                  <Typography.Text type="secondary">Chưa có label</Typography.Text>
+                ) : (
+                  activeContactLabels.map((label) => (
+                    <CustomerLabel
+                      key={label.id}
+                      label={label}
+                      closable
+                      onClose={handleRemoveLabel}
+                    />
+                  ))
+                )}
+              </div>
+              <Select
+                key={labelSelectorKey}
+                size="small"
+                showSearch
+                placeholder="Thêm label"
+                value={labelSelectValue}
+                searchValue={labelSearchText}
+                optionFilterProp="label"
+                filterOption={(input, option) =>
+                  String(option?.label || '').toLowerCase().includes(input.toLowerCase())
+                }
+                loading={labelsLoading || assigningLabel}
+                onSearch={setLabelSearchText}
+                onChange={handleAssignLabel}
+                onDropdownVisibleChange={(open) => {
+                  if (!open) setLabelSearchText('')
+                }}
+                style={{ width: '100%' }}
+                options={labels.map((label) => ({
+                  value: label.id,
+                  label: label.name,
+                  disabled: assignedLabelIds.has(label.id),
+                }))}
+              />
+            </div>
+          </aside>
+        )
+      )}
     </div>
   )
 }

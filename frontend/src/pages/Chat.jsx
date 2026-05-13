@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { List, Avatar, Typography, Input, Button, Spin, Switch, Badge, Empty, Select, message } from 'antd'
 import {
   SendOutlined,
@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons'
 import { useChatStore } from '../store/chatStore'
 import CustomerLabel from '../components/CustomerLabel'
+import client from '../api/client'
 import dayjs from 'dayjs'
 
 export default function Chat() {
@@ -34,11 +35,14 @@ export default function Chat() {
   const [assigningLabel, setAssigningLabel] = useState(false)
   const [labelSelectValue, setLabelSelectValue] = useState(undefined)
   const [labelSearchText, setLabelSearchText] = useState('')
+  const [savedReplies, setSavedReplies] = useState([])
+  const [replyPickerIndex, setReplyPickerIndex] = useState(0)
   const messagesEndRef = useRef(null)
 
   useEffect(() => {
     fetchConversations()
     fetchLabels()
+    fetchSavedReplies()
   }, [])
 
   useEffect(() => {
@@ -58,6 +62,31 @@ export default function Chat() {
     setLabelSearchText('')
   }, [activeConv?.contact_id])
 
+  const quickReplyQuery = inputValue.startsWith('/') ? inputValue.slice(1).toLowerCase() : null
+  const filteredReplies = useMemo(() => {
+    if (quickReplyQuery == null) return []
+    return savedReplies
+      .filter((reply) => {
+        const haystack = `${reply.shortcut} ${reply.title} ${reply.content}`.toLowerCase()
+        return haystack.includes(quickReplyQuery)
+      })
+      .slice(0, 20)
+  }, [quickReplyQuery, savedReplies])
+  const isReplyPickerOpen = quickReplyQuery != null && filteredReplies.length > 0
+
+  useEffect(() => {
+    setReplyPickerIndex(0)
+  }, [quickReplyQuery])
+
+  const fetchSavedReplies = async () => {
+    try {
+      const res = await client.get('/api/saved-replies')
+      setSavedReplies(res.data)
+    } catch (err) {
+      console.error('Failed to fetch saved replies:', err)
+    }
+  }
+
   const handleSend = async () => {
     if (!inputValue.trim() || !activeConversationId) return
     setSending(true)
@@ -68,6 +97,35 @@ export default function Chat() {
       // Error handled in store
     } finally {
       setSending(false)
+    }
+  }
+
+  const applySavedReply = (reply) => {
+    setInputValue(reply.content)
+    setReplyPickerIndex(0)
+  }
+
+  const handleInputKeyDown = (event) => {
+    if (!isReplyPickerOpen) return
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setReplyPickerIndex((index) => (index + 1) % filteredReplies.length)
+      return
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setReplyPickerIndex((index) => (index - 1 + filteredReplies.length) % filteredReplies.length)
+      return
+    }
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      applySavedReply(filteredReplies[replyPickerIndex])
+      return
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      setInputValue('')
     }
   }
 
@@ -311,24 +369,99 @@ export default function Chat() {
               style={{
                 padding: '12px 16px',
                 borderTop: '1px solid #f0f0f0',
-                display: 'flex',
-                gap: 8,
+                position: 'relative',
               }}
             >
-              <Input
-                placeholder="Nhập tin nhắn..."
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onPressEnter={handleSend}
-                size="large"
-              />
-              <Button
-                type="primary"
-                icon={<SendOutlined />}
-                onClick={handleSend}
-                loading={sending}
-                size="large"
-              />
+              {isReplyPickerOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 16,
+                    right: 16,
+                    bottom: 68,
+                    maxHeight: 300,
+                    overflowY: 'auto',
+                    border: '1px solid #2f3036',
+                    borderRadius: 8,
+                    background: '#24252b',
+                    boxShadow: '0 12px 32px rgba(0,0,0,0.28)',
+                    zIndex: 20,
+                  }}
+                >
+                  {filteredReplies.map((reply, index) => (
+                    <button
+                      key={reply.id}
+                      type="button"
+                      onMouseDown={(event) => {
+                        event.preventDefault()
+                        applySavedReply(reply)
+                      }}
+                      onMouseEnter={() => setReplyPickerIndex(index)}
+                      style={{
+                        width: '100%',
+                        border: 0,
+                        padding: '10px 14px',
+                        display: 'grid',
+                        gridTemplateColumns: '34px 1fr',
+                        gap: 10,
+                        textAlign: 'left',
+                        background: index === replyPickerIndex ? '#31333b' : 'transparent',
+                        color: '#fff',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Avatar
+                        size={28}
+                        icon={reply.visibility === 'business' ? <ShopOutlined /> : <UserOutlined />}
+                        style={{
+                          background: reply.visibility === 'business' ? '#1677ff' : '#52c41a',
+                        }}
+                      />
+                      <span style={{ minWidth: 0 }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <Typography.Text style={{ color: '#fff', fontWeight: 600 }}>
+                            /{reply.shortcut}
+                          </Typography.Text>
+                          <Typography.Text style={{ color: '#b5bac1', fontSize: 12 }}>
+                            {reply.title}
+                          </Typography.Text>
+                        </span>
+                        <Typography.Text
+                          style={{
+                            display: 'block',
+                            color: '#b5bac1',
+                            fontSize: 12,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {reply.content}
+                        </Typography.Text>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: 8 }}>
+                <Input
+                  placeholder="Nhập tin nhắn..."
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleInputKeyDown}
+                  onPressEnter={() => {
+                    if (!isReplyPickerOpen) handleSend()
+                  }}
+                  size="large"
+                />
+                <Button
+                  type="primary"
+                  icon={<SendOutlined />}
+                  onClick={handleSend}
+                  loading={sending}
+                  size="large"
+                />
+              </div>
             </div>
           </>
         ) : (

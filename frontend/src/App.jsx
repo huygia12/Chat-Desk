@@ -12,6 +12,8 @@ import WidgetPage from "./pages/WidgetPage";
 import Widgets from "./pages/Widgets";
 import Employees from "./pages/Employees";
 import Labels from "./pages/Labels";
+import EmployeeSettings from "./pages/EmployeeSettings";
+import SavedReplies from "./pages/SavedReplies";
 
 function PrivateRoute({ children }) {
   const token = useAuthStore((state) => state.token);
@@ -36,6 +38,28 @@ function BusinessOnlyRoute({ children }) {
   if (!token) return <Navigate to="/login" />;
   if (user?.role === "employee") return <Navigate to="/chat" />;
   if (user?.role === "admin") return <Navigate to="/admin" />;
+
+  return children;
+}
+
+function EmployeeOnlyRoute({ children }) {
+  const token = useAuthStore((state) => state.token);
+  const user = useAuthStore((state) => state.user);
+
+  if (!token) return <Navigate to="/login" />;
+  if (user?.role === "admin") return <Navigate to="/admin" />;
+  if (user?.role !== "employee") return <Navigate to="/chat" />;
+
+  return children;
+}
+
+function BusinessOrEmployeeRoute({ children }) {
+  const token = useAuthStore((state) => state.token);
+  const user = useAuthStore((state) => state.user);
+
+  if (!token) return <Navigate to="/login" />;
+  if (user?.role === "admin") return <Navigate to="/admin" />;
+  if (!["business", "employee"].includes(user?.role)) return <Navigate to="/login" />;
 
   return children;
 }
@@ -115,11 +139,27 @@ export default function App() {
           }
         />
         <Route
+          path="saved-replies"
+          element={
+            <BusinessOrEmployeeRoute>
+              <SavedReplies />
+            </BusinessOrEmployeeRoute>
+          }
+        />
+        <Route
           path="settings"
           element={
             <BusinessOnlyRoute>
               <Settings />
             </BusinessOnlyRoute>
+          }
+        />
+        <Route
+          path="employee-settings"
+          element={
+            <EmployeeOnlyRoute>
+              <EmployeeSettings />
+            </EmployeeOnlyRoute>
           }
         />
       </Route>

@@ -1,5 +1,5 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { Layout as AntLayout, Menu, Button, Typography, Tag } from "antd";
+import { Layout as AntLayout, Menu, Button, Typography, Tag, Modal } from "antd";
 import {
   MessageOutlined,
   ApiOutlined,
@@ -8,6 +8,7 @@ import {
   LogoutOutlined,
   DashboardOutlined,
   CodeOutlined,
+  FileTextOutlined,
   TeamOutlined,
   TagsOutlined,
 } from "@ant-design/icons";
@@ -24,12 +25,15 @@ const businessMenuItems = [
   { key: "/products", icon: <ShoppingOutlined />, label: "Sản phẩm" },
   { key: "/widgets", icon: <CodeOutlined />, label: "Widgets" },
   { key: "/labels", icon: <TagsOutlined />, label: "Labels" },
+  { key: "/saved-replies", icon: <FileTextOutlined />, label: "Saved Replies" },
   { key: "/employees", icon: <TeamOutlined />, label: "Nhân viên" },
   { key: "/settings", icon: <SettingOutlined />, label: "Cài đặt" },
 ];
 
 const employeeMenuItems = [
   { key: "/chat", icon: <MessageOutlined />, label: "Tin nhắn" },
+  { key: "/saved-replies", icon: <FileTextOutlined />, label: "Saved Replies" },
+  { key: "/employee-settings", icon: <SettingOutlined />, label: "Cài đặt" },
 ];
 
 const adminMenuItems = [
@@ -74,6 +78,17 @@ export default function Layout() {
     navigate("/login");
   };
 
+  const confirmLogout = () => {
+    Modal.confirm({
+      title: "Đăng xuất?",
+      content: "Bạn có chắc muốn đăng xuất?",
+      centered: true,
+      okText: "Đồng ý",
+      cancelText: "Hủy",
+      onOk: handleLogout,
+    });
+  };
+
   // Display name in header
   const displayName = isEmployee
     ? (user?.full_name || user?.email)
@@ -113,7 +128,7 @@ export default function Layout() {
             padding: "0 16px",
           }}
         >
-          <Button icon={<LogoutOutlined />} onClick={handleLogout} block>
+          <Button icon={<LogoutOutlined />} onClick={confirmLogout} block>
             Đăng xuất
           </Button>
         </div>

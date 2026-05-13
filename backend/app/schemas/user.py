@@ -35,6 +35,20 @@ class EmployeeUpdate(BaseModel):
     is_active: bool
 
 
+class EmployeeProfileUpdate(BaseModel):
+    email: EmailStr
+    full_name: str
+
+
+class EmployeePasswordUpdate(BaseModel):
+    password: str
+
+
+class EmployeeOwnPasswordUpdate(BaseModel):
+    current_password: str
+    password: str
+
+
 class EmployeeOut(BaseModel):
     id: uuid.UUID
     email: EmailStr
@@ -46,4 +60,3 @@ class EmployeeOut(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
-

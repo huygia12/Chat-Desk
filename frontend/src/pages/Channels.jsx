@@ -161,6 +161,8 @@ export default function Channels() {
         <Popconfirm
           title="Ngắt kết nối kênh này?"
           onConfirm={() => handleDisconnect(record.id)}
+          okText="Đồng ý"
+          cancelText="Hủy"
         >
           <Button danger icon={<DeleteOutlined />} size="small">
             Ngắt

@@ -5,5 +5,6 @@ from app.models.conversation import Conversation
 from app.models.message import Message
 from app.models.product import Product
 from app.models.label import Label
+from app.models.saved_reply import SavedReply
 
-__all__ = ["User", "Channel", "Contact", "Conversation", "Message", "Product", "Label"]
+__all__ = ["User", "Channel", "Contact", "Conversation", "Message", "Product", "Label", "SavedReply"]

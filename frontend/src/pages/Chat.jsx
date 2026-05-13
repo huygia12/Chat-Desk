@@ -13,6 +13,9 @@ import CustomerLabel from '../components/CustomerLabel'
 import client from '../api/client'
 import dayjs from 'dayjs'
 
+const CONVERSATION_MIN_WIDTH = 240
+const CONVERSATION_MAX_WIDTH = 420
+
 export default function Chat() {
   const {
     conversations,
@@ -37,6 +40,9 @@ export default function Chat() {
   const [labelSearchText, setLabelSearchText] = useState('')
   const [savedReplies, setSavedReplies] = useState([])
   const [replyPickerIndex, setReplyPickerIndex] = useState(0)
+  const [conversationWidth, setConversationWidth] = useState(320)
+  const chatContainerRef = useRef(null)
+  const resizingConversationRef = useRef(false)
   const messagesEndRef = useRef(null)
 
   useEffect(() => {
@@ -48,6 +54,35 @@ export default function Chat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    const handleMouseMove = (event) => {
+      if (!resizingConversationRef.current) return
+      const containerLeft = chatContainerRef.current?.getBoundingClientRect().left || 0
+      const nextWidth = Math.min(
+        CONVERSATION_MAX_WIDTH,
+        Math.max(CONVERSATION_MIN_WIDTH, event.clientX - containerLeft),
+      )
+      setConversationWidth(nextWidth)
+    }
+
+    const handleMouseUp = () => {
+      if (!resizingConversationRef.current) return
+      resizingConversationRef.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+  }, [])
 
   const activeConv = conversations.find((c) => c.id === activeConversationId)
   const activeContactLabels = activeConv?.contact?.labels || []
@@ -196,11 +231,13 @@ export default function Chat() {
   }
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 64px)' }}>
+    <div ref={chatContainerRef} style={{ display: 'flex', height: 'calc(100vh - 64px)' }}>
       <div
         style={{
-          width: 320,
-          borderRight: '1px solid #f0f0f0',
+          width: conversationWidth,
+          minWidth: CONVERSATION_MIN_WIDTH,
+          maxWidth: CONVERSATION_MAX_WIDTH,
+          flex: '0 0 auto',
           overflowY: 'auto',
         }}
       >
@@ -246,6 +283,25 @@ export default function Chat() {
           />
         )}
       </div>
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        title="Kéo để đổi độ rộng danh sách hội thoại"
+        onMouseDown={(event) => {
+          event.preventDefault()
+          resizingConversationRef.current = true
+          document.body.style.cursor = 'col-resize'
+          document.body.style.userSelect = 'none'
+        }}
+        style={{
+          width: 6,
+          flex: '0 0 6px',
+          cursor: 'col-resize',
+          borderLeft: '1px solid #f0f0f0',
+          borderRight: '1px solid #f0f0f0',
+          background: '#fafafa',
+        }}
+      />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {activeConversationId ? (

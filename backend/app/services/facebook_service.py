@@ -6,6 +6,26 @@ logger = logging.getLogger(__name__)
 FB_GRAPH_API = "https://graph.facebook.com/v21.0"
 
 
+def _meta_error_detail(response: httpx.Response) -> str:
+    try:
+        error = response.json().get("error", {})
+    except ValueError:
+        return response.text[:500]
+
+    message = error.get("message") or response.text[:500]
+    code = error.get("code")
+    subcode = error.get("error_subcode")
+    fbtrace_id = error.get("fbtrace_id")
+    parts = [message]
+    if code is not None:
+        parts.append(f"code={code}")
+    if subcode is not None:
+        parts.append(f"subcode={subcode}")
+    if fbtrace_id:
+        parts.append(f"fbtrace_id={fbtrace_id}")
+    return " | ".join(parts)
+
+
 async def send_facebook_message(
     page_access_token: str,
     recipient_id: str,
@@ -22,6 +42,10 @@ async def send_facebook_message(
 
     async with httpx.AsyncClient(timeout=30) as client:
         response = await client.post(url, json=payload, params=params)
+        if response.status_code >= 400:
+            detail = _meta_error_detail(response)
+            logger.warning("Facebook send failed (%s): %s", response.status_code, detail)
+            raise RuntimeError(detail)
         response.raise_for_status()
         data = response.json()
         return data.get("message_id")

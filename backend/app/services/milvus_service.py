@@ -21,9 +21,12 @@ _client: MilvusClient | None = None
 def connect_milvus() -> None:
     """Connect to Milvus Cloud (Zilliz). Call once at startup."""
     global _client
+    if not settings.MILVUS_URI:
+        raise RuntimeError("MILVUS_URI is not configured")
+
     _client = MilvusClient(
         uri=settings.MILVUS_URI,
-        token=settings.MILVUS_TOKEN,
+        token=settings.MILVUS_TOKEN or None,
     )
     _ensure_collection()
     logger.info(f"Connected to Milvus Cloud: {settings.MILVUS_URI[:50]}...")
@@ -38,9 +41,15 @@ def disconnect_milvus() -> None:
 
 
 def _get_client() -> MilvusClient:
+    global _client
     if _client is None:
-        raise RuntimeError("Milvus not connected. Call connect_milvus() first.")
+        logger.warning("Milvus client is not connected; attempting lazy reconnect")
+        connect_milvus()
     return _client
+
+
+def is_connected() -> bool:
+    return _client is not None
 
 
 # ── collection management ────────────────────────────────────────────────────
@@ -72,6 +81,20 @@ def _ensure_collection() -> None:
         logger.info(f"Created Milvus collection '{COLLECTION_NAME}' with COSINE AUTOINDEX")
     else:
         logger.info(f"Milvus collection '{COLLECTION_NAME}' already exists")
+
+
+def reset_collection() -> None:
+    """Drop and recreate the product embedding collection."""
+    client = _get_client()
+    if client.has_collection(COLLECTION_NAME):
+        client.drop_collection(COLLECTION_NAME)
+        logger.warning(f"Dropped Milvus collection '{COLLECTION_NAME}'")
+    _ensure_collection()
+
+
+def flush_collection() -> None:
+    client = _get_client()
+    client.flush(COLLECTION_NAME)
 
 
 # ── CRUD operations ──────────────────────────────────────────────────────────

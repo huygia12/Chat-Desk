@@ -38,6 +38,21 @@ async def _retrieve_relevant_products(
     return result.scalars().all()
 
 
+async def _retrieve_products_without_vector_search(
+    db: AsyncSession,
+    business_id,
+    limit: int = 10,
+) -> list[Product]:
+    """Fallback product context when Milvus is unavailable or unhealthy."""
+    result = await db.execute(
+        select(Product)
+        .where(Product.business_id == business_id)
+        .order_by(Product.created_at.desc())
+        .limit(limit)
+    )
+    return result.scalars().all()
+
+
 async def _get_chat_history(db: AsyncSession, conversation_id, limit: int = 10) -> list[Message]:
     """Get last N messages for context."""
     result = await db.execute(
@@ -67,8 +82,18 @@ async def generate_ai_response(
         business_name = business.business_name or "Cửa hàng" if business else "Cửa hàng"
         business_desc = business.business_description or "" if business else ""
 
-        # 2. Retrieve relevant products (RAG)
-        products = await _retrieve_relevant_products(db, conversation.business_id, user_message)
+        # 2. Retrieve relevant products (RAG). If Milvus is temporarily
+        # unavailable, keep the AI reply working without product context.
+        try:
+            products = await _retrieve_relevant_products(db, conversation.business_id, user_message)
+        except Exception as retrieval_error:
+            logger.warning(
+                "Product retrieval skipped for conversation %s: %s",
+                conversation.id,
+                retrieval_error,
+                exc_info=True,
+            )
+            products = await _retrieve_products_without_vector_search(db, conversation.business_id)
 
         product_context = ""
         if products:

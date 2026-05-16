@@ -19,6 +19,17 @@ settings = get_settings()
 
 # ==================== Facebook Webhook ====================
 
+
+def _verify_webhook_request(
+    hub_mode: str | None,
+    hub_verify_token: str | None,
+    hub_challenge: str | None,
+):
+    if hub_mode == "subscribe" and hub_verify_token == settings.FB_VERIFY_TOKEN:
+        return PlainTextResponse(content=hub_challenge)
+    raise HTTPException(status_code=403, detail="Verification failed")
+
+
 @router.get("/facebook")
 async def facebook_verify(
     hub_mode: str = Query(None, alias="hub.mode"),
@@ -26,43 +37,19 @@ async def facebook_verify(
     hub_challenge: str = Query(None, alias="hub.challenge"),
 ):
     """Facebook webhook verification (GET)."""
-    if hub_mode == "subscribe" and hub_verify_token == settings.FB_VERIFY_TOKEN:
-        # Facebook expects plain text response, NOT JSON
-        return PlainTextResponse(content=hub_challenge)
-    raise HTTPException(status_code=403, detail="Verification failed")
+    return _verify_webhook_request(hub_mode, hub_verify_token, hub_challenge)
 
 
 @router.post("/facebook")
 async def facebook_webhook(request: Request):
-    """Receive messages from Facebook Messenger."""
+    """Receive Meta webhooks on the legacy Facebook callback URL."""
     body = await request.json()
-    logger.info(f"Facebook webhook received: {body}")
-
-    if body.get("object") != "page":
-        return {"status": "ignored"}
-
-    for entry in body.get("entry", []):
-        page_id = entry.get("id")
-        for messaging_event in entry.get("messaging", []):
-            sender_id = messaging_event.get("sender", {}).get("id")
-            message_data = messaging_event.get("message", {})
-            message_text = message_data.get("text")
-
-            if not message_text or sender_id == page_id:
-                continue
-
-            await _process_incoming_message(
-                platform="facebook",
-                page_id=page_id,
-                sender_id=sender_id,
-                message_text=message_text,
-                platform_message_id=message_data.get("mid"),
-            )
-
-    return {"status": "ok"}
+    logger.info("Meta webhook received on /facebook: object=%s body=%s", body.get("object"), body)
+    return await _handle_meta_webhook_body(body)
 
 
 # ==================== Instagram Webhook ====================
+
 
 @router.get("/instagram")
 async def instagram_verify(
@@ -71,33 +58,60 @@ async def instagram_verify(
     hub_challenge: str = Query(None, alias="hub.challenge"),
 ):
     """Instagram webhook verification (GET)."""
-    if hub_mode == "subscribe" and hub_verify_token == settings.FB_VERIFY_TOKEN:
-        return PlainTextResponse(content=hub_challenge)
-    raise HTTPException(status_code=403, detail="Verification failed")
+    return _verify_webhook_request(hub_mode, hub_verify_token, hub_challenge)
 
 
 @router.post("/instagram")
 async def instagram_webhook(request: Request):
-    """Receive messages from Instagram."""
+    """Receive Meta webhooks on the Instagram callback URL."""
     body = await request.json()
-    logger.info(f"Instagram webhook received: {body}")
+    logger.info("Meta webhook received on /instagram: object=%s body=%s", body.get("object"), body)
+    return await _handle_meta_webhook_body(body)
 
-    if body.get("object") != "instagram":
-        return {"status": "ignored"}
 
+@router.get("/meta")
+async def meta_verify(
+    hub_mode: str = Query(None, alias="hub.mode"),
+    hub_verify_token: str = Query(None, alias="hub.verify_token"),
+    hub_challenge: str = Query(None, alias="hub.challenge"),
+):
+    """Unified Meta webhook verification (GET)."""
+    return _verify_webhook_request(hub_mode, hub_verify_token, hub_challenge)
+
+
+@router.post("/meta")
+async def meta_webhook(request: Request):
+    """Receive Facebook and Instagram webhooks on one callback URL."""
+    body = await request.json()
+    logger.info("Meta webhook received on /meta: object=%s body=%s", body.get("object"), body)
+    return await _handle_meta_webhook_body(body)
+
+
+async def _handle_meta_webhook_body(body: dict):
+    meta_object = body.get("object")
+    if meta_object == "page":
+        return await _process_messaging_entries(body, platform="facebook")
+    if meta_object == "instagram":
+        return await _process_messaging_entries(body, platform="instagram")
+
+    logger.info("Ignored unsupported Meta webhook object=%s", meta_object)
+    return {"status": "ignored"}
+
+
+async def _process_messaging_entries(body: dict, platform: str):
     for entry in body.get("entry", []):
-        ig_id = entry.get("id")
+        channel_platform_id = entry.get("id")
         for messaging_event in entry.get("messaging", []):
             sender_id = messaging_event.get("sender", {}).get("id")
             message_data = messaging_event.get("message", {})
             message_text = message_data.get("text")
 
-            if not message_text or sender_id == ig_id:
+            if not message_text or sender_id == channel_platform_id:
                 continue
 
             await _process_incoming_message(
-                platform="instagram",
-                page_id=ig_id,
+                platform=platform,
+                page_id=channel_platform_id,
                 sender_id=sender_id,
                 message_text=message_text,
                 platform_message_id=message_data.get("mid"),

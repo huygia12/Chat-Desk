@@ -1,31 +1,30 @@
 import { useEffect, useState } from "react";
 import {
-  Card,
-  Table,
+  Alert,
   Button,
-  Modal,
+  Card,
   Form,
   Input,
-  Select,
-  Typography,
-  Tag,
-  message,
+  Modal,
   Popconfirm,
+  Select,
   Space,
-  Alert,
+  Table,
+  Tag,
+  Typography,
+  message,
 } from "antd";
 import {
-  PlusOutlined,
   DeleteOutlined,
   FacebookOutlined,
   InstagramOutlined,
   LinkOutlined,
+  PlusOutlined,
   SendOutlined,
 } from "@ant-design/icons";
-import { useChannelStore } from "../store/channelStore";
-import { useAuthStore } from "../store/authStore";
-import client from "../api/client";
 import dayjs from "dayjs";
+import client from "../api/client";
+import { useChannelStore } from "../store/channelStore";
 
 export default function Channels() {
   const {
@@ -37,8 +36,8 @@ export default function Channels() {
     connectTelegram,
     disconnectChannel,
   } = useChannelStore();
-  const token = useAuthStore((s) => s.token);
-  const [modalOpen, setModalOpen] = useState(false);
+
+  const [manualModalOpen, setManualModalOpen] = useState(false);
   const [telegramModalOpen, setTelegramModalOpen] = useState(false);
   const [telegramToken, setTelegramToken] = useState("");
   const [telegramLoading, setTelegramLoading] = useState(false);
@@ -48,20 +47,27 @@ export default function Channels() {
   useEffect(() => {
     fetchChannels();
 
-    // Check for OAuth callback success/error
     const params = new URLSearchParams(window.location.search);
-    if (params.get("success")) {
-      message.success("Kết nối Facebook thành công!");
+    const success = params.get("success");
+    const error = params.get("error");
+
+    if (success) {
+      const pages = params.get("pages");
+      const instagram = params.get("instagram");
+      const detail =
+        pages != null && instagram != null
+          ? ` (${pages} Facebook Page, ${instagram} Instagram)`
+          : "";
+      message.success(`Ket noi Meta thanh cong${detail}`);
       fetchChannels();
       window.history.replaceState({}, "", "/channels");
-    } else if (params.get("error")) {
-      const error = params.get("error");
+    } else if (error) {
       if (error === "no_pages") {
         message.error(
-          "Không tìm thấy Facebook Page nào. Vui lòng tạo Page trước.",
+          "Khong tim thay Facebook Page. Hay tao Page va lien ket Instagram Professional account truoc.",
         );
       } else {
-        message.error(`Lỗi: ${error}`);
+        message.error(`Loi ket noi Meta: ${error}`);
       }
       window.history.replaceState({}, "", "/channels");
     }
@@ -70,33 +76,34 @@ export default function Channels() {
   const handleConnectOAuth = async () => {
     try {
       const res = await client.get("/api/channels/facebook/oauth");
-      window.open(res.data.url, "_blank");
+      window.location.href = res.data.url;
     } catch (err) {
       message.error(
-        "Lỗi khởi tạo OAuth: " + (err.response?.data?.detail || err.message),
+        "Khong the khoi tao OAuth: " + (err.response?.data?.detail || err.message),
       );
     }
   };
 
   const handleConnectTelegram = async () => {
     if (!telegramToken.trim()) {
-      message.error("Vui lòng nhập Bot Token");
+      message.error("Vui long nhap Bot Token");
       return;
     }
+
     setTelegramLoading(true);
     try {
       await connectTelegram(telegramToken.trim());
-      message.success("Kết nối Telegram Bot thành công!");
+      message.success("Ket noi Telegram Bot thanh cong");
       setTelegramModalOpen(false);
       setTelegramToken("");
     } catch (err) {
-      message.error(err.response?.data?.detail || "Kết nối Telegram thất bại");
+      message.error(err.response?.data?.detail || "Ket noi Telegram that bai");
     } finally {
       setTelegramLoading(false);
     }
   };
 
-  const handleConnect = async () => {
+  const handleManualConnect = async () => {
     try {
       const values = await form.validateFields();
       if (platform === "facebook") {
@@ -104,68 +111,80 @@ export default function Channels() {
       } else {
         await connectInstagram(values);
       }
-      message.success(`Kết nối ${platform} thành công!`);
-      setModalOpen(false);
+      message.success(`Ket noi ${platform} thanh cong`);
+      setManualModalOpen(false);
       form.resetFields();
     } catch (err) {
-      message.error(err.response?.data?.detail || "Kết nối thất bại");
+      message.error(err.response?.data?.detail || "Ket noi that bai");
     }
   };
 
   const handleDisconnect = async (channelId) => {
     try {
       await disconnectChannel(channelId);
-      message.success("Đã ngắt kết nối");
+      message.success("Da ngat ket noi");
     } catch {
-      message.error("Ngắt kết nối thất bại");
+      message.error("Ngat ket noi that bai");
     }
   };
 
   const columns = [
     {
-      title: "Nền tảng",
+      title: "Nen tang",
       dataIndex: "platform",
-      render: (p) =>
-        p === "facebook" ? (
-          <Tag icon={<FacebookOutlined />} color="blue">
-            Facebook
-          </Tag>
-        ) : p === "instagram" ? (
-          <Tag icon={<InstagramOutlined />} color="magenta">
-            Instagram
-          </Tag>
-        ) : p === "telegram" ? (
-          <Tag icon={<SendOutlined />} color="cyan">
-            Telegram
-          </Tag>
-        ) : (
-          <Tag>{p}</Tag>
-        ),
+      render: (value) => {
+        if (value === "facebook") {
+          return (
+            <Tag icon={<FacebookOutlined />} color="blue">
+              Facebook
+            </Tag>
+          );
+        }
+        if (value === "instagram") {
+          return (
+            <Tag icon={<InstagramOutlined />} color="magenta">
+              Instagram
+            </Tag>
+          );
+        }
+        if (value === "telegram") {
+          return (
+            <Tag icon={<SendOutlined />} color="cyan">
+              Telegram
+            </Tag>
+          );
+        }
+        return <Tag>{value}</Tag>;
+      },
     },
-    { title: "Tên Page", dataIndex: "page_name", render: (v) => v || "-" },
-    { title: "Page ID", dataIndex: "platform_page_id" },
+    { title: "Ten kenh", dataIndex: "page_name", render: (value) => value || "-" },
     {
-      title: "Trạng thái",
+      title: "Platform ID",
+      dataIndex: "platform_page_id",
+      render: (value) => <Typography.Text copyable>{value}</Typography.Text>,
+    },
+    {
+      title: "Trang thai",
       dataIndex: "is_active",
-      render: (v) =>
-        v ? <Tag color="green">Hoạt động</Tag> : <Tag color="red">Tắt</Tag>,
+      render: (value) =>
+        value ? <Tag color="green">Hoat dong</Tag> : <Tag color="red">Tat</Tag>,
     },
     {
-      title: "Ngày kết nối",
+      title: "Ngay ket noi",
       dataIndex: "created_at",
-      render: (v) => dayjs(v).format("DD/MM/YYYY HH:mm"),
+      render: (value) => dayjs(value).format("DD/MM/YYYY HH:mm"),
     },
     {
       title: "",
       render: (_, record) => (
         <Popconfirm
-          title="Ngắt kết nối kênh này?"
+          title="Ngat ket noi kenh nay?"
           onConfirm={() => handleDisconnect(record.id)}
-          okText="Đồng ý"
-          cancelText="Hủy"
+          okText="Dong y"
+          cancelText="Huy"
         >
           <Button danger icon={<DeleteOutlined />} size="small">
-            Ngắt
+            Ngat
           </Button>
         </Popconfirm>
       ),
@@ -175,31 +194,28 @@ export default function Channels() {
   return (
     <div style={{ padding: 24 }}>
       <Card
-        title="Kênh kết nối"
+        title="Kenh ket noi"
         extra={
-          <Space>
-            <Button
-              type="primary"
-              icon={<LinkOutlined />}
-              onClick={handleConnectOAuth}
-            >
-              Kết nối Facebook (OAuth)
+          <Space wrap>
+            <Button type="primary" icon={<LinkOutlined />} onClick={handleConnectOAuth}>
+              Ket noi Meta
             </Button>
             <Button
               icon={<SendOutlined />}
               onClick={() => setTelegramModalOpen(true)}
               style={{ borderColor: "#0088cc", color: "#0088cc" }}
             >
-              Kết nối Telegram
+              Ket noi Telegram
             </Button>
-            <Button icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>
-              Nhập token thủ công
+            <Button icon={<PlusOutlined />} onClick={() => setManualModalOpen(true)}>
+              Nhap token thu cong
             </Button>
           </Space>
         }
       >
         <Alert
-          message="Khuyến nghị: Dùng nút 'Kết nối Facebook (OAuth)' để tự động lấy token"
+          message="Ket noi Meta se tu dong them Facebook Page va Instagram Professional account da lien ket voi Page."
+          description="Instagram can Business hoac Creator account, da lien ket voi Facebook Page va da bat webhook messages trong Meta Developer."
           type="info"
           showIcon
           style={{ marginBottom: 16 }}
@@ -210,58 +226,64 @@ export default function Channels() {
           rowKey="id"
           loading={loading}
           pagination={false}
-          locale={{ emptyText: "Chưa kết nối kênh nào" }}
+          locale={{ emptyText: "Chua ket noi kenh nao" }}
         />
       </Card>
 
       <Modal
-        title="Kết nối kênh thủ công"
-        open={modalOpen}
-        onOk={handleConnect}
+        title="Ket noi kenh thu cong"
+        open={manualModalOpen}
+        onOk={handleManualConnect}
         onCancel={() => {
-          setModalOpen(false);
+          setManualModalOpen(false);
           form.resetFields();
         }}
-        okText="Kết nối"
-        cancelText="Hủy"
+        okText="Ket noi"
+        cancelText="Huy"
       >
         <Alert
-          message="Chỉ dùng cách này nếu bạn đã có Page Access Token"
+          message="Nen dung OAuth Meta truoc. Cach thu cong chi phu hop khi ban da co Page Access Token hop le."
           type="warning"
           showIcon
           style={{ marginBottom: 16 }}
         />
         <Space direction="vertical" style={{ width: "100%" }} size="middle">
           <div>
-            <Typography.Text>Chọn nền tảng:</Typography.Text>
+            <Typography.Text>Chon nen tang:</Typography.Text>
             <Select
               value={platform}
               onChange={setPlatform}
               style={{ width: "100%", marginTop: 8 }}
               options={[
                 { label: "Facebook Page", value: "facebook" },
-                { label: "Instagram", value: "instagram" },
+                { label: "Instagram Professional", value: "instagram" },
               ]}
             />
           </div>
           <Form form={form} layout="vertical">
             <Form.Item
               name="platform_page_id"
-              label="Page ID"
-              rules={[{ required: true, message: "Nhập Page ID" }]}
+              label={platform === "instagram" ? "Instagram Account ID" : "Facebook Page ID"}
+              rules={[{ required: true, message: "Nhap Platform ID" }]}
             >
-              <Input placeholder="Nhập Facebook Page ID hoặc Instagram Account ID" />
+              <Input
+                placeholder={
+                  platform === "instagram"
+                    ? "Nhap Instagram Professional Account ID"
+                    : "Nhap Facebook Page ID"
+                }
+              />
             </Form.Item>
-            <Form.Item name="page_name" label="Tên Page (tùy chọn)">
-              <Input placeholder="Nhập tên hiển thị" />
+            <Form.Item name="page_name" label="Ten hien thi (tuy chon)">
+              <Input placeholder="Nhap ten hien thi" />
             </Form.Item>
             <Form.Item
               name="access_token"
-              label="Access Token"
-              rules={[{ required: true, message: "Nhập Access Token" }]}
+              label="Page Access Token"
+              rules={[{ required: true, message: "Nhap Page Access Token" }]}
             >
               <Input.TextArea
-                placeholder="Dán Page Access Token vào đây"
+                placeholder="Dan Page Access Token co quyen messaging"
                 rows={3}
               />
             </Form.Item>
@@ -270,32 +292,24 @@ export default function Channels() {
       </Modal>
 
       <Modal
-        title="Kết nối Telegram Bot"
+        title="Ket noi Telegram Bot"
         open={telegramModalOpen}
         onOk={handleConnectTelegram}
         onCancel={() => {
           setTelegramModalOpen(false);
           setTelegramToken("");
         }}
-        okText="Kết nối"
-        cancelText="Hủy"
+        okText="Ket noi"
+        cancelText="Huy"
         confirmLoading={telegramLoading}
       >
         <Alert
-          message="Hướng dẫn lấy Bot Token"
+          message="Cach lay Bot Token"
           description={
             <ol style={{ paddingLeft: 20, margin: "8px 0 0" }}>
-              <li>
-                Mở Telegram, tìm <b>@BotFather</b>
-              </li>
-              <li>
-                Gửi <code>/newbot</code> và làm theo hướng dẫn
-              </li>
-              <li>
-                BotFather sẽ trả về một <b>Bot Token</b> (dạng:{" "}
-                <code>123456:ABC-DEF...</code>)
-              </li>
-              <li>Copy token đó và dán vào ô bên dưới</li>
+              <li>Mo Telegram va tim @BotFather.</li>
+              <li>Gui /newbot va lam theo huong dan.</li>
+              <li>Copy Bot Token va dan vao o ben duoi.</li>
             </ol>
           }
           type="info"
@@ -303,10 +317,10 @@ export default function Channels() {
           style={{ marginBottom: 16 }}
         />
         <Input.TextArea
-          placeholder="Dán Bot Token vào đây (vd: 7123456789:AAF...)"
+          placeholder="Dan Bot Token vao day, vi du: 7123456789:AAF..."
           rows={2}
           value={telegramToken}
-          onChange={(e) => setTelegramToken(e.target.value)}
+          onChange={(event) => setTelegramToken(event.target.value)}
         />
       </Modal>
     </div>

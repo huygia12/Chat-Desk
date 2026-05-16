@@ -1,4 +1,5 @@
 import uuid
+import logging
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,6 +17,7 @@ from app.services.telegram_service import send_telegram_message
 from app.websocket.manager import manager
 
 router = APIRouter(prefix="/api/conversations", tags=["messages"])
+logger = logging.getLogger(__name__)
 
 
 @router.get("/{conversation_id}/messages", response_model=list[MessageOut])
@@ -96,6 +98,13 @@ async def send_message(
                 message_text=data.content,
             )
     except Exception as e:
+        logger.warning(
+            "Failed to send %s message for conversation %s via channel %s: %s",
+            conversation.platform,
+            conversation_id,
+            conversation.channel_id,
+            e,
+        )
         raise HTTPException(status_code=502, detail=f"Failed to send message: {str(e)}")
 
     # Save message to DB

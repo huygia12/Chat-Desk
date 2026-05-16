@@ -17,6 +17,7 @@ from app.services.oauth_service import (
     get_user_pages,
     subscribe_page_webhook,
     get_instagram_accounts,
+    validate_instagram_account,
 )
 from app.services.telegram_service import (
     get_telegram_bot_info,
@@ -28,6 +29,17 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/channels", tags=["channels"])
 
 settings = get_settings()
+
+
+def _apply_channel_updates(
+    channel: Channel,
+    page_name: str | None,
+    access_token: str,
+) -> None:
+    """Refresh credentials when a user reconnects the same Meta asset."""
+    channel.page_name = page_name or channel.page_name
+    channel.access_token = access_token
+    channel.is_active = True
 
 
 def _encode_oauth_state(business_id: str) -> str:
@@ -87,7 +99,10 @@ async def facebook_oauth_callback(
             logger.warning(f"No pages found for business {business_id}")
             return RedirectResponse(f"{settings.FRONTEND_URL}/channels?error=no_pages")
         
-        # Save all pages
+        connected_pages = 0
+        connected_instagram_accounts = 0
+
+        # Save all pages and their linked Instagram professional accounts.
         for page in pages:
             # Check if already exists
             result = await db.execute(
@@ -99,7 +114,9 @@ async def facebook_oauth_callback(
             )
             existing = result.scalar_one_or_none()
             
-            if not existing:
+            if existing:
+                _apply_channel_updates(existing, page.get("name"), page["access_token"])
+            else:
                 channel = Channel(
                     business_id=uuid.UUID(business_id),
                     platform="facebook",
@@ -108,34 +125,49 @@ async def facebook_oauth_callback(
                     access_token=page["access_token"],
                 )
                 db.add(channel)
-                
-                # Subscribe to webhook
-                await subscribe_page_webhook(page["id"], page["access_token"])
-                
-                # Try to get Instagram accounts
-                ig_accounts = await get_instagram_accounts(page["id"], page["access_token"])
-                for ig in ig_accounts:
-                    ig_result = await db.execute(
-                        select(Channel).where(
-                            Channel.business_id == uuid.UUID(business_id),
-                            Channel.platform == "instagram",
-                            Channel.platform_page_id == ig["id"],
-                        )
+            connected_pages += 1
+
+            # Subscribe the Facebook Page. Instagram messaging webhooks for a
+            # linked professional account also depend on the Meta app webhook
+            # subscription configured in the developer dashboard.
+            await subscribe_page_webhook(page["id"], page["access_token"])
+
+            # Try to get Instagram accounts linked to this Page.
+            ig_accounts = await get_instagram_accounts(page["id"], page["access_token"])
+            for ig in ig_accounts:
+                ig_result = await db.execute(
+                    select(Channel).where(
+                        Channel.business_id == uuid.UUID(business_id),
+                        Channel.platform == "instagram",
+                        Channel.platform_page_id == ig["id"],
                     )
-                    ig_existing = ig_result.scalar_one_or_none()
-                    if not ig_existing:
-                        ig_channel = Channel(
-                            business_id=uuid.UUID(business_id),
-                            platform="instagram",
-                            platform_page_id=ig["id"],
-                            page_name=ig.get("username") or ig.get("name"),
-                            access_token=page["access_token"],  # Use page token for IG
-                        )
-                        db.add(ig_channel)
+                )
+                ig_existing = ig_result.scalar_one_or_none()
+                ig_name = ig.get("username") or ig.get("name") or f"Instagram {ig['id']}"
+                if ig_existing:
+                    _apply_channel_updates(ig_existing, ig_name, page["access_token"])
+                else:
+                    ig_channel = Channel(
+                        business_id=uuid.UUID(business_id),
+                        platform="instagram",
+                        platform_page_id=ig["id"],
+                        page_name=ig_name,
+                        access_token=page["access_token"],  # Use linked Page token for IG messaging.
+                    )
+                    db.add(ig_channel)
+                connected_instagram_accounts += 1
         
         await db.commit()
-        logger.info(f"Successfully connected {len(pages)} page(s) for business {business_id}")
-        return RedirectResponse(f"{settings.FRONTEND_URL}/channels?success=true")
+        logger.info(
+            "Successfully connected Meta assets for business %s: %s Facebook page(s), %s Instagram account(s)",
+            business_id,
+            connected_pages,
+            connected_instagram_accounts,
+        )
+        return RedirectResponse(
+            f"{settings.FRONTEND_URL}/channels?success=meta"
+            f"&pages={connected_pages}&instagram={connected_instagram_accounts}"
+        )
         
     except Exception as e:
         await db.rollback()
@@ -170,6 +202,7 @@ async def connect_facebook(
     )
     db.add(channel)
     await db.flush()
+    await subscribe_page_webhook(data.platform_page_id, data.access_token)
     await db.refresh(channel)
     return channel
 
@@ -180,11 +213,26 @@ async def connect_instagram(
     current_user: User = Depends(get_current_business),
     db: AsyncSession = Depends(get_db),
 ):
+    ig_account_id = data.platform_page_id.strip()
+    page_access_token = data.access_token.strip()
+    if not ig_account_id or not page_access_token:
+        raise HTTPException(status_code=400, detail="Instagram Account ID va Access Token la bat buoc")
+
+    ig_info = await validate_instagram_account(ig_account_id, page_access_token)
+    if not ig_info:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Khong the xac thuc Instagram account. Hay dung Instagram Professional "
+                "account da lien ket voi Facebook Page va Page Access Token co quyen messaging."
+            ),
+        )
+
     result = await db.execute(
         select(Channel).where(
             Channel.business_id == current_user.id,
             Channel.platform == "instagram",
-            Channel.platform_page_id == data.platform_page_id,
+            Channel.platform_page_id == ig_info["id"],
         )
     )
     existing = result.scalar_one_or_none()
@@ -194,9 +242,9 @@ async def connect_instagram(
     channel = Channel(
         business_id=current_user.id,
         platform="instagram",
-        platform_page_id=data.platform_page_id,
-        page_name=data.page_name,
-        access_token=data.access_token,
+        platform_page_id=ig_info["id"],
+        page_name=data.page_name or ig_info.get("username") or ig_info.get("name"),
+        access_token=page_access_token,
     )
     db.add(channel)
     await db.flush()

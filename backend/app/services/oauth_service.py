@@ -8,6 +8,17 @@ settings = get_settings()
 
 FB_GRAPH_API = "https://graph.facebook.com/v21.0"
 FB_OAUTH_URL = "https://www.facebook.com/v21.0/dialog/oauth"
+META_OAUTH_SCOPES = ",".join(
+    [
+        "pages_show_list",
+        "pages_messaging",
+        "pages_read_engagement",
+        "pages_manage_metadata",
+        "instagram_basic",
+        "instagram_manage_messages",
+        "business_management",
+    ]
+)
 
 
 def get_facebook_oauth_url(state: str) -> str:
@@ -26,7 +37,7 @@ def get_facebook_oauth_url(state: str) -> str:
         logger.info(f"Using FLFB config_id: {settings.FB_CONFIG_ID}")
     else:
         # Fallback to classic scope-based login
-        params["scope"] = "pages_show_list,pages_messaging,pages_read_engagement,pages_manage_metadata,instagram_basic,instagram_manage_messages"
+        params["scope"] = META_OAUTH_SCOPES
         logger.info("Using classic scope-based OAuth (no config_id set)")
     
     return f"{FB_OAUTH_URL}?{urlencode(params)}"
@@ -150,13 +161,25 @@ async def subscribe_page_webhook(page_id: str, page_access_token: str) -> bool:
     url = f"{FB_GRAPH_API}/{page_id}/subscribed_apps"
     params = {
         "access_token": page_access_token,
-        "subscribed_fields": "messages,messaging_postbacks,messaging_optins,message_deliveries,message_reads",
+        "subscribed_fields": (
+            "messages,messaging_postbacks,messaging_optins,"
+            "message_deliveries,message_reads,message_echoes,"
+            "message_reactions,messaging_seen"
+        ),
     }
     
     try:
         async with httpx.AsyncClient(timeout=30) as client:
             response = await client.post(url, params=params)
+            if response.status_code >= 400:
+                logger.warning(
+                    "Failed to subscribe webhook for page %s (%s): %s",
+                    page_id,
+                    response.status_code,
+                    response.text[:500],
+                )
             response.raise_for_status()
+            logger.info(f"Subscribed page {page_id} to webhook fields")
             return True
     except Exception as e:
         logger.warning(f"Failed to subscribe webhook for page {page_id}: {e}")
@@ -166,29 +189,60 @@ async def subscribe_page_webhook(page_id: str, page_access_token: str) -> bool:
 async def get_instagram_accounts(page_id: str, page_access_token: str) -> list[dict]:
     """Get Instagram business accounts connected to a Facebook Page."""
     url = f"{FB_GRAPH_API}/{page_id}"
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.get(
+                url,
+                params={
+                    "access_token": page_access_token,
+                    "fields": "instagram_business_account{id,username,name,profile_picture_url}",
+                },
+            )
+            if response.status_code != 200:
+                logger.info(
+                    "Expanded Instagram account lookup failed for page %s (%s), trying fallback",
+                    page_id,
+                    response.status_code,
+                )
+                response = await client.get(
+                    url,
+                    params={
+                        "access_token": page_access_token,
+                        "fields": "instagram_business_account",
+                    },
+                )
+            response.raise_for_status()
+            data = response.json()
+
+            ig_account = data.get("instagram_business_account")
+            if ig_account:
+                if not ig_account.get("username"):
+                    ig_details = await validate_instagram_account(ig_account["id"], page_access_token)
+                    return [ig_details or ig_account]
+                return [ig_account]
+            return []
+    except Exception as e:
+        logger.warning(f"Failed to get Instagram accounts for page {page_id}: {e}")
+        return []
+
+
+async def validate_instagram_account(ig_account_id: str, page_access_token: str) -> dict | None:
+    """Validate that a Page token can access an Instagram professional account."""
+    url = f"{FB_GRAPH_API}/{ig_account_id}"
     params = {
         "access_token": page_access_token,
-        "fields": "instagram_business_account",
+        "fields": "id,username,name,profile_picture_url",
     }
-    
+
     try:
         async with httpx.AsyncClient(timeout=30) as client:
             response = await client.get(url, params=params)
             response.raise_for_status()
             data = response.json()
-            
-            ig_account = data.get("instagram_business_account")
-            if ig_account:
-                # Get IG account details
-                ig_url = f"{FB_GRAPH_API}/{ig_account['id']}"
-                ig_params = {
-                    "access_token": page_access_token,
-                    "fields": "id,username,name",
-                }
-                ig_response = await client.get(ig_url, params=ig_params)
-                ig_response.raise_for_status()
-                return [ig_response.json()]
-            return []
+            if not data.get("id"):
+                return None
+            return data
     except Exception as e:
-        logger.warning(f"Failed to get Instagram accounts for page {page_id}: {e}")
-        return []
+        logger.warning(f"Failed to validate Instagram account {ig_account_id}: {e}")
+        return None

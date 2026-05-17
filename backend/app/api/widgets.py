@@ -7,7 +7,7 @@ from typing import List, Optional
 from urllib.parse import urljoin, urlparse
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Header, UploadFile
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -21,6 +21,7 @@ from app.models.conversation import Conversation
 from app.models.message import Message
 from app.api.deps import get_current_business
 from app.services.widget_service import generate_widget_id, generate_widget_secret, validate_widget_request
+from app.services.file_storage import save_upload_file
 from app.services.ai_service import generate_ai_response
 from app.websocket.manager import manager
 from app.config import get_settings
@@ -41,6 +42,20 @@ class SendMessageRequest(BaseModel):
     visitor_email: Optional[str] = None
     visitor_phone: Optional[str] = None
     message_text: str
+
+
+def _message_payload(message: Message) -> dict:
+    return {
+        "id": str(message.id),
+        "sender_type": message.sender_type,
+        "content": message.content,
+        "created_at": message.created_at.isoformat(),
+        "attachment_url": message.attachment_url,
+        "attachment_filename": message.attachment_filename,
+        "attachment_mime_type": message.attachment_mime_type,
+        "attachment_size": message.attachment_size,
+        "attachment_kind": message.attachment_kind,
+    }
 
 
 @router.get("/list")
@@ -186,12 +201,7 @@ async def get_widget_history(
     return {
         "conversation_id": str(conversation.id),
         "messages": [
-            {
-                "id": str(m.id),
-                "sender_type": m.sender_type,
-                "content": m.content,
-                "created_at": m.created_at.isoformat(),
-            }
+            _message_payload(m)
             for m in msgs
         ],
     }
@@ -228,12 +238,7 @@ async def get_widget_messages(
     )
     msgs = msg_result.scalars().all()
     return [
-        {
-            "id": str(m.id),
-            "sender_type": m.sender_type,
-            "content": m.content,
-            "created_at": m.created_at.isoformat(),
-        }
+        _message_payload(m)
         for m in msgs
     ]
 
@@ -378,12 +383,7 @@ async def send_widget_message(
         {
             "type": "new_message",
             "conversation_id": str(conversation.id),
-            "message": {
-                "id": str(message.id),
-                "sender_type": "contact",
-                "content": message.content,
-                "created_at": message.created_at.isoformat(),
-            },
+            "message": _message_payload(message),
             "contact": {
                 "id": str(contact.id),
                 "display_name": contact.display_name,
@@ -423,12 +423,7 @@ async def send_widget_message(
                     {
                         "type": "new_message",
                         "conversation_id": str(conversation.id),
-                        "message": {
-                            "id": str(ai_message.id),
-                            "sender_type": "ai",
-                            "content": ai_message.content,
-                            "created_at": ai_message.created_at.isoformat(),
-                        },
+                        "message": _message_payload(ai_message),
                     },
                 )
         except Exception as e:
@@ -447,6 +442,126 @@ async def send_widget_message(
         response["ai_response"] = ai_response_text
 
     return response
+
+
+@router.post("/send-file")
+async def send_widget_file(
+    visitor_id: str = Form(...),
+    visitor_name: str = Form(...),
+    visitor_email: str | None = Form(None),
+    visitor_phone: str | None = Form(None),
+    message_text: str = Form(""),
+    file: UploadFile = File(...),
+    widget_id: str = Header(...),
+    widget_secret: str = Header(...),
+    x_widget_origin: str | None = Header(None),
+    db: AsyncSession = Depends(get_db),
+):
+    channel = await validate_widget_request(widget_id, widget_secret, "*", db)
+    if not channel:
+        raise HTTPException(status_code=401, detail="Invalid widget credentials")
+
+    attachment = await save_upload_file(file)
+    business_id = channel.business_id
+    widget_profile_pic_url = await _favicon_url_from_origin(
+        x_widget_origin,
+        channel.allowed_origins,
+    )
+
+    contact = await _find_widget_contact(
+        db=db,
+        business_id=business_id,
+        visitor_id=visitor_id,
+        visitor_email=visitor_email,
+    )
+
+    if not contact:
+        contact = Contact(
+            business_id=business_id,
+            platform="widget",
+            platform_user_id=visitor_id,
+            display_name=visitor_name,
+            profile_pic_url=widget_profile_pic_url,
+            visitor_email=visitor_email,
+            visitor_phone=visitor_phone,
+        )
+        db.add(contact)
+        await db.flush()
+    else:
+        _apply_widget_contact_updates(
+            contact=contact,
+            visitor_name=visitor_name,
+            visitor_email=visitor_email,
+            visitor_phone=visitor_phone,
+            profile_pic_url=widget_profile_pic_url,
+        )
+
+    conv_result = await db.execute(
+        select(Conversation)
+        .where(
+            Conversation.business_id == business_id,
+            Conversation.channel_id == channel.id,
+            Conversation.contact_id == contact.id,
+            Conversation.platform == "widget",
+        )
+        .order_by(Conversation.created_at.asc(), Conversation.id.asc())
+        .limit(1)
+    )
+    conversation = conv_result.scalar_one_or_none()
+
+    if not conversation:
+        conversation = Conversation(
+            business_id=business_id,
+            channel_id=channel.id,
+            contact_id=contact.id,
+            platform="widget",
+            is_ai_enabled=True,
+        )
+        db.add(conversation)
+        await db.flush()
+
+    message = Message(
+        conversation_id=conversation.id,
+        sender_type="contact",
+        content=message_text.strip() or attachment["attachment_filename"],
+        attachment_url=attachment["attachment_url"],
+        attachment_filename=attachment["attachment_filename"],
+        attachment_mime_type=attachment["attachment_mime_type"],
+        attachment_size=attachment["attachment_size"],
+        attachment_kind=attachment["attachment_kind"],
+    )
+    db.add(message)
+    conversation.last_message_at = datetime.now(timezone.utc)
+    await db.flush()
+    await db.refresh(message)
+
+    await manager.send_message(
+        str(business_id),
+        {
+            "type": "new_message",
+            "conversation_id": str(conversation.id),
+            "message": _message_payload(message),
+            "contact": {
+                "id": str(contact.id),
+                "display_name": contact.display_name,
+                "profile_pic_url": contact.profile_pic_url,
+                "platform": contact.platform,
+                "visitor_email": contact.visitor_email,
+            },
+        },
+    )
+
+    await db.commit()
+    return {
+        "status": "ok",
+        "conversation_id": str(conversation.id),
+        "message_id": str(message.id),
+        "attachment_url": message.attachment_url,
+        "attachment_filename": message.attachment_filename,
+        "attachment_mime_type": message.attachment_mime_type,
+        "attachment_size": message.attachment_size,
+        "attachment_kind": message.attachment_kind,
+    }
 
 
 async def _find_widget_contact(

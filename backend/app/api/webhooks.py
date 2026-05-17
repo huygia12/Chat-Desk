@@ -10,6 +10,8 @@ from app.models.contact import Contact
 from app.models.conversation import Conversation
 from app.models.message import Message
 from app.services.ai_service import generate_ai_response
+from app.services.file_storage import save_remote_file
+from app.services.telegram_service import get_telegram_file_url
 from app.websocket.manager import manager
 
 logger = logging.getLogger(__name__)
@@ -105,16 +107,18 @@ async def _process_messaging_entries(body: dict, platform: str):
             sender_id = messaging_event.get("sender", {}).get("id")
             message_data = messaging_event.get("message", {})
             message_text = message_data.get("text")
+            attachment = await _meta_attachment(message_data)
 
-            if not message_text or sender_id == channel_platform_id:
+            if (not message_text and not attachment) or sender_id == channel_platform_id:
                 continue
 
             await _process_incoming_message(
                 platform=platform,
                 page_id=channel_platform_id,
                 sender_id=sender_id,
-                message_text=message_text,
+                message_text=message_text or attachment.get("attachment_filename") or "Attachment",
                 platform_message_id=message_data.get("mid"),
+                attachment=attachment,
             )
 
     return {"status": "ok"}
@@ -136,9 +140,9 @@ async def telegram_webhook(bot_id: str, request: Request):
     if not message_data:
         return {"status": "ignored"}
 
-    # Only process text messages
-    text = message_data.get("text", "")
-    if not text or text.startswith("/start"):
+    text = message_data.get("text", "") or message_data.get("caption", "")
+    attachment = await _telegram_attachment(message_data, bot_id)
+    if (not text and not attachment) or text.startswith("/start"):
         return {"status": "ignored"}
 
     chat = message_data.get("chat", {})
@@ -155,9 +159,10 @@ async def telegram_webhook(bot_id: str, request: Request):
         platform="telegram",
         page_id=bot_id,
         sender_id=chat_id,  # Use chat_id as recipient for replies
-        message_text=text,
+        message_text=text or attachment.get("attachment_filename") or "Attachment",
         platform_message_id=str(message_data.get("message_id", "")),
         sender_name=sender_name,
+        attachment=attachment,
     )
 
     return {"status": "ok"}
@@ -172,6 +177,7 @@ async def _process_incoming_message(
     message_text: str,
     platform_message_id: str | None,
     sender_name: str | None = None,
+    attachment: dict | None = None,
 ):
     """Process incoming message from FB or IG: save to DB, trigger AI, notify via WS."""
     async with async_session() as db:
@@ -251,6 +257,11 @@ async def _process_incoming_message(
                 sender_type="contact",
                 content=message_text,
                 platform_message_id=platform_message_id,
+                attachment_url=attachment.get("attachment_url") if attachment else None,
+                attachment_filename=attachment.get("attachment_filename") if attachment else None,
+                attachment_mime_type=attachment.get("attachment_mime_type") if attachment else None,
+                attachment_size=attachment.get("attachment_size") if attachment else None,
+                attachment_kind=attachment.get("attachment_kind") if attachment else None,
             )
             db.add(message)
             conversation.last_message_at = datetime.now(timezone.utc)
@@ -265,12 +276,7 @@ async def _process_incoming_message(
                 {
                     "type": "new_message",
                     "conversation_id": str(conversation.id),
-                    "message": {
-                        "id": str(message.id),
-                        "sender_type": message.sender_type,
-                        "content": message.content,
-                        "created_at": message.created_at.isoformat(),
-                    },
+                    "message": _message_payload(message),
                     "contact": {
                         "id": str(contact.id),
                         "display_name": contact.display_name,
@@ -281,7 +287,7 @@ async def _process_incoming_message(
             )
 
             # 6. If AI enabled, generate and send AI response
-            if conversation.is_ai_enabled:
+            if conversation.is_ai_enabled and not attachment:
                 logger.info(f"Generating AI response for {platform} conversation {conversation.id}")
                 ai_response_text = await generate_ai_response(
                     db=db,
@@ -338,12 +344,7 @@ async def _process_incoming_message(
                         {
                             "type": "new_message",
                             "conversation_id": str(conversation.id),
-                            "message": {
-                                "id": str(ai_message.id),
-                                "sender_type": "ai",
-                                "content": ai_message.content,
-                                "created_at": ai_message.created_at.isoformat(),
-                            },
+                            "message": _message_payload(ai_message),
                         },
                     )
 
@@ -394,3 +395,94 @@ def _profile_pic_url(profile: dict | None) -> str | None:
     if not profile:
         return None
     return profile.get("profile_pic") or profile.get("profile_picture_url")
+
+
+def _message_payload(message: Message) -> dict:
+    return {
+        "id": str(message.id),
+        "conversation_id": str(message.conversation_id),
+        "sender_type": message.sender_type,
+        "content": message.content,
+        "created_at": message.created_at.isoformat(),
+        "attachment_url": message.attachment_url,
+        "attachment_filename": message.attachment_filename,
+        "attachment_mime_type": message.attachment_mime_type,
+        "attachment_size": message.attachment_size,
+        "attachment_kind": message.attachment_kind,
+    }
+
+
+async def _meta_attachment(message_data: dict) -> dict | None:
+    attachments = message_data.get("attachments") or []
+    if not attachments:
+        return None
+
+    item = attachments[0]
+    payload = item.get("payload") or {}
+    url = payload.get("url")
+    if not url:
+        return None
+
+    kind = item.get("type") or "file"
+    saved_file = await save_remote_file(
+        url,
+        filename=payload.get("name") or f"{kind}-attachment",
+    )
+    if saved_file:
+        saved_file["attachment_kind"] = kind if kind in {"image", "video", "audio", "file"} else "file"
+        return saved_file
+
+    return {
+        "attachment_url": url,
+        "attachment_filename": payload.get("name") or f"{kind}-attachment",
+        "attachment_mime_type": None,
+        "attachment_size": None,
+        "attachment_kind": kind if kind in {"image", "video", "audio", "file"} else "file",
+    }
+
+
+async def _telegram_attachment(message_data: dict, bot_id: str) -> dict | None:
+    file_info = None
+    kind = "file"
+
+    if message_data.get("document"):
+        document = message_data["document"]
+        file_info = document
+        kind = "file"
+    elif message_data.get("photo"):
+        photos = message_data["photo"]
+        file_info = photos[-1] if photos else None
+        kind = "image"
+    elif message_data.get("video"):
+        file_info = message_data["video"]
+        kind = "video"
+    elif message_data.get("audio"):
+        file_info = message_data["audio"]
+        kind = "audio"
+
+    if not file_info:
+        return None
+
+    channel_result = None
+    async with async_session() as db:
+        channel_result = await db.execute(
+            select(Channel).where(Channel.platform == "telegram", Channel.platform_page_id == bot_id)
+        )
+        channel = channel_result.scalar_one_or_none()
+        if not channel:
+            return None
+        file_url = await get_telegram_file_url(channel.access_token, file_info.get("file_id"))
+
+    if not file_url:
+        return None
+
+    saved_file = await save_remote_file(
+        file_url,
+        filename=file_info.get("file_name") or f"{kind}-attachment",
+        mime_type=file_info.get("mime_type"),
+    )
+    if not saved_file:
+        return None
+
+    saved_file["attachment_kind"] = kind
+    return saved_file

@@ -51,6 +51,38 @@ async def send_instagram_message(
         return data.get("message_id")
 
 
+async def send_instagram_attachment(
+    page_access_token: str,
+    recipient_id: str,
+    attachment_url: str,
+    attachment_kind: str,
+) -> str | None:
+    """Send an attachment by URL via Instagram Messaging API."""
+    url = f"{IG_GRAPH_API}/me/messages"
+    attachment_type = attachment_kind if attachment_kind in {"image", "video", "audio", "file"} else "file"
+    payload = {
+        "recipient": {"id": recipient_id},
+        "message": {
+            "attachment": {
+                "type": attachment_type,
+                "payload": {"url": attachment_url, "is_reusable": True},
+            }
+        },
+        "messaging_type": "RESPONSE",
+    }
+    params = {"access_token": page_access_token}
+
+    async with httpx.AsyncClient(timeout=30) as client:
+        response = await client.post(url, json=payload, params=params)
+        if response.status_code >= 400:
+            detail = _meta_error_detail(response)
+            logger.warning("Instagram attachment send failed (%s): %s", response.status_code, detail)
+            raise RuntimeError(detail)
+        response.raise_for_status()
+        data = response.json()
+        return data.get("message_id")
+
+
 async def get_instagram_user_profile(page_access_token: str, user_id: str) -> dict | None:
     """Get Instagram messaging user profile from an Instagram-scoped sender ID."""
     url = f"{IG_GRAPH_API}/{user_id}"

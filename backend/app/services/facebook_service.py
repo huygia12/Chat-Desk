@@ -51,6 +51,39 @@ async def send_facebook_message(
         return data.get("message_id")
 
 
+async def send_facebook_attachment(
+    page_access_token: str,
+    recipient_id: str,
+    attachment_url: str,
+    attachment_kind: str,
+) -> str | None:
+    """Send an attachment by URL via Facebook Messenger API."""
+    url = f"{FB_GRAPH_API}/me/messages"
+    attachment_type = attachment_kind if attachment_kind in {"image", "video", "audio", "file"} else "file"
+    logger.info("Sending Facebook attachment type=%s url=%s", attachment_type, attachment_url)
+    payload = {
+        "recipient": {"id": recipient_id},
+        "message": {
+            "attachment": {
+                "type": attachment_type,
+                "payload": {"url": attachment_url, "is_reusable": True},
+            }
+        },
+        "messaging_type": "RESPONSE",
+    }
+    params = {"access_token": page_access_token}
+
+    async with httpx.AsyncClient(timeout=30) as client:
+        response = await client.post(url, json=payload, params=params)
+        if response.status_code >= 400:
+            detail = _meta_error_detail(response)
+            logger.warning("Facebook attachment send failed (%s): %s", response.status_code, detail)
+            raise RuntimeError(detail)
+        response.raise_for_status()
+        data = response.json()
+        return data.get("message_id")
+
+
 async def get_facebook_user_profile(page_access_token: str, user_id: str) -> dict | None:
     """Get user profile from Facebook."""
     url = f"{FB_GRAPH_API}/{user_id}"

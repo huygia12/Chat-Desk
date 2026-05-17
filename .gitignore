@@ -68,6 +68,7 @@ frontend/.turbo/
 
 # Backend
 backend/.env.railway
+backend/uploads/
 
 # Alembic
 # Uncomment to ignore migration files (not recommended)

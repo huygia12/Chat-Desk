@@ -14,6 +14,11 @@ class Message(Base):
     sender_type: Mapped[str] = mapped_column(SAEnum("contact", "business", "ai", name="sender_type"), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     platform_message_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    attachment_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    attachment_filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    attachment_mime_type: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    attachment_size: Mapped[int | None] = mapped_column(nullable=True)
+    attachment_kind: Mapped[str | None] = mapped_column(String(32), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships

@@ -4,9 +4,9 @@ from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconn
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from app.api import auth, users, channels, contacts, conversations, messages, products, webhooks, admin, widgets, employees, labels, saved_replies, assignments
+from app.api import auth, users, channels, contacts, conversations, messages, products, webhooks, admin, widgets, employees, labels, saved_replies, assignments, files
 from app.websocket.manager import manager
 from app.config import get_settings
 from app.i18n import (
@@ -130,6 +130,7 @@ app.include_router(products.router)
 app.include_router(labels.router)
 app.include_router(saved_replies.router)
 app.include_router(assignments.router)
+app.include_router(files.router)
 app.include_router(webhooks.router)
 app.include_router(widgets.router)
 app.include_router(employees.router)
@@ -191,6 +192,23 @@ async def widget_websocket_endpoint(
 @app.get("/")
 async def root():
     return {"message": "ChatDesk API is running", "docs": "/docs"}
+
+
+@app.get("/robots.txt", response_class=PlainTextResponse, include_in_schema=False)
+async def robots_txt():
+    return "\n".join(
+        [
+            "User-agent: facebookexternalhit",
+            "Allow: /api/files/",
+            "",
+            "User-agent: Facebot",
+            "Allow: /api/files/",
+            "",
+            "User-agent: *",
+            "Allow: /",
+            "",
+        ]
+    )
 
 
 # === Facebook App Required Pages ===

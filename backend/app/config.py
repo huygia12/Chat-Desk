@@ -53,6 +53,10 @@ class Settings(BaseSettings):
     # API
     API_URL : str = "http://localhost:8000"
 
+    # Uploads
+    UPLOAD_DIR: str = str(BACKEND_DIR / "uploads")
+    MAX_UPLOAD_SIZE: int = 15 * 1024 * 1024
+
     model_config = SettingsConfigDict(env_file=str(BACKEND_DIR / ".env"), extra="ignore")
 
 

@@ -28,6 +28,50 @@ async def send_telegram_message(
         return None
 
 
+async def send_telegram_attachment(
+    bot_token: str,
+    chat_id: str,
+    attachment_url: str,
+    caption: str | None = None,
+) -> str | None:
+    """Send a file by URL via Telegram Bot API. Returns message_id."""
+    url = f"{TELEGRAM_API}/bot{bot_token}/sendDocument"
+    payload = {
+        "chat_id": chat_id,
+        "document": attachment_url,
+    }
+    if caption:
+        payload["caption"] = caption[:1024]
+
+    async with httpx.AsyncClient(timeout=30) as client:
+        response = await client.post(url, json=payload)
+        data = response.json()
+        logger.info(f"Telegram sendDocument response: ok={data.get('ok')}, chat_id={chat_id}")
+        if data.get("ok"):
+            return str(data["result"]["message_id"])
+        logger.error(f"Telegram attachment send failed: {data}")
+        return None
+
+
+async def get_telegram_file_url(bot_token: str, file_id: str) -> str | None:
+    """Return a temporary Telegram file URL for an incoming file_id."""
+    url = f"{TELEGRAM_API}/bot{bot_token}/getFile"
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(url, params={"file_id": file_id})
+            data = response.json()
+            if not data.get("ok"):
+                logger.warning("Telegram getFile failed: %s", data)
+                return None
+            file_path = data.get("result", {}).get("file_path")
+            if not file_path:
+                return None
+            return f"{TELEGRAM_API}/file/bot{bot_token}/{file_path}"
+    except Exception as e:
+        logger.warning("Failed to get Telegram file URL: %s", e)
+        return None
+
+
 async def set_telegram_webhook(bot_token: str, webhook_url: str) -> bool:
     """Register webhook URL with Telegram Bot API."""
     url = f"{TELEGRAM_API}/bot{bot_token}/setWebhook"

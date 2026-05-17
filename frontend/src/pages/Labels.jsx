@@ -151,7 +151,7 @@ export default function Labels() {
       render: (value) => dayjs(value).format('DD/MM/YYYY HH:mm'),
     },
     {
-      title: '',
+      title: t('common.actions'),
       width: 120,
       render: (_, record) => (
         <>

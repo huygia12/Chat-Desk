@@ -24,7 +24,7 @@ import client from "../api/client";
 import { useI18n } from "../i18n/useI18n";
 
 const WidgetManager = forwardRef(function WidgetManager(
-  { embedded = false, showCreateButton = true },
+  { embedded = false, showCreateButton = true, createButtonPlacement = "extra" },
   ref,
 ) {
   const [widgets, setWidgets] = useState([]);
@@ -208,16 +208,18 @@ const WidgetManager = forwardRef(function WidgetManager(
     },
   ];
 
+  const createButton = showCreateButton ? (
+    <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
+      {t("widgets.createButton")}
+    </Button>
+  ) : null;
+  const showExtraButton = createButtonPlacement === "extra";
+  const showBottomButton = createButtonPlacement === "bottom";
+
   return (
     <Card
       title="Widgets"
-      extra={
-        showCreateButton ? (
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
-            {t("widgets.createButton")}
-          </Button>
-        ) : null
-      }
+      extra={showExtraButton ? createButton : null}
       loading={loading}
       style={embedded ? { marginTop: 24 } : undefined}
     >
@@ -231,6 +233,12 @@ const WidgetManager = forwardRef(function WidgetManager(
           pagination={{ pageSize: 10 }}
           scroll={{ x: 1000 }}
         />
+      )}
+
+      {showBottomButton && (
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+          {createButton}
+        </div>
       )}
 
       <Modal

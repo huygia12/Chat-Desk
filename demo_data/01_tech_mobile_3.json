@@ -1,0 +1,342 @@
+{
+  "company": {
+    "business_name": "TechMobile Việt Nam",
+    "business_description": "Cửa hàng chuyên kinh doanh điện thoại, máy tính bảng và phụ kiện chính hãng. Cam kết hàng mới 100%, bảo hành rõ ràng, hỗ trợ trả góp, giao hàng toàn quốc.",
+    "phone": "0901234567",
+    "store_address": "125 Nguyễn Trãi, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh",
+    "opening_hours": "09:00 - 21:30, tất cả các ngày trong tuần",
+    "shipping_policy": "Nội thành TP.HCM giao 2-4 giờ. Toàn quốc giao 2-5 ngày. Miễn phí giao hàng cho đơn từ 2.000.000 VND.",
+    "warranty_policy": "Điện thoại bảo hành 12 tháng theo hãng, phụ kiện bảo hành 3-12 tháng tùy sản phẩm. Hỗ trợ đổi lỗi phần cứng trong 7 ngày đầu.",
+    "return_policy": "Đổi trả trong 7 ngày nếu lỗi từ nhà sản xuất, sản phẩm còn nguyên hộp và đầy đủ phụ kiện.",
+    "payment_methods": [
+      "Tiền mặt",
+      "Chuyển khoản",
+      "COD",
+      "Thẻ ATM/Visa/Mastercard",
+      "Trả góp qua thẻ tín dụng"
+    ],
+    "hotline": "1900 6688"
+  },
+  "products": [
+    {
+      "name": "iPhone 16 Plus 256GB - Xanh",
+      "sku": "APPLE-IPHONE-16-PLUS-256GB-XANH",
+      "category": "Điện thoại",
+      "description": "iPhone màn hình lớn, pin lâu cho giải trí và học tập. Phiên bản 256GB, màu Xanh. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 24190000,
+      "stock_quantity": 41,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Xanh",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A18",
+        "display": "6.7 inch OLED",
+        "camera_or_sensor": "camera kép 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16e 128GB - Trắng",
+      "sku": "APPLE-IPHONE-16E-128GB-TRANG",
+      "category": "Điện thoại",
+      "description": "iPhone giá dễ tiếp cận, cập nhật lâu dài. Phiên bản 128GB, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 16990000,
+      "stock_quantity": 52,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "128GB",
+        "color": "Trắng",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A18",
+        "display": "6.1 inch OLED",
+        "camera_or_sensor": "camera 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16e 128GB - Đen",
+      "sku": "APPLE-IPHONE-16E-128GB-EN",
+      "category": "Điện thoại",
+      "description": "iPhone giá dễ tiếp cận, cập nhật lâu dài. Phiên bản 128GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 16990000,
+      "stock_quantity": 63,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "128GB",
+        "color": "Đen",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A18",
+        "display": "6.1 inch OLED",
+        "camera_or_sensor": "camera 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16e 256GB - Trắng",
+      "sku": "APPLE-IPHONE-16E-256GB-TRANG",
+      "category": "Điện thoại",
+      "description": "iPhone giá dễ tiếp cận, cập nhật lâu dài. Phiên bản 256GB, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 18190000,
+      "stock_quantity": 6,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Trắng",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A18",
+        "display": "6.1 inch OLED",
+        "camera_or_sensor": "camera 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16e 256GB - Đen",
+      "sku": "APPLE-IPHONE-16E-256GB-EN",
+      "category": "Điện thoại",
+      "description": "iPhone giá dễ tiếp cận, cập nhật lâu dài. Phiên bản 256GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 18190000,
+      "stock_quantity": 17,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Đen",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A18",
+        "display": "6.1 inch OLED",
+        "camera_or_sensor": "camera 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy S25 Ultra 256GB - Đen Titanium",
+      "sku": "SAMSU-SAMSUNG-GALAXY-S25-ULTRA-256GB-EN-TITANIUM",
+      "category": "Điện thoại",
+      "description": "flagship Galaxy có S Pen, Galaxy AI và camera zoom mạnh. Phiên bản 256GB, màu Đen Titanium. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 31190000,
+      "stock_quantity": 28,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Đen Titanium",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Snapdragon 8 Elite for Galaxy",
+        "display": "6.9 inch Dynamic AMOLED 2X 120Hz",
+        "camera_or_sensor": "camera 200MP, tele 5x, S Pen",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy S25 Ultra 256GB - Xám Titanium",
+      "sku": "SAMSU-SAMSUNG-GALAXY-S25-ULTRA-256GB-XAM-TITANIUM",
+      "category": "Điện thoại",
+      "description": "flagship Galaxy có S Pen, Galaxy AI và camera zoom mạnh. Phiên bản 256GB, màu Xám Titanium. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 31190000,
+      "stock_quantity": 39,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Xám Titanium",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Snapdragon 8 Elite for Galaxy",
+        "display": "6.9 inch Dynamic AMOLED 2X 120Hz",
+        "camera_or_sensor": "camera 200MP, tele 5x, S Pen",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy S25 Ultra 512GB - Đen Titanium",
+      "sku": "SAMSU-SAMSUNG-GALAXY-S25-ULTRA-512GB-EN-TITANIUM",
+      "category": "Điện thoại",
+      "description": "flagship Galaxy có S Pen, Galaxy AI và camera zoom mạnh. Phiên bản 512GB, màu Đen Titanium. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 33490000,
+      "stock_quantity": 50,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Đen Titanium",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "Snapdragon 8 Elite for Galaxy",
+        "display": "6.9 inch Dynamic AMOLED 2X 120Hz",
+        "camera_or_sensor": "camera 200MP, tele 5x, S Pen",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy S25 Ultra 512GB - Xám Titanium",
+      "sku": "SAMSU-SAMSUNG-GALAXY-S25-ULTRA-512GB-XAM-TITANIUM",
+      "category": "Điện thoại",
+      "description": "flagship Galaxy có S Pen, Galaxy AI và camera zoom mạnh. Phiên bản 512GB, màu Xám Titanium. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 33490000,
+      "stock_quantity": 0,
+      "status": "out_of_stock",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Xám Titanium",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "Snapdragon 8 Elite for Galaxy",
+        "display": "6.9 inch Dynamic AMOLED 2X 120Hz",
+        "camera_or_sensor": "camera 200MP, tele 5x, S Pen",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy S25 Plus 256GB - Navy",
+      "sku": "SAMSU-SAMSUNG-GALAXY-S25-PLUS-256GB-NAVY",
+      "category": "Điện thoại",
+      "description": "Galaxy S màn hình lớn, pin tốt và hiệu năng flagship. Phiên bản 256GB, màu Navy. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 25190000,
+      "stock_quantity": 4,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Navy",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Snapdragon 8 Elite for Galaxy",
+        "display": "6.7 inch Dynamic AMOLED 2X 120Hz",
+        "camera_or_sensor": "camera 50MP",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    }
+  ]
+}

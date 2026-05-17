@@ -1,0 +1,1545 @@
+{
+  "company": {
+    "business_name": "TechMobile Việt Nam",
+    "business_description": "Cửa hàng chuyên kinh doanh điện thoại, máy tính bảng và phụ kiện chính hãng. Cam kết hàng mới 100%, bảo hành rõ ràng, hỗ trợ trả góp, giao hàng toàn quốc.",
+    "phone": "0901234567",
+    "store_address": "125 Nguyễn Trãi, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh",
+    "opening_hours": "09:00 - 21:30, tất cả các ngày trong tuần",
+    "shipping_policy": "Nội thành TP.HCM giao 2-4 giờ. Toàn quốc giao 2-5 ngày. Miễn phí giao hàng cho đơn từ 2.000.000 VND.",
+    "warranty_policy": "Điện thoại bảo hành 12 tháng theo hãng, phụ kiện bảo hành 3-12 tháng tùy sản phẩm. Hỗ trợ đổi lỗi phần cứng trong 7 ngày đầu.",
+    "return_policy": "Đổi trả trong 7 ngày nếu lỗi từ nhà sản xuất, sản phẩm còn nguyên hộp và đầy đủ phụ kiện.",
+    "payment_methods": [
+      "Tiền mặt",
+      "Chuyển khoản",
+      "COD",
+      "Thẻ ATM/Visa/Mastercard",
+      "Trả góp qua thẻ tín dụng"
+    ],
+    "hotline": "1900 6688"
+  },
+  "products": [
+    {
+      "name": "iPhone 15 Pro Max 256GB Chính hãng VN/A",
+      "sku": "APL-IP15PM-256-NAT",
+      "category": "Điện thoại",
+      "description": "iPhone 15 Pro Max 256GB bản VN/A, chip A17 Pro, camera chính 48MP, zoom quang 5x, Dynamic Island, cổng USB-C, khung Titanium nhẹ và bền. Phù hợp khách cần máy cao cấp để quay chụp, làm việc và chơi game nặng.",
+      "price": 29990000,
+      "stock_quantity": 8,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng Apple Việt Nam",
+        "storage": "256GB",
+        "ram": "8GB",
+        "screen": "6.7 inch Super Retina XDR OLED 120Hz",
+        "chipset": "Apple A17 Pro",
+        "battery": "Thời lượng pin xem video đến 29 giờ",
+        "colors": [
+          "Titan Tự nhiên",
+          "Titan Xanh",
+          "Titan Trắng",
+          "Titan Đen"
+        ],
+        "included_accessories": [
+          "Cáp USB-C",
+          "Sách hướng dẫn",
+          "Que lấy SIM"
+        ],
+        "promotions": [
+          "Tặng ốp lưng trong suốt",
+          "Giảm 300.000 VND khi thanh toán chuyển khoản"
+        ],
+        "installment": "Trả góp 0% qua thẻ tín dụng kỳ hạn 3-6 tháng"
+      }
+    },
+    {
+      "name": "Samsung Galaxy S24 Ultra 256GB",
+      "sku": "SS-S24U-256-GRAY",
+      "category": "Điện thoại",
+      "description": "Samsung Galaxy S24 Ultra 256GB, chip Snapdragon 8 Gen 3 for Galaxy, camera 200MP, bút S-Pen tích hợp, khung Titanium, màn hình Dynamic AMOLED 2X QHD+ 120Hz. Có Galaxy AI hỗ trợ dịch trực tiếp, khoanh vùng tìm kiếm và chỉnh ảnh thông minh.",
+      "price": 27990000,
+      "stock_quantity": 12,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng Samsung",
+        "storage": "256GB",
+        "ram": "12GB",
+        "screen": "6.8 inch QHD+ Dynamic AMOLED 2X 120Hz",
+        "chipset": "Snapdragon 8 Gen 3 for Galaxy",
+        "camera": "200MP + 50MP tele 5x + 10MP tele 3x + 12MP góc rộng",
+        "colors": [
+          "Xám Titanium",
+          "Đen Titanium",
+          "Tím Titanium",
+          "Vàng Titanium"
+        ],
+        "included_accessories": [
+          "Cáp USB-C",
+          "Bút S-Pen",
+          "Sách hướng dẫn"
+        ],
+        "promotions": [
+          "Tặng củ sạc nhanh 45W",
+          "Hỗ trợ dán cường lực miễn phí"
+        ]
+      }
+    },
+    {
+      "name": "Xiaomi 14 Ultra 512GB",
+      "sku": "XMI-14U-512-BLK",
+      "category": "Điện thoại",
+      "description": "Xiaomi 14 Ultra 512GB, chip Snapdragon 8 Gen 3, cụm camera Leica 50MP, ống kính khẩu độ biến thiên, pin 5000mAh, sạc nhanh 90W. Dành cho người dùng cần camera mạnh, bộ nhớ lớn và hiệu năng cao.",
+      "price": 19990000,
+      "stock_quantity": 5,
+      "status": "available",
+      "extra_info": {
+        "brand": "Xiaomi",
+        "warranty": "12 tháng",
+        "storage": "512GB",
+        "ram": "16GB",
+        "screen": "6.73 inch AMOLED 2K 120Hz",
+        "chipset": "Snapdragon 8 Gen 3",
+        "charging": "Sạc nhanh dây 90W, sạc không dây 80W",
+        "colors": [
+          "Đen",
+          "Trắng"
+        ],
+        "included_accessories": [
+          "Củ sạc 90W",
+          "Cáp USB-C",
+          "Ốp lưng",
+          "Que lấy SIM"
+        ]
+      }
+    },
+    {
+      "name": "OPPO Find X7 Ultra 256GB",
+      "sku": "OPP-FX7U-256-BRN",
+      "category": "Điện thoại",
+      "description": "OPPO Find X7 Ultra, hệ thống 4 camera Hasselblad, chip Snapdragon 8 Gen 3, màn hình AMOLED 120Hz, pin 5000mAh và sạc nhanh SUPERVOOC 100W. Phù hợp khách thích chụp chân dung, chụp đêm và thiết kế cao cấp.",
+      "price": 22990000,
+      "stock_quantity": 3,
+      "status": "available",
+      "extra_info": {
+        "brand": "OPPO",
+        "warranty": "12 tháng",
+        "storage": "256GB",
+        "ram": "16GB",
+        "screen": "6.82 inch AMOLED QHD+ 120Hz",
+        "chipset": "Snapdragon 8 Gen 3",
+        "charging": "SUPERVOOC 100W",
+        "colors": [
+          "Nâu da",
+          "Đen",
+          "Xanh dương"
+        ],
+        "note": "Hàng nhập khẩu, hỗ trợ cài đặt tiếng Việt và Google Play"
+      }
+    },
+    {
+      "name": "iPhone 15 128GB Chính hãng VN/A",
+      "sku": "APL-IP15-128-PNK",
+      "category": "Điện thoại",
+      "description": "iPhone 15 128GB, chip A16 Bionic, Dynamic Island, camera 48MP, cổng USB-C, mặt lưng kính pha màu. Lựa chọn cân bằng cho khách cần iPhone đời mới, dễ dùng, camera tốt.",
+      "price": 19490000,
+      "stock_quantity": 15,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng Apple Việt Nam",
+        "storage": "128GB",
+        "screen": "6.1 inch Super Retina XDR OLED",
+        "chipset": "Apple A16 Bionic",
+        "colors": [
+          "Hồng",
+          "Xanh",
+          "Vàng",
+          "Đen",
+          "Xanh lá"
+        ],
+        "included_accessories": [
+          "Cáp USB-C",
+          "Sách hướng dẫn",
+          "Que lấy SIM"
+        ],
+        "promotions": [
+          "Giảm 5% khi mua kèm AirPods",
+          "Tặng sim 4G data 30 ngày"
+        ]
+      }
+    },
+    {
+      "name": "Samsung Galaxy A55 5G 128GB",
+      "sku": "SS-A55-5G-128-BLUE",
+      "category": "Điện thoại",
+      "description": "Samsung Galaxy A55 5G, chip Exynos 1480, camera 50MP OIS, chống nước IP67, màn hình Super AMOLED 6.6 inch 120Hz, pin 5000mAh. Phù hợp học sinh, sinh viên và người dùng cần máy tầm trung ổn định.",
+      "price": 7990000,
+      "stock_quantity": 24,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng Samsung",
+        "storage": "128GB",
+        "ram": "8GB",
+        "screen": "6.6 inch Super AMOLED 120Hz",
+        "chipset": "Exynos 1480",
+        "battery": "5000mAh",
+        "colors": [
+          "Xanh Iceblue",
+          "Tím Lilac",
+          "Đen Navy"
+        ],
+        "promotions": [
+          "Tặng cường lực",
+          "Giảm 150.000 VND khi mua kèm ốp lưng"
+        ]
+      }
+    },
+    {
+      "name": "Samsung Galaxy Tab S9 FE WiFi 128GB",
+      "sku": "SS-TABS9FE-WIFI-128-GRY",
+      "category": "Máy tính bảng",
+      "description": "Galaxy Tab S9 FE WiFi, màn hình 10.9 inch 90Hz, kèm bút S-Pen, chống nước IP68, RAM 6GB, bộ nhớ 128GB. Phù hợp ghi chú, học online, xem phim và làm việc nhẹ.",
+      "price": 8490000,
+      "stock_quantity": 0,
+      "status": "out_of_stock",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng Samsung",
+        "storage": "128GB",
+        "ram": "6GB",
+        "screen": "10.9 inch TFT LCD 90Hz",
+        "included_accessories": [
+          "Bút S-Pen",
+          "Cáp USB-C"
+        ],
+        "restock_eta": "Dự kiến có hàng lại sau 5-7 ngày",
+        "alternative_skus": [
+          "SS-TABS9FE-5G-128-GRY"
+        ]
+      }
+    },
+    {
+      "name": "AirPods Pro 2 USB-C",
+      "sku": "APL-APP2-USBC-WHT",
+      "category": "Phụ kiện âm thanh",
+      "description": "Tai nghe Apple AirPods Pro 2 phiên bản USB-C, chống ồn chủ động ANC, Adaptive Audio, Transparency Mode, âm thanh không gian cá nhân hóa, hộp sạc MagSafe USB-C.",
+      "price": 5490000,
+      "stock_quantity": 18,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng Apple Việt Nam",
+        "battery": "Tai nghe 6 giờ, tổng 30 giờ kèm hộp sạc",
+        "features": [
+          "ANC",
+          "Transparency Mode",
+          "Adaptive Audio",
+          "Spatial Audio"
+        ],
+        "compatibility": [
+          "iPhone",
+          "iPad",
+          "MacBook",
+          "Apple Watch"
+        ],
+        "promotions": [
+          "Giảm 200.000 VND khi mua kèm iPhone"
+        ]
+      }
+    },
+    {
+      "name": "Củ sạc nhanh Apple 20W USB-C",
+      "sku": "APL-CHG-20W-USBC",
+      "category": "Phụ kiện sạc",
+      "description": "Adapter sạc nhanh Apple 20W USB-C chính hãng, tương thích iPhone 15/14/13/12 series và iPad. Hỗ trợ sạc nhanh iPhone lên khoảng 50% trong 30 phút khi dùng cáp phù hợp.",
+      "price": 490000,
+      "stock_quantity": 50,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "6 tháng",
+        "power": "20W",
+        "port": "USB-C",
+        "compatibility": [
+          "iPhone",
+          "iPad",
+          "AirPods"
+        ],
+        "included_accessories": [],
+        "note": "Không kèm cáp sạc"
+      }
+    },
+    {
+      "name": "Ốp lưng iPhone 15 Pro Max MagSafe Silicon",
+      "sku": "APL-CASE-IP15PM-MSAFE-BLK",
+      "category": "Phụ kiện bảo vệ",
+      "description": "Ốp lưng silicon hỗ trợ MagSafe cho iPhone 15 Pro Max, bề mặt mềm, chống bám vân tay, viền camera nhô cao, tương thích sạc không dây MagSafe.",
+      "price": 390000,
+      "stock_quantity": 32,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "3 tháng",
+        "material": "Silicon mềm",
+        "compatible_model": "iPhone 15 Pro Max",
+        "colors": [
+          "Đen",
+          "Xanh navy",
+          "Hồng nhạt",
+          "Trong suốt"
+        ],
+        "features": [
+          "Hỗ trợ MagSafe",
+          "Chống trầy mặt lưng",
+          "Viền bảo vệ camera"
+        ]
+      }
+    },
+    {
+      "name": "iPhone 17 Pro Max 256GB - Bạc",
+      "sku": "APPLE-IPHONE-17-PRO-MAX-256GB-BAC",
+      "category": "Điện thoại",
+      "description": "flagship iPhone màn hình lớn cho quay chụp, làm việc và chơi game. Phiên bản 256GB, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 36190000,
+      "stock_quantity": 0,
+      "status": "out_of_stock",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Bạc",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A19 Pro",
+        "display": "6.9 inch Super Retina XDR 120Hz",
+        "camera_or_sensor": "camera Pro 48MP, zoom quang, quay video chuyên nghiệp",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Z Fold7 256GB - Đen",
+      "sku": "SAMSU-SAMSUNG-GALAXY-Z-FOLD7-256GB-EN",
+      "category": "Điện thoại gập",
+      "description": "điện thoại gập màn hình lớn cho đa nhiệm và làm việc. Phiên bản 256GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 44190000,
+      "stock_quantity": 14,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Đen",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Snapdragon flagship for Galaxy",
+        "display": "màn hình gập AMOLED 120Hz",
+        "camera_or_sensor": "camera đa ống kính",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad Pro 11 inch M5 WiFi 256GB - Bạc",
+      "sku": "APPLE-IPAD-PRO-11-INCH-M5-WIFI-256GB-BAC",
+      "category": "Máy tính bảng",
+      "description": "iPad Pro gọn, mạnh cho ghi chú, vẽ và chỉnh ảnh. Phiên bản 256GB, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 31190000,
+      "stock_quantity": 25,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Bạc",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Apple M5",
+        "display": "11 inch Ultra Retina XDR",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Apple Watch Series 11 GPS 42mm 32GB - Đen",
+      "sku": "APPLE-APPLE-WATCH-SERIES-11-GPS-42MM-32GB-EN",
+      "category": "Đồng hồ thông minh",
+      "description": "Apple Watch mới cho theo dõi sức khỏe, luyện tập và thông báo. Phiên bản 32GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 11490000,
+      "stock_quantity": 36,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "32GB",
+        "color": "Đen",
+        "ram": null,
+        "chipset": "Apple S-series",
+        "display": "OLED Always-On",
+        "camera_or_sensor": "cảm biến sức khỏe",
+        "operating_system": "watchOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Garmin Forerunner 165 Music 4GB - Đen",
+      "sku": "GARMI-GARMIN-FORERUNNER-165-MUSIC-4GB-EN",
+      "category": "Đồng hồ thể thao",
+      "description": "đồng hồ chạy bộ GPS có lưu nhạc và chỉ số luyện tập. Phiên bản 4GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 7990000,
+      "stock_quantity": 47,
+      "status": "available",
+      "extra_info": {
+        "brand": "Garmin",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "4GB",
+        "color": "Đen",
+        "ram": null,
+        "chipset": "Garmin wearable",
+        "display": "AMOLED",
+        "camera_or_sensor": "GPS, đo nhịp tim",
+        "operating_system": "Wearable OS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "AirPods Pro 3 USB-C - Trắng",
+      "sku": "APPLE-AIRPODS-PRO-3-USB-C-N-A-TRANG",
+      "category": "Tai nghe",
+      "description": "tai nghe true wireless chống ồn chủ động, âm thanh không gian. Phiên bản N/A, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 6799000,
+      "stock_quantity": 58,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Trắng",
+        "ram": null,
+        "chipset": "Apple H-series",
+        "display": "in-ear",
+        "camera_or_sensor": "ANC, Spatial Audio",
+        "operating_system": "Firmware/phụ kiện Apple",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Hộp sạc",
+          "Cáp sạc",
+          "Nút tai dự phòng nếu có"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "AirPods Max 2 USB-C - Xanh",
+      "sku": "APPLE-AIRPODS-MAX-2-USB-C-N-A-XANH",
+      "category": "Tai nghe chụp tai",
+      "description": "tai nghe chụp tai cao cấp, chống ồn mạnh và đệm êm. Phiên bản N/A, màu Xanh. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 12990000,
+      "stock_quantity": 69,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Xanh",
+        "ram": null,
+        "chipset": "Apple H-series",
+        "display": "over-ear",
+        "camera_or_sensor": "ANC, Spatial Audio",
+        "operating_system": "Firmware/phụ kiện Apple",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Hộp sạc",
+          "Cáp sạc",
+          "Nút tai dự phòng nếu có"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "AirTag 1 Pack - Trắng",
+      "sku": "APPLE-AIRTAG-1-PACK-N-A-TRANG",
+      "category": "Phụ kiện định vị",
+      "description": "thiết bị định vị đồ vật qua mạng Find My. Phiên bản N/A, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 890000,
+      "stock_quantity": 12,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Trắng",
+        "ram": null,
+        "chipset": "Apple U-series",
+        "display": "N/A",
+        "camera_or_sensor": "Bluetooth LE, UWB",
+        "operating_system": "Firmware/phụ kiện Apple",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Bộ sạc MagSafe 25W USB-C - Trắng",
+      "sku": "APPLE-BO-SAC-MAGSAFE-25W-USB-C-N-A-TRANG",
+      "category": "Phụ kiện sạc",
+      "description": "đế sạc không dây từ tính cho iPhone tương thích. Phiên bản N/A, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 1190000,
+      "stock_quantity": 23,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Trắng",
+        "ram": null,
+        "chipset": "MagSafe",
+        "display": "N/A",
+        "camera_or_sensor": "Qi/MagSafe",
+        "operating_system": "Firmware/phụ kiện Apple",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Pin dự phòng Anker Nano 10000mAh 30W - Đen",
+      "sku": "ANKER-PIN-DU-PHONG-ANKER-NANO-10000M-N-A-EN",
+      "category": "Pin dự phòng",
+      "description": "pin dự phòng nhỏ gọn, sạc nhanh cho điện thoại và tablet. Phiên bản N/A, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 1190000,
+      "stock_quantity": 34,
+      "status": "available",
+      "extra_info": {
+        "brand": "Anker",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Đen",
+        "ram": null,
+        "chipset": "USB-C PD",
+        "display": "N/A",
+        "camera_or_sensor": "10000mAh, 30W",
+        "operating_system": "Firmware/phụ kiện",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 17 Pro Max 256GB - Xanh đậm",
+      "sku": "APPLE-IPHONE-17-PRO-MAX-256GB-XANH-AM",
+      "category": "Điện thoại",
+      "description": "flagship iPhone màn hình lớn cho quay chụp, làm việc và chơi game. Phiên bản 256GB, màu Xanh đậm. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 36190000,
+      "stock_quantity": 45,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Xanh đậm",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A19 Pro",
+        "display": "6.9 inch Super Retina XDR 120Hz",
+        "camera_or_sensor": "camera Pro 48MP, zoom quang, quay video chuyên nghiệp",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Z Fold7 256GB - Bạc",
+      "sku": "SAMSU-SAMSUNG-GALAXY-Z-FOLD7-256GB-BAC",
+      "category": "Điện thoại gập",
+      "description": "điện thoại gập màn hình lớn cho đa nhiệm và làm việc. Phiên bản 256GB, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 44190000,
+      "stock_quantity": 56,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Bạc",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Snapdragon flagship for Galaxy",
+        "display": "màn hình gập AMOLED 120Hz",
+        "camera_or_sensor": "camera đa ống kính",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad Pro 11 inch M5 WiFi 256GB - Đen",
+      "sku": "APPLE-IPAD-PRO-11-INCH-M5-WIFI-256GB-EN",
+      "category": "Máy tính bảng",
+      "description": "iPad Pro gọn, mạnh cho ghi chú, vẽ và chỉnh ảnh. Phiên bản 256GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 31190000,
+      "stock_quantity": 67,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Đen",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Apple M5",
+        "display": "11 inch Ultra Retina XDR",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Apple Watch Series 11 GPS 42mm 32GB - Hồng",
+      "sku": "APPLE-APPLE-WATCH-SERIES-11-GPS-42MM-32GB-HONG",
+      "category": "Đồng hồ thông minh",
+      "description": "Apple Watch mới cho theo dõi sức khỏe, luyện tập và thông báo. Phiên bản 32GB, màu Hồng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 11490000,
+      "stock_quantity": 10,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "32GB",
+        "color": "Hồng",
+        "ram": null,
+        "chipset": "Apple S-series",
+        "display": "OLED Always-On",
+        "camera_or_sensor": "cảm biến sức khỏe",
+        "operating_system": "watchOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Garmin Forerunner 165 Music 4GB - Trắng",
+      "sku": "GARMI-GARMIN-FORERUNNER-165-MUSIC-4GB-TRANG",
+      "category": "Đồng hồ thể thao",
+      "description": "đồng hồ chạy bộ GPS có lưu nhạc và chỉ số luyện tập. Phiên bản 4GB, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 7990000,
+      "stock_quantity": 0,
+      "status": "out_of_stock",
+      "extra_info": {
+        "brand": "Garmin",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "4GB",
+        "color": "Trắng",
+        "ram": null,
+        "chipset": "Garmin wearable",
+        "display": "AMOLED",
+        "camera_or_sensor": "GPS, đo nhịp tim",
+        "operating_system": "Wearable OS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "AirPods 4 ANC USB-C - Trắng",
+      "sku": "APPLE-AIRPODS-4-ANC-USB-C-N-A-TRANG",
+      "category": "Tai nghe",
+      "description": "AirPods open-ear có chống ồn, kết nối nhanh. Phiên bản N/A, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 4990000,
+      "stock_quantity": 32,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Trắng",
+        "ram": null,
+        "chipset": "Apple H-series",
+        "display": "open-ear",
+        "camera_or_sensor": "ANC, Adaptive Audio",
+        "operating_system": "Firmware/phụ kiện Apple",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Hộp sạc",
+          "Cáp sạc",
+          "Nút tai dự phòng nếu có"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "AirPods Max 2 USB-C - Tím",
+      "sku": "APPLE-AIRPODS-MAX-2-USB-C-N-A-TIM",
+      "category": "Tai nghe chụp tai",
+      "description": "tai nghe chụp tai cao cấp, chống ồn mạnh và đệm êm. Phiên bản N/A, màu Tím. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 12990000,
+      "stock_quantity": 43,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Tím",
+        "ram": null,
+        "chipset": "Apple H-series",
+        "display": "over-ear",
+        "camera_or_sensor": "ANC, Spatial Audio",
+        "operating_system": "Firmware/phụ kiện Apple",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Hộp sạc",
+          "Cáp sạc",
+          "Nút tai dự phòng nếu có"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "AirTag 4 Pack - Trắng",
+      "sku": "APPLE-AIRTAG-4-PACK-N-A-TRANG",
+      "category": "Phụ kiện định vị",
+      "description": "bộ 4 AirTag tiết kiệm cho gia đình. Phiên bản N/A, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 2990000,
+      "stock_quantity": 54,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Trắng",
+        "ram": null,
+        "chipset": "Apple U-series",
+        "display": "N/A",
+        "camera_or_sensor": "Bluetooth LE, UWB",
+        "operating_system": "Firmware/phụ kiện Apple",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Bộ tiếp hợp nguồn USB-C kép 35W Apple - Trắng",
+      "sku": "APPLE-BO-TIEP-HOP-NGUON-USB-C-KEP-35-N-A-TRANG",
+      "category": "Phụ kiện sạc",
+      "description": "củ sạc hai cổng USB-C sạc cùng lúc nhiều thiết bị. Phiên bản N/A, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 1471000,
+      "stock_quantity": 65,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Trắng",
+        "ram": null,
+        "chipset": "USB-C PD",
+        "display": "N/A",
+        "camera_or_sensor": "2 cổng USB-C, 35W",
+        "operating_system": "Firmware/phụ kiện Apple",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Pin dự phòng Anker Nano 10000mAh 30W - Trắng",
+      "sku": "ANKER-PIN-DU-PHONG-ANKER-NANO-10000M-N-A-TRANG",
+      "category": "Pin dự phòng",
+      "description": "pin dự phòng nhỏ gọn, sạc nhanh cho điện thoại và tablet. Phiên bản N/A, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 1190000,
+      "stock_quantity": 8,
+      "status": "available",
+      "extra_info": {
+        "brand": "Anker",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Trắng",
+        "ram": null,
+        "chipset": "USB-C PD",
+        "display": "N/A",
+        "camera_or_sensor": "10000mAh, 30W",
+        "operating_system": "Firmware/phụ kiện",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 17 Pro Max 512GB - Bạc",
+      "sku": "APPLE-IPHONE-17-PRO-MAX-512GB-BAC",
+      "category": "Điện thoại",
+      "description": "flagship iPhone màn hình lớn cho quay chụp, làm việc và chơi game. Phiên bản 512GB, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 38490000,
+      "stock_quantity": 19,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Bạc",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "A19 Pro",
+        "display": "6.9 inch Super Retina XDR 120Hz",
+        "camera_or_sensor": "camera Pro 48MP, zoom quang, quay video chuyên nghiệp",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Z Fold7 512GB - Đen",
+      "sku": "SAMSU-SAMSUNG-GALAXY-Z-FOLD7-512GB-EN",
+      "category": "Điện thoại gập",
+      "description": "điện thoại gập màn hình lớn cho đa nhiệm và làm việc. Phiên bản 512GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 46490000,
+      "stock_quantity": 30,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Đen",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "Snapdragon flagship for Galaxy",
+        "display": "màn hình gập AMOLED 120Hz",
+        "camera_or_sensor": "camera đa ống kính",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad Pro 11 inch M5 WiFi 512GB - Bạc",
+      "sku": "APPLE-IPAD-PRO-11-INCH-M5-WIFI-512GB-BAC",
+      "category": "Máy tính bảng",
+      "description": "iPad Pro gọn, mạnh cho ghi chú, vẽ và chỉnh ảnh. Phiên bản 512GB, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 33490000,
+      "stock_quantity": 41,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Bạc",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "Apple M5",
+        "display": "11 inch Ultra Retina XDR",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Apple Watch Ultra 3 49mm Titanium 64GB - Titan tự nhiên",
+      "sku": "APPLE-APPLE-WATCH-ULTRA-3-49MM-TITAN-64GB-TITAN-TU-NHIEN",
+      "category": "Đồng hồ thông minh",
+      "description": "Apple Watch bền bỉ cho thể thao ngoài trời và pin lâu. Phiên bản 64GB, màu Titan tự nhiên. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 23990000,
+      "stock_quantity": 52,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "64GB",
+        "color": "Titan tự nhiên",
+        "ram": null,
+        "chipset": "Apple S-series",
+        "display": "OLED Always-On độ sáng cao",
+        "camera_or_sensor": "GPS, cảm biến sức khỏe",
+        "operating_system": "watchOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Buds3 Pro - Trắng",
+      "sku": "SAMSU-SAMSUNG-GALAXY-BUDS3-PRO-N-A-TRANG",
+      "category": "Tai nghe",
+      "description": "tai nghe Galaxy chống ồn, âm thanh 24-bit. Phiên bản N/A, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 4990000,
+      "stock_quantity": 63,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Trắng",
+        "ram": null,
+        "chipset": "Samsung audio chip",
+        "display": "in-ear",
+        "camera_or_sensor": "ANC, 360 Audio",
+        "operating_system": "Firmware/phụ kiện",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Hộp sạc",
+          "Cáp sạc",
+          "Nút tai dự phòng nếu có"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Củ sạc Anker Prime 67W 3 cổng - Đen",
+      "sku": "ANKER-CU-SAC-ANKER-PRIME-67W-3-CONG-N-A-EN",
+      "category": "Phụ kiện sạc",
+      "description": "củ sạc GaN ba cổng cho laptop mỏng nhẹ, điện thoại và tai nghe. Phiên bản N/A, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 1490000,
+      "stock_quantity": 6,
+      "status": "available",
+      "extra_info": {
+        "brand": "Anker",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Đen",
+        "ram": null,
+        "chipset": "GaN",
+        "display": "N/A",
+        "camera_or_sensor": "2 USB-C + 1 USB-A, 67W",
+        "operating_system": "Firmware/phụ kiện",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 17 Pro Max 512GB - Xanh đậm",
+      "sku": "APPLE-IPHONE-17-PRO-MAX-512GB-XANH-AM",
+      "category": "Điện thoại",
+      "description": "flagship iPhone màn hình lớn cho quay chụp, làm việc và chơi game. Phiên bản 512GB, màu Xanh đậm. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 38490000,
+      "stock_quantity": 17,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Xanh đậm",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "A19 Pro",
+        "display": "6.9 inch Super Retina XDR 120Hz",
+        "camera_or_sensor": "camera Pro 48MP, zoom quang, quay video chuyên nghiệp",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Z Fold7 512GB - Bạc",
+      "sku": "SAMSU-SAMSUNG-GALAXY-Z-FOLD7-512GB-BAC",
+      "category": "Điện thoại gập",
+      "description": "điện thoại gập màn hình lớn cho đa nhiệm và làm việc. Phiên bản 512GB, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 46490000,
+      "stock_quantity": 28,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Bạc",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "Snapdragon flagship for Galaxy",
+        "display": "màn hình gập AMOLED 120Hz",
+        "camera_or_sensor": "camera đa ống kính",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad Pro 11 inch M5 WiFi 512GB - Đen",
+      "sku": "APPLE-IPAD-PRO-11-INCH-M5-WIFI-512GB-EN",
+      "category": "Máy tính bảng",
+      "description": "iPad Pro gọn, mạnh cho ghi chú, vẽ và chỉnh ảnh. Phiên bản 512GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 33490000,
+      "stock_quantity": 0,
+      "status": "out_of_stock",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Đen",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "Apple M5",
+        "display": "11 inch Ultra Retina XDR",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Apple Watch Ultra 3 49mm Titanium 64GB - Đen",
+      "sku": "APPLE-APPLE-WATCH-ULTRA-3-49MM-TITAN-64GB-EN",
+      "category": "Đồng hồ thông minh",
+      "description": "Apple Watch bền bỉ cho thể thao ngoài trời và pin lâu. Phiên bản 64GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 23990000,
+      "stock_quantity": 50,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "64GB",
+        "color": "Đen",
+        "ram": null,
+        "chipset": "Apple S-series",
+        "display": "OLED Always-On độ sáng cao",
+        "camera_or_sensor": "GPS, cảm biến sức khỏe",
+        "operating_system": "watchOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Buds3 Pro - Bạc",
+      "sku": "SAMSU-SAMSUNG-GALAXY-BUDS3-PRO-N-A-BAC",
+      "category": "Tai nghe",
+      "description": "tai nghe Galaxy chống ồn, âm thanh 24-bit. Phiên bản N/A, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 4990000,
+      "stock_quantity": 61,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Bạc",
+        "ram": null,
+        "chipset": "Samsung audio chip",
+        "display": "in-ear",
+        "camera_or_sensor": "ANC, 360 Audio",
+        "operating_system": "Firmware/phụ kiện",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Hộp sạc",
+          "Cáp sạc",
+          "Nút tai dự phòng nếu có"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 17 Pro 256GB - Trắng",
+      "sku": "APPLE-IPHONE-17-PRO-256GB-TRANG",
+      "category": "Điện thoại",
+      "description": "iPhone Pro nhỏ gọn, hiệu năng cao và camera chuyên nghiệp. Phiên bản 256GB, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 33190000,
+      "stock_quantity": 4,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Trắng",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A19 Pro",
+        "display": "6.3 inch Super Retina XDR 120Hz",
+        "camera_or_sensor": "camera Pro 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Z Flip7 256GB - Hồng",
+      "sku": "SAMSU-SAMSUNG-GALAXY-Z-FLIP7-256GB-HONG",
+      "category": "Điện thoại gập",
+      "description": "điện thoại gập vỏ sò thời trang, màn hình phụ tiện dụng. Phiên bản 256GB, màu Hồng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 27190000,
+      "stock_quantity": 15,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Hồng",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Snapdragon/Exynos flagship",
+        "display": "AMOLED gập 120Hz",
+        "camera_or_sensor": "camera kép",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad Pro 13 inch M5 WiFi 256GB - Bạc",
+      "sku": "APPLE-IPAD-PRO-13-INCH-M5-WIFI-256GB-BAC",
+      "category": "Máy tính bảng",
+      "description": "iPad Pro màn hình lớn cho sáng tạo nội dung và đa nhiệm. Phiên bản 256GB, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 43190000,
+      "stock_quantity": 26,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Bạc",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Apple M5",
+        "display": "13 inch Ultra Retina XDR",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Watch8 44mm Bluetooth 32GB - Bạc",
+      "sku": "SAMSU-SAMSUNG-GALAXY-WATCH8-44MM-BLU-32GB-BAC",
+      "category": "Đồng hồ thông minh",
+      "description": "Galaxy Watch theo dõi sức khỏe, giấc ngủ và thể thao. Phiên bản 32GB, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 7990000,
+      "stock_quantity": 37,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "32GB",
+        "color": "Bạc",
+        "ram": null,
+        "chipset": "Exynos wearable",
+        "display": "Super AMOLED",
+        "camera_or_sensor": "BioActive Sensor",
+        "operating_system": "Wearable OS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Xiaomi Buds 5 Pro - Đen",
+      "sku": "XIAOM-XIAOMI-BUDS-5-PRO-N-A-EN",
+      "category": "Tai nghe",
+      "description": "tai nghe Xiaomi chống ồn, âm thanh Hi-Res và độ trễ thấp. Phiên bản N/A, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 3990000,
+      "stock_quantity": 48,
+      "status": "available",
+      "extra_info": {
+        "brand": "Xiaomi",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Đen",
+        "ram": null,
+        "chipset": "Xiaomi audio chip",
+        "display": "in-ear",
+        "camera_or_sensor": "ANC, Hi-Res Audio",
+        "operating_system": "Firmware/phụ kiện",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Hộp sạc",
+          "Cáp sạc",
+          "Nút tai dự phòng nếu có"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 17 Pro 256GB - Đen",
+      "sku": "APPLE-IPHONE-17-PRO-256GB-EN",
+      "category": "Điện thoại",
+      "description": "iPhone Pro nhỏ gọn, hiệu năng cao và camera chuyên nghiệp. Phiên bản 256GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 33190000,
+      "stock_quantity": 59,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Đen",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A19 Pro",
+        "display": "6.3 inch Super Retina XDR 120Hz",
+        "camera_or_sensor": "camera Pro 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Z Flip7 256GB - Xanh",
+      "sku": "SAMSU-SAMSUNG-GALAXY-Z-FLIP7-256GB-XANH",
+      "category": "Điện thoại gập",
+      "description": "điện thoại gập vỏ sò thời trang, màn hình phụ tiện dụng. Phiên bản 256GB, màu Xanh. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 27190000,
+      "stock_quantity": 70,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Xanh",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Snapdragon/Exynos flagship",
+        "display": "AMOLED gập 120Hz",
+        "camera_or_sensor": "camera kép",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad Pro 13 inch M5 WiFi 256GB - Đen",
+      "sku": "APPLE-IPAD-PRO-13-INCH-M5-WIFI-256GB-EN",
+      "category": "Máy tính bảng",
+      "description": "iPad Pro màn hình lớn cho sáng tạo nội dung và đa nhiệm. Phiên bản 256GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 43190000,
+      "stock_quantity": 13,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Đen",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Apple M5",
+        "display": "13 inch Ultra Retina XDR",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Watch8 44mm Bluetooth 32GB - Đen",
+      "sku": "SAMSU-SAMSUNG-GALAXY-WATCH8-44MM-BLU-32GB-EN",
+      "category": "Đồng hồ thông minh",
+      "description": "Galaxy Watch theo dõi sức khỏe, giấc ngủ và thể thao. Phiên bản 32GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 7990000,
+      "stock_quantity": 24,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "32GB",
+        "color": "Đen",
+        "ram": null,
+        "chipset": "Exynos wearable",
+        "display": "Super AMOLED",
+        "camera_or_sensor": "BioActive Sensor",
+        "operating_system": "Wearable OS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    }
+  ]
+}

@@ -17,22 +17,9 @@ export const useChannelStore = create((set) => ({
     }
   },
 
-  connectFacebook: async (data) => {
-    const res = await client.post('/api/channels/facebook', data)
-    set((state) => ({ channels: [res.data, ...state.channels] }))
-    return res.data
-  },
-
-  connectInstagram: async (data) => {
-    const res = await client.post('/api/channels/instagram', data)
-    set((state) => ({ channels: [res.data, ...state.channels] }))
-    return res.data
-  },
-
   connectTelegram: async (botToken) => {
     const res = await client.post('/api/channels/telegram/connect', {
       access_token: botToken,
-      platform_page_id: 'auto',  // Will be set by backend
     })
     set((state) => ({ channels: [res.data, ...state.channels] }))
     return res.data

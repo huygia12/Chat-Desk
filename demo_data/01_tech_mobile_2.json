@@ -1,0 +1,1596 @@
+{
+  "company": {
+    "business_name": "TechMobile Việt Nam",
+    "business_description": "Cửa hàng chuyên kinh doanh điện thoại, máy tính bảng và phụ kiện chính hãng. Cam kết hàng mới 100%, bảo hành rõ ràng, hỗ trợ trả góp, giao hàng toàn quốc.",
+    "phone": "0901234567",
+    "store_address": "125 Nguyễn Trãi, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh",
+    "opening_hours": "09:00 - 21:30, tất cả các ngày trong tuần",
+    "shipping_policy": "Nội thành TP.HCM giao 2-4 giờ. Toàn quốc giao 2-5 ngày. Miễn phí giao hàng cho đơn từ 2.000.000 VND.",
+    "warranty_policy": "Điện thoại bảo hành 12 tháng theo hãng, phụ kiện bảo hành 3-12 tháng tùy sản phẩm. Hỗ trợ đổi lỗi phần cứng trong 7 ngày đầu.",
+    "return_policy": "Đổi trả trong 7 ngày nếu lỗi từ nhà sản xuất, sản phẩm còn nguyên hộp và đầy đủ phụ kiện.",
+    "payment_methods": [
+      "Tiền mặt",
+      "Chuyển khoản",
+      "COD",
+      "Thẻ ATM/Visa/Mastercard",
+      "Trả góp qua thẻ tín dụng"
+    ],
+    "hotline": "1900 6688"
+  },
+  "products": [
+    {
+      "name": "Xiaomi Buds 5 Pro - Trắng",
+      "sku": "XIAOM-XIAOMI-BUDS-5-PRO-N-A-TRANG",
+      "category": "Tai nghe",
+      "description": "tai nghe Xiaomi chống ồn, âm thanh Hi-Res và độ trễ thấp. Phiên bản N/A, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 3990000,
+      "stock_quantity": 35,
+      "status": "available",
+      "extra_info": {
+        "brand": "Xiaomi",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Trắng",
+        "ram": null,
+        "chipset": "Xiaomi audio chip",
+        "display": "in-ear",
+        "camera_or_sensor": "ANC, Hi-Res Audio",
+        "operating_system": "Firmware/phụ kiện",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Hộp sạc",
+          "Cáp sạc",
+          "Nút tai dự phòng nếu có"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 17 Pro 512GB - Trắng",
+      "sku": "APPLE-IPHONE-17-PRO-512GB-TRANG",
+      "category": "Điện thoại",
+      "description": "iPhone Pro nhỏ gọn, hiệu năng cao và camera chuyên nghiệp. Phiên bản 512GB, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 35490000,
+      "stock_quantity": 46,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Trắng",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "A19 Pro",
+        "display": "6.3 inch Super Retina XDR 120Hz",
+        "camera_or_sensor": "camera Pro 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Z Flip7 512GB - Hồng",
+      "sku": "SAMSU-SAMSUNG-GALAXY-Z-FLIP7-512GB-HONG",
+      "category": "Điện thoại gập",
+      "description": "điện thoại gập vỏ sò thời trang, màn hình phụ tiện dụng. Phiên bản 512GB, màu Hồng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 29490000,
+      "stock_quantity": 0,
+      "status": "out_of_stock",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Hồng",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "Snapdragon/Exynos flagship",
+        "display": "AMOLED gập 120Hz",
+        "camera_or_sensor": "camera kép",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad Pro 13 inch M5 WiFi 512GB - Bạc",
+      "sku": "APPLE-IPAD-PRO-13-INCH-M5-WIFI-512GB-BAC",
+      "category": "Máy tính bảng",
+      "description": "iPad Pro màn hình lớn cho sáng tạo nội dung và đa nhiệm. Phiên bản 512GB, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 45490000,
+      "stock_quantity": 68,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Bạc",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "Apple M5",
+        "display": "13 inch Ultra Retina XDR",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Watch Ultra 47mm LTE 32GB - Xám",
+      "sku": "SAMSU-SAMSUNG-GALAXY-WATCH-ULTRA-47M-32GB-XAM",
+      "category": "Đồng hồ thông minh",
+      "description": "đồng hồ Galaxy bền bỉ cho thể thao, GPS và LTE. Phiên bản 32GB, màu Xám. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 13990000,
+      "stock_quantity": 11,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "32GB",
+        "color": "Xám",
+        "ram": null,
+        "chipset": "Exynos wearable",
+        "display": "Super AMOLED độ sáng cao",
+        "camera_or_sensor": "GPS, BioActive Sensor",
+        "operating_system": "Wearable OS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Sony WF-1000XM5 - Đen",
+      "sku": "SONY-SONY-WF-1000XM5-N-A-EN",
+      "category": "Tai nghe",
+      "description": "tai nghe chống ồn mạnh, chất âm cao cấp và app tùy chỉnh. Phiên bản N/A, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 5990000,
+      "stock_quantity": 22,
+      "status": "available",
+      "extra_info": {
+        "brand": "Sony",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Đen",
+        "ram": null,
+        "chipset": "Sony V2/QN2e",
+        "display": "in-ear",
+        "camera_or_sensor": "ANC, LDAC",
+        "operating_system": "Firmware/phụ kiện",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Hộp sạc",
+          "Cáp sạc",
+          "Nút tai dự phòng nếu có"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 17 Pro 512GB - Đen",
+      "sku": "APPLE-IPHONE-17-PRO-512GB-EN",
+      "category": "Điện thoại",
+      "description": "iPhone Pro nhỏ gọn, hiệu năng cao và camera chuyên nghiệp. Phiên bản 512GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 35490000,
+      "stock_quantity": 33,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Đen",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "A19 Pro",
+        "display": "6.3 inch Super Retina XDR 120Hz",
+        "camera_or_sensor": "camera Pro 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Z Flip7 512GB - Xanh",
+      "sku": "SAMSU-SAMSUNG-GALAXY-Z-FLIP7-512GB-XANH",
+      "category": "Điện thoại gập",
+      "description": "điện thoại gập vỏ sò thời trang, màn hình phụ tiện dụng. Phiên bản 512GB, màu Xanh. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 29490000,
+      "stock_quantity": 44,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Xanh",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "Snapdragon/Exynos flagship",
+        "display": "AMOLED gập 120Hz",
+        "camera_or_sensor": "camera kép",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad Pro 13 inch M5 WiFi 512GB - Đen",
+      "sku": "APPLE-IPAD-PRO-13-INCH-M5-WIFI-512GB-EN",
+      "category": "Máy tính bảng",
+      "description": "iPad Pro màn hình lớn cho sáng tạo nội dung và đa nhiệm. Phiên bản 512GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 45490000,
+      "stock_quantity": 55,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Đen",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "Apple M5",
+        "display": "13 inch Ultra Retina XDR",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Watch Ultra 47mm LTE 32GB - Trắng",
+      "sku": "SAMSU-SAMSUNG-GALAXY-WATCH-ULTRA-47M-32GB-TRANG",
+      "category": "Đồng hồ thông minh",
+      "description": "đồng hồ Galaxy bền bỉ cho thể thao, GPS và LTE. Phiên bản 32GB, màu Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 13990000,
+      "stock_quantity": 66,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "32GB",
+        "color": "Trắng",
+        "ram": null,
+        "chipset": "Exynos wearable",
+        "display": "Super AMOLED độ sáng cao",
+        "camera_or_sensor": "GPS, BioActive Sensor",
+        "operating_system": "Wearable OS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Sony WF-1000XM5 - Bạc",
+      "sku": "SONY-SONY-WF-1000XM5-N-A-BAC",
+      "category": "Tai nghe",
+      "description": "tai nghe chống ồn mạnh, chất âm cao cấp và app tùy chỉnh. Phiên bản N/A, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 5990000,
+      "stock_quantity": 9,
+      "status": "available",
+      "extra_info": {
+        "brand": "Sony",
+        "warranty": "6-12 tháng tùy sản phẩm",
+        "storage": "N/A",
+        "color": "Bạc",
+        "ram": null,
+        "chipset": "Sony V2/QN2e",
+        "display": "in-ear",
+        "camera_or_sensor": "ANC, LDAC",
+        "operating_system": "Firmware/phụ kiện",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Hộp sạc",
+          "Cáp sạc",
+          "Nút tai dự phòng nếu có"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 17 256GB - Xanh",
+      "sku": "APPLE-IPHONE-17-256GB-XANH",
+      "category": "Điện thoại",
+      "description": "iPhone mới cân bằng giữa giá, hiệu năng và camera. Phiên bản 256GB, màu Xanh. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 26190000,
+      "stock_quantity": 20,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Xanh",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A19",
+        "display": "6.1 inch Super Retina XDR",
+        "camera_or_sensor": "camera Fusion 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "OPPO Find N6 512GB - Đen",
+      "sku": "OPPO-OPPO-FIND-N6-512GB-EN",
+      "category": "Điện thoại gập",
+      "description": "điện thoại gập cao cấp cho đa nhiệm và chụp ảnh. Phiên bản 512GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 43490000,
+      "stock_quantity": 31,
+      "status": "available",
+      "extra_info": {
+        "brand": "OPPO",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Đen",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "Snapdragon flagship",
+        "display": "màn hình gập AMOLED 120Hz",
+        "camera_or_sensor": "camera Hasselblad",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad Air 11 inch M4 WiFi 128GB - Xanh",
+      "sku": "APPLE-IPAD-AIR-11-INCH-M4-WIFI-128GB-XANH",
+      "category": "Máy tính bảng",
+      "description": "iPad Air gọn nhẹ, hỗ trợ Apple Pencil và bàn phím. Phiên bản 128GB, màu Xanh. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 16990000,
+      "stock_quantity": 42,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "128GB",
+        "color": "Xanh",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Apple M4",
+        "display": "11 inch Liquid Retina",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Xiaomi Watch S4 47mm 4GB - Đen",
+      "sku": "XIAOM-XIAOMI-WATCH-S4-47MM-4GB-EN",
+      "category": "Đồng hồ thông minh",
+      "description": "đồng hồ Xiaomi pin lâu, nhiều chế độ thể thao. Phiên bản 4GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 3990000,
+      "stock_quantity": 53,
+      "status": "available",
+      "extra_info": {
+        "brand": "Xiaomi",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "4GB",
+        "color": "Đen",
+        "ram": null,
+        "chipset": "Xiaomi wearable chip",
+        "display": "AMOLED",
+        "camera_or_sensor": "nhịp tim, SpO2",
+        "operating_system": "Wearable OS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 17 256GB - Hồng",
+      "sku": "APPLE-IPHONE-17-256GB-HONG",
+      "category": "Điện thoại",
+      "description": "iPhone mới cân bằng giữa giá, hiệu năng và camera. Phiên bản 256GB, màu Hồng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 26190000,
+      "stock_quantity": 64,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Hồng",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A19",
+        "display": "6.1 inch Super Retina XDR",
+        "camera_or_sensor": "camera Fusion 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "OPPO Find N6 512GB - Vàng",
+      "sku": "OPPO-OPPO-FIND-N6-512GB-VANG",
+      "category": "Điện thoại gập",
+      "description": "điện thoại gập cao cấp cho đa nhiệm và chụp ảnh. Phiên bản 512GB, màu Vàng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 43490000,
+      "stock_quantity": 0,
+      "status": "out_of_stock",
+      "extra_info": {
+        "brand": "OPPO",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Vàng",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "Snapdragon flagship",
+        "display": "màn hình gập AMOLED 120Hz",
+        "camera_or_sensor": "camera Hasselblad",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad Air 11 inch M4 WiFi 128GB - Tím",
+      "sku": "APPLE-IPAD-AIR-11-INCH-M4-WIFI-128GB-TIM",
+      "category": "Máy tính bảng",
+      "description": "iPad Air gọn nhẹ, hỗ trợ Apple Pencil và bàn phím. Phiên bản 128GB, màu Tím. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 16990000,
+      "stock_quantity": 18,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "128GB",
+        "color": "Tím",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Apple M4",
+        "display": "11 inch Liquid Retina",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Xiaomi Watch S4 47mm 4GB - Bạc",
+      "sku": "XIAOM-XIAOMI-WATCH-S4-47MM-4GB-BAC",
+      "category": "Đồng hồ thông minh",
+      "description": "đồng hồ Xiaomi pin lâu, nhiều chế độ thể thao. Phiên bản 4GB, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 3990000,
+      "stock_quantity": 29,
+      "status": "available",
+      "extra_info": {
+        "brand": "Xiaomi",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "4GB",
+        "color": "Bạc",
+        "ram": null,
+        "chipset": "Xiaomi wearable chip",
+        "display": "AMOLED",
+        "camera_or_sensor": "nhịp tim, SpO2",
+        "operating_system": "Wearable OS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Phụ kiện theo hộp"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 17 512GB - Xanh",
+      "sku": "APPLE-IPHONE-17-512GB-XANH",
+      "category": "Điện thoại",
+      "description": "iPhone mới cân bằng giữa giá, hiệu năng và camera. Phiên bản 512GB, màu Xanh. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 28490000,
+      "stock_quantity": 40,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Xanh",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "A19",
+        "display": "6.1 inch Super Retina XDR",
+        "camera_or_sensor": "camera Fusion 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad Air 11 inch M4 WiFi 256GB - Xanh",
+      "sku": "APPLE-IPAD-AIR-11-INCH-M4-WIFI-256GB-XANH",
+      "category": "Máy tính bảng",
+      "description": "iPad Air gọn nhẹ, hỗ trợ Apple Pencil và bàn phím. Phiên bản 256GB, màu Xanh. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 18190000,
+      "stock_quantity": 51,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Xanh",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Apple M4",
+        "display": "11 inch Liquid Retina",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 17 512GB - Hồng",
+      "sku": "APPLE-IPHONE-17-512GB-HONG",
+      "category": "Điện thoại",
+      "description": "iPhone mới cân bằng giữa giá, hiệu năng và camera. Phiên bản 512GB, màu Hồng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 28490000,
+      "stock_quantity": 62,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Hồng",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "A19",
+        "display": "6.1 inch Super Retina XDR",
+        "camera_or_sensor": "camera Fusion 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad Air 11 inch M4 WiFi 256GB - Tím",
+      "sku": "APPLE-IPAD-AIR-11-INCH-M4-WIFI-256GB-TIM",
+      "category": "Máy tính bảng",
+      "description": "iPad Air gọn nhẹ, hỗ trợ Apple Pencil và bàn phím. Phiên bản 256GB, màu Tím. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 18190000,
+      "stock_quantity": 5,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Tím",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Apple M4",
+        "display": "11 inch Liquid Retina",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone Air 256GB - Xanh da trời",
+      "sku": "APPLE-IPHONE-AIR-256GB-XANH-DA-TROI",
+      "category": "Điện thoại",
+      "description": "iPhone mỏng nhẹ, thiết kế cao cấp, phù hợp di chuyển nhiều. Phiên bản 256GB, màu Xanh da trời. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 33190000,
+      "stock_quantity": 16,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Xanh da trời",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A19",
+        "display": "6.5 inch OLED",
+        "camera_or_sensor": "camera Fusion 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad Air 13 inch M4 WiFi 256GB - Xanh",
+      "sku": "APPLE-IPAD-AIR-13-INCH-M4-WIFI-256GB-XANH",
+      "category": "Máy tính bảng",
+      "description": "iPad Air màn hình lớn, giá mềm hơn iPad Pro. Phiên bản 256GB, màu Xanh. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 24190000,
+      "stock_quantity": 27,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Xanh",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Apple M4",
+        "display": "13 inch Liquid Retina",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone Air 256GB - Đen",
+      "sku": "APPLE-IPHONE-AIR-256GB-EN",
+      "category": "Điện thoại",
+      "description": "iPhone mỏng nhẹ, thiết kế cao cấp, phù hợp di chuyển nhiều. Phiên bản 256GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 33190000,
+      "stock_quantity": 38,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Đen",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A19",
+        "display": "6.5 inch OLED",
+        "camera_or_sensor": "camera Fusion 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad Air 13 inch M4 WiFi 256GB - Bạc",
+      "sku": "APPLE-IPAD-AIR-13-INCH-M4-WIFI-256GB-BAC",
+      "category": "Máy tính bảng",
+      "description": "iPad Air màn hình lớn, giá mềm hơn iPad Pro. Phiên bản 256GB, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 24190000,
+      "stock_quantity": 49,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Bạc",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Apple M4",
+        "display": "13 inch Liquid Retina",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone Air 512GB - Xanh da trời",
+      "sku": "APPLE-IPHONE-AIR-512GB-XANH-DA-TROI",
+      "category": "Điện thoại",
+      "description": "iPhone mỏng nhẹ, thiết kế cao cấp, phù hợp di chuyển nhiều. Phiên bản 512GB, màu Xanh da trời. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 35490000,
+      "stock_quantity": 60,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Xanh da trời",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "A19",
+        "display": "6.5 inch OLED",
+        "camera_or_sensor": "camera Fusion 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad mini A17 Pro WiFi 128GB - Tím",
+      "sku": "APPLE-IPAD-MINI-A17-PRO-WIFI-128GB-TIM",
+      "category": "Máy tính bảng",
+      "description": "iPad mini nhỏ gọn cho đọc sách, ghi chú và di chuyển. Phiên bản 128GB, màu Tím. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 13990000,
+      "stock_quantity": 3,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "128GB",
+        "color": "Tím",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A17 Pro",
+        "display": "8.3 inch Liquid Retina",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone Air 512GB - Đen",
+      "sku": "APPLE-IPHONE-AIR-512GB-EN",
+      "category": "Điện thoại",
+      "description": "iPhone mỏng nhẹ, thiết kế cao cấp, phù hợp di chuyển nhiều. Phiên bản 512GB, màu Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 35490000,
+      "stock_quantity": 14,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Đen",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "A19",
+        "display": "6.5 inch OLED",
+        "camera_or_sensor": "camera Fusion 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad mini A17 Pro WiFi 128GB - Xám",
+      "sku": "APPLE-IPAD-MINI-A17-PRO-WIFI-128GB-XAM",
+      "category": "Máy tính bảng",
+      "description": "iPad mini nhỏ gọn cho đọc sách, ghi chú và di chuyển. Phiên bản 128GB, màu Xám. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 13990000,
+      "stock_quantity": 0,
+      "status": "out_of_stock",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "128GB",
+        "color": "Xám",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A17 Pro",
+        "display": "8.3 inch Liquid Retina",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16 Pro Max 256GB - Titan Đen",
+      "sku": "APPLE-IPHONE-16-PRO-MAX-256GB-TITAN-EN",
+      "category": "Điện thoại",
+      "description": "iPhone Pro Max đời trước, giá tốt hơn nhưng vẫn rất mạnh. Phiên bản 256GB, màu Titan Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 34190000,
+      "stock_quantity": 36,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Titan Đen",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A18 Pro",
+        "display": "6.9 inch OLED 120Hz",
+        "camera_or_sensor": "camera Pro 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad mini A17 Pro WiFi 256GB - Tím",
+      "sku": "APPLE-IPAD-MINI-A17-PRO-WIFI-256GB-TIM",
+      "category": "Máy tính bảng",
+      "description": "iPad mini nhỏ gọn cho đọc sách, ghi chú và di chuyển. Phiên bản 256GB, màu Tím. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 15190000,
+      "stock_quantity": 47,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Tím",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A17 Pro",
+        "display": "8.3 inch Liquid Retina",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16 Pro Max 256GB - Titan Trắng",
+      "sku": "APPLE-IPHONE-16-PRO-MAX-256GB-TITAN-TRANG",
+      "category": "Điện thoại",
+      "description": "iPhone Pro Max đời trước, giá tốt hơn nhưng vẫn rất mạnh. Phiên bản 256GB, màu Titan Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 34190000,
+      "stock_quantity": 58,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Titan Trắng",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A18 Pro",
+        "display": "6.9 inch OLED 120Hz",
+        "camera_or_sensor": "camera Pro 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPad mini A17 Pro WiFi 256GB - Xám",
+      "sku": "APPLE-IPAD-MINI-A17-PRO-WIFI-256GB-XAM",
+      "category": "Máy tính bảng",
+      "description": "iPad mini nhỏ gọn cho đọc sách, ghi chú và di chuyển. Phiên bản 256GB, màu Xám. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 15190000,
+      "stock_quantity": 69,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Xám",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A17 Pro",
+        "display": "8.3 inch Liquid Retina",
+        "camera_or_sensor": "camera 12MP",
+        "operating_system": "iPadOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16 Pro Max 512GB - Titan Đen",
+      "sku": "APPLE-IPHONE-16-PRO-MAX-512GB-TITAN-EN",
+      "category": "Điện thoại",
+      "description": "iPhone Pro Max đời trước, giá tốt hơn nhưng vẫn rất mạnh. Phiên bản 512GB, màu Titan Đen. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 36490000,
+      "stock_quantity": 12,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Titan Đen",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "A18 Pro",
+        "display": "6.9 inch OLED 120Hz",
+        "camera_or_sensor": "camera Pro 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Tab S10 Ultra 5G 512GB - Xám",
+      "sku": "SAMSU-SAMSUNG-GALAXY-TAB-S10-ULTRA-5-512GB-XAM",
+      "category": "Máy tính bảng",
+      "description": "tablet Android màn hình rất lớn, hỗ trợ S Pen. Phiên bản 512GB, màu Xám. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 36490000,
+      "stock_quantity": 23,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Xám",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "Dimensity flagship for Galaxy",
+        "display": "14.6 inch Dynamic AMOLED 2X",
+        "camera_or_sensor": "camera kép",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16 Pro Max 512GB - Titan Trắng",
+      "sku": "APPLE-IPHONE-16-PRO-MAX-512GB-TITAN-TRANG",
+      "category": "Điện thoại",
+      "description": "iPhone Pro Max đời trước, giá tốt hơn nhưng vẫn rất mạnh. Phiên bản 512GB, màu Titan Trắng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 36490000,
+      "stock_quantity": 34,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Titan Trắng",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "A18 Pro",
+        "display": "6.9 inch OLED 120Hz",
+        "camera_or_sensor": "camera Pro 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Tab S10 Ultra 5G 512GB - Bạc",
+      "sku": "SAMSU-SAMSUNG-GALAXY-TAB-S10-ULTRA-5-512GB-BAC",
+      "category": "Máy tính bảng",
+      "description": "tablet Android màn hình rất lớn, hỗ trợ S Pen. Phiên bản 512GB, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 36490000,
+      "stock_quantity": 45,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "512GB",
+        "color": "Bạc",
+        "ram": "12GB-16GB tùy phiên bản",
+        "chipset": "Dimensity flagship for Galaxy",
+        "display": "14.6 inch Dynamic AMOLED 2X",
+        "camera_or_sensor": "camera kép",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16 Pro 128GB - Titan Tự nhiên",
+      "sku": "APPLE-IPHONE-16-PRO-128GB-TITAN-TU-NHIEN",
+      "category": "Điện thoại",
+      "description": "iPhone Pro gọn, hỗ trợ AI và quay chụp tốt. Phiên bản 128GB, màu Titan Tự nhiên. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 27990000,
+      "stock_quantity": 56,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "128GB",
+        "color": "Titan Tự nhiên",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A18 Pro",
+        "display": "6.3 inch OLED 120Hz",
+        "camera_or_sensor": "camera Pro 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Tab S10 Plus WiFi 256GB - Xám",
+      "sku": "SAMSU-SAMSUNG-GALAXY-TAB-S10-PLUS-WI-256GB-XAM",
+      "category": "Máy tính bảng",
+      "description": "Galaxy Tab S cao cấp, mỏng nhẹ, kèm S Pen. Phiên bản 256GB, màu Xám. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 24190000,
+      "stock_quantity": 67,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Xám",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Dimensity flagship",
+        "display": "12.4 inch AMOLED 120Hz",
+        "camera_or_sensor": "camera 13MP",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16 Pro 128GB - Titan Xanh",
+      "sku": "APPLE-IPHONE-16-PRO-128GB-TITAN-XANH",
+      "category": "Điện thoại",
+      "description": "iPhone Pro gọn, hỗ trợ AI và quay chụp tốt. Phiên bản 128GB, màu Titan Xanh. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 27990000,
+      "stock_quantity": 10,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "128GB",
+        "color": "Titan Xanh",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A18 Pro",
+        "display": "6.3 inch OLED 120Hz",
+        "camera_or_sensor": "camera Pro 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "Samsung Galaxy Tab S10 Plus WiFi 256GB - Bạc",
+      "sku": "SAMSU-SAMSUNG-GALAXY-TAB-S10-PLUS-WI-256GB-BAC",
+      "category": "Máy tính bảng",
+      "description": "Galaxy Tab S cao cấp, mỏng nhẹ, kèm S Pen. Phiên bản 256GB, màu Bạc. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 24190000,
+      "stock_quantity": 21,
+      "status": "available",
+      "extra_info": {
+        "brand": "Samsung",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Bạc",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Dimensity flagship",
+        "display": "12.4 inch AMOLED 120Hz",
+        "camera_or_sensor": "camera 13MP",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16 Pro 256GB - Titan Tự nhiên",
+      "sku": "APPLE-IPHONE-16-PRO-256GB-TITAN-TU-NHIEN",
+      "category": "Điện thoại",
+      "description": "iPhone Pro gọn, hỗ trợ AI và quay chụp tốt. Phiên bản 256GB, màu Titan Tự nhiên. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 29190000,
+      "stock_quantity": 32,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Titan Tự nhiên",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A18 Pro",
+        "display": "6.3 inch OLED 120Hz",
+        "camera_or_sensor": "camera Pro 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "POCO Pad 256GB - Xanh",
+      "sku": "XIAOM-POCO-PAD-256GB-XANH",
+      "category": "Máy tính bảng",
+      "description": "POCO Pad màn hình 2.5K 120Hz, pin 10000mAh và bốn loa. Phiên bản 256GB, màu Xanh. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 10190000,
+      "stock_quantity": 0,
+      "status": "out_of_stock",
+      "extra_info": {
+        "brand": "Xiaomi",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Xanh",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Snapdragon 7s Gen 2",
+        "display": "12.1 inch 2.5K 120Hz",
+        "camera_or_sensor": "camera trước/sau 8MP",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16 Pro 256GB - Titan Xanh",
+      "sku": "APPLE-IPHONE-16-PRO-256GB-TITAN-XANH",
+      "category": "Điện thoại",
+      "description": "iPhone Pro gọn, hỗ trợ AI và quay chụp tốt. Phiên bản 256GB, màu Titan Xanh. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 29190000,
+      "stock_quantity": 54,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Titan Xanh",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A18 Pro",
+        "display": "6.3 inch OLED 120Hz",
+        "camera_or_sensor": "camera Pro 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "POCO Pad 256GB - Xám",
+      "sku": "XIAOM-POCO-PAD-256GB-XAM",
+      "category": "Máy tính bảng",
+      "description": "POCO Pad màn hình 2.5K 120Hz, pin 10000mAh và bốn loa. Phiên bản 256GB, màu Xám. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 10190000,
+      "stock_quantity": 65,
+      "status": "available",
+      "extra_info": {
+        "brand": "Xiaomi",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Xám",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "Snapdragon 7s Gen 2",
+        "display": "12.1 inch 2.5K 120Hz",
+        "camera_or_sensor": "camera trước/sau 8MP",
+        "operating_system": "Android",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16 Plus 128GB - Hồng",
+      "sku": "APPLE-IPHONE-16-PLUS-128GB-HONG",
+      "category": "Điện thoại",
+      "description": "iPhone màn hình lớn, pin lâu cho giải trí và học tập. Phiên bản 128GB, màu Hồng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 22990000,
+      "stock_quantity": 8,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "128GB",
+        "color": "Hồng",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A18",
+        "display": "6.7 inch OLED",
+        "camera_or_sensor": "camera kép 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16 Plus 128GB - Xanh",
+      "sku": "APPLE-IPHONE-16-PLUS-128GB-XANH",
+      "category": "Điện thoại",
+      "description": "iPhone màn hình lớn, pin lâu cho giải trí và học tập. Phiên bản 128GB, màu Xanh. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 22990000,
+      "stock_quantity": 19,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "128GB",
+        "color": "Xanh",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A18",
+        "display": "6.7 inch OLED",
+        "camera_or_sensor": "camera kép 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    },
+    {
+      "name": "iPhone 16 Plus 256GB - Hồng",
+      "sku": "APPLE-IPHONE-16-PLUS-256GB-HONG",
+      "category": "Điện thoại",
+      "description": "iPhone màn hình lớn, pin lâu cho giải trí và học tập. Phiên bản 256GB, màu Hồng. Dữ liệu demo được viết để AI và nhân viên có thể tra cứu nhanh nhóm sản phẩm, cấu hình nổi bật, giá tham khảo, tồn kho và gợi ý tư vấn phù hợp cho khách hàng.",
+      "price": 24190000,
+      "stock_quantity": 30,
+      "status": "available",
+      "extra_info": {
+        "brand": "Apple",
+        "warranty": "12 tháng chính hãng hoặc theo chính sách nhà phân phối",
+        "storage": "256GB",
+        "color": "Hồng",
+        "ram": "8GB-12GB tùy phiên bản",
+        "chipset": "A18",
+        "display": "6.7 inch OLED",
+        "camera_or_sensor": "camera kép 48MP",
+        "operating_system": "iOS",
+        "condition": "Mới 100%, nguyên hộp",
+        "included_accessories": [
+          "Cáp sạc",
+          "Que lấy SIM",
+          "Sách hướng dẫn"
+        ],
+        "sales_notes": [
+          "Kiểm tra tồn kho trước khi chốt đơn",
+          "Giá demo có thể thay đổi theo chương trình khuyến mãi",
+          "Có thể tư vấn trả góp hoặc combo phụ kiện"
+        ],
+        "source_research": "Tham khảo danh mục và thông số từ website hãng/nhà bán lẻ; giá và tồn kho là dữ liệu demo."
+      }
+    }
+  ]
+}

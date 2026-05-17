@@ -22,8 +22,10 @@ export default function Products() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
+  const [deleteAllModalOpen, setDeleteAllModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
   const [importing, setImporting] = useState(false)
+  const [deletingAll, setDeletingAll] = useState(false)
   const [form] = Form.useForm()
   const { t } = useI18n()
 
@@ -78,6 +80,20 @@ export default function Products() {
     }
   }
 
+  const handleDeleteAll = async () => {
+    setDeletingAll(true)
+    try {
+      const res = await client.delete('/api/products')
+      message.success(t('products.deleteAllSuccess', { count: res.data?.deleted_count ?? products.length }))
+      setDeleteAllModalOpen(false)
+      fetchProducts()
+    } catch (err) {
+      message.error(err.response?.data?.detail || t('products.deleteAllError'))
+    } finally {
+      setDeletingAll(false)
+    }
+  }
+
   const handleImportJSON = () => {
     const input = document.createElement('input')
     input.type = 'file'
@@ -107,7 +123,7 @@ export default function Products() {
   }
 
   const columns = [
-    { title: t('products.productName'), dataIndex: 'name', ellipsis: true },
+    { title: t('products.productName'), dataIndex: 'name', ellipsis: true, width: 180 },
     {
       title: t('products.sku'),
       dataIndex: 'sku',
@@ -126,6 +142,7 @@ export default function Products() {
       title: t('products.description'),
       dataIndex: 'description',
       ellipsis: true,
+      width: 220,
       render: (v) => v || '-',
     },
     {
@@ -154,12 +171,12 @@ export default function Products() {
     {
       title: t('common.updatedAt'),
       dataIndex: 'updated_at',
-      width: 150,
+      width: 160,
       render: (v) => dayjs(v).format('DD/MM/YYYY HH:mm'),
     },
     {
-      title: '',
-      width: 140,
+      title: t('common.actions'),
+      width: 110,
       render: (_, record) => (
         <>
           <Button
@@ -200,6 +217,14 @@ export default function Products() {
             >
               {t('products.addProduct')}
             </Button>
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => setDeleteAllModalOpen(true)}
+              disabled={products.length === 0}
+            >
+              {t('products.deleteAllButton')}
+            </Button>
           </div>
         }
       >
@@ -212,6 +237,8 @@ export default function Products() {
           rowKey="id"
           loading={loading}
           pagination={{ pageSize: 10 }}
+          scroll={{ x: 1220 }}
+          style={{ maxWidth: '100%' }}
           locale={{ emptyText: t('products.empty') }}
         />
       </Card>
@@ -274,6 +301,24 @@ export default function Products() {
             />
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        title={t('products.deleteAllTitle')}
+        open={deleteAllModalOpen}
+        onOk={handleDeleteAll}
+        onCancel={() => setDeleteAllModalOpen(false)}
+        okText={t('products.deleteAllConfirm')}
+        cancelText={t('common.cancel')}
+        okButtonProps={{ danger: true }}
+        confirmLoading={deletingAll}
+      >
+        <Typography.Paragraph>
+          {t('products.deleteAllDescription', { count: products.length })}
+        </Typography.Paragraph>
+        <Typography.Text type="danger">
+          {t('products.deleteAllWarning')}
+        </Typography.Text>
       </Modal>
     </div>
   )

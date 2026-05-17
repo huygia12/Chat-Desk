@@ -3,9 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class ChannelCreate(BaseModel):
-    platform_page_id: str
-    page_name: str | None = None
+class TelegramConnect(BaseModel):
     access_token: str
 
 

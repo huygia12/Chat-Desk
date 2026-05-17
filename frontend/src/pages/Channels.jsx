@@ -1,13 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Button,
   Card,
-  Form,
   Input,
   Modal,
   Popconfirm,
-  Select,
   Space,
   Table,
   Tag,
@@ -18,9 +16,6 @@ import {
   DeleteOutlined,
   FacebookOutlined,
   InstagramOutlined,
-  LinkOutlined,
-  PlusOutlined,
-  SendOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import client from "../api/client";
@@ -28,24 +23,67 @@ import WidgetManager from "../components/WidgetManager";
 import { useI18n } from "../i18n/useI18n";
 import { useChannelStore } from "../store/channelStore";
 
+function MetaIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      fill="none"
+      style={{ display: "inline-block", verticalAlign: "-0.125em" }}
+    >
+      <path
+        d="M3.5 12.1C4.9 7.4 7.1 5 9.5 5c1.5 0 2.8.9 4.1 2.5.3.4.6.8.9 1.3.3-.5.6-.9.9-1.3C16.7 5.9 18 5 19.5 5c2.4 0 4.2 2.1 4.2 5.2 0 3.4-1.9 6.8-4.7 6.8-1.7 0-3.1-1.2-4.5-3.2-.1-.2-.3-.4-.4-.6-.2.3-.4.6-.6.9C12.1 16.1 10.7 17 9 17c-3 0-5.5-1.6-5.5-4.9Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5.4 12.3C6.3 9.5 7.6 7 9.3 7c1.2 0 2.2 1.4 3.6 3.6l1.2 1.9c1.5 2.2 2.8 3.4 4.5 3.4 1.9 0 3.1-2.4 3.1-5.2C21.7 8.4 20.8 7 19.5 7c-1.2 0-2.2 1.2-3.6 3.4l-1.3 2.1C12.9 15.1 11.5 17 9 17c-2.1 0-3.6-1-3.6-4.7Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function TelegramIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      fill="none"
+      style={{ display: "inline-block", verticalAlign: "-0.125em" }}
+    >
+      <path
+        d="M21.5 4.5 18.2 20c-.2 1-1 1.2-1.8.7l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.3-8.4c.4-.4-.1-.6-.6-.3L5.6 13.2l-5-1.6c-1.1-.3-1.1-1.1.2-1.6L20.3 2.5c.9-.3 1.7.2 1.2 2Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export default function Channels() {
   const {
     channels,
     loading,
     fetchChannels,
-    connectFacebook,
-    connectInstagram,
     connectTelegram,
     disconnectChannel,
   } = useChannelStore();
 
-  const [manualModalOpen, setManualModalOpen] = useState(false);
+  const [metaModalOpen, setMetaModalOpen] = useState(false);
   const [telegramModalOpen, setTelegramModalOpen] = useState(false);
   const [telegramToken, setTelegramToken] = useState("");
   const [telegramLoading, setTelegramLoading] = useState(false);
-  const [platform, setPlatform] = useState("facebook");
-  const widgetManagerRef = useRef(null);
-  const [form] = Form.useForm();
   const { t } = useI18n();
 
   useEffect(() => {
@@ -107,22 +145,6 @@ export default function Channels() {
     }
   };
 
-  const handleManualConnect = async () => {
-    try {
-      const values = await form.validateFields();
-      if (platform === "facebook") {
-        await connectFacebook(values);
-      } else {
-        await connectInstagram(values);
-      }
-      message.success(t("channels.manualSuccess", { platform }));
-      setManualModalOpen(false);
-      form.resetFields();
-    } catch (err) {
-      message.error(err.response?.data?.detail || t("channels.connectError"));
-    }
-  };
-
   const handleDisconnect = async (channelId) => {
     try {
       await disconnectChannel(channelId);
@@ -153,7 +175,7 @@ export default function Channels() {
         }
         if (value === "telegram") {
           return (
-            <Tag icon={<SendOutlined />} color="cyan">
+            <Tag icon={<TelegramIcon />} color="cyan">
               Telegram
             </Tag>
           );
@@ -179,7 +201,7 @@ export default function Channels() {
       render: (value) => dayjs(value).format("DD/MM/YYYY HH:mm"),
     },
     {
-      title: "",
+      title: t("common.actions"),
       render: (_, record) => (
         <Popconfirm
           title={t("channels.disconnectTitle")}
@@ -201,36 +223,19 @@ export default function Channels() {
         title={t("channels.title")}
         extra={
           <Space wrap>
-            <Button type="primary" icon={<LinkOutlined />} onClick={handleConnectOAuth}>
+            <Button type="primary" icon={<MetaIcon />} onClick={() => setMetaModalOpen(true)}>
               {t("channels.connectMeta")}
             </Button>
             <Button
-              icon={<SendOutlined />}
+              icon={<TelegramIcon />}
               onClick={() => setTelegramModalOpen(true)}
               style={{ borderColor: "#0088cc", color: "#0088cc" }}
             >
               {t("channels.connectTelegram")}
             </Button>
-            <Button icon={<PlusOutlined />} onClick={() => setManualModalOpen(true)}>
-              {t("channels.manualToken")}
-            </Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => widgetManagerRef.current?.openCreate()}
-            >
-              {t("widgets.createButton")}
-            </Button>
           </Space>
         }
       >
-        <Alert
-          message={t("channels.metaInfo")}
-          description={t("channels.metaDescription")}
-          type="info"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
         <Table
           dataSource={channels}
           columns={columns}
@@ -241,67 +246,27 @@ export default function Channels() {
         />
       </Card>
 
-      <WidgetManager ref={widgetManagerRef} embedded showCreateButton={false} />
+      <WidgetManager embedded />
 
       <Modal
-        title={t("channels.manualTitle")}
-        open={manualModalOpen}
-        onOk={handleManualConnect}
-        onCancel={() => {
-          setManualModalOpen(false);
-          form.resetFields();
-        }}
-        okText={t("channels.connectMeta").replace("Meta", "").trim() || t("common.confirm")}
-        cancelText={t("common.cancel")}
+        title={t("channels.connectMeta")}
+        open={metaModalOpen}
+        onCancel={() => setMetaModalOpen(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setMetaModalOpen(false)}>
+            {t("common.cancel")}
+          </Button>,
+          <Button key="continue" type="primary" icon={<MetaIcon />} onClick={handleConnectOAuth}>
+            {t("common.continue")}
+          </Button>,
+        ]}
       >
         <Alert
-          message={t("channels.manualWarning")}
-          type="warning"
+          message={t("channels.metaInfo")}
+          description={t("channels.metaDescription")}
+          type="info"
           showIcon
-          style={{ marginBottom: 16 }}
         />
-        <Space direction="vertical" style={{ width: "100%" }} size="middle">
-          <div>
-            <Typography.Text>{t("channels.choosePlatform")}</Typography.Text>
-            <Select
-              value={platform}
-              onChange={setPlatform}
-              style={{ width: "100%", marginTop: 8 }}
-              options={[
-                { label: "Facebook Page", value: "facebook" },
-                { label: "Instagram Professional", value: "instagram" },
-              ]}
-            />
-          </div>
-          <Form form={form} layout="vertical">
-            <Form.Item
-              name="platform_page_id"
-              label={platform === "instagram" ? "Instagram Account ID" : "Facebook Page ID"}
-              rules={[{ required: true, message: t("channels.platformIdRequired") }]}
-            >
-              <Input
-                placeholder={
-                  platform === "instagram"
-                    ? t("channels.instagramIdPlaceholder")
-                    : t("channels.facebookIdPlaceholder")
-                }
-              />
-            </Form.Item>
-            <Form.Item name="page_name" label={t("channels.displayName")}>
-              <Input placeholder={t("channels.displayNamePlaceholder")} />
-            </Form.Item>
-            <Form.Item
-              name="access_token"
-              label="Page Access Token"
-              rules={[{ required: true, message: t("channels.tokenRequired") }]}
-            >
-              <Input.TextArea
-                placeholder={t("channels.tokenPlaceholder")}
-                rows={3}
-              />
-            </Form.Item>
-          </Form>
-        </Space>
       </Modal>
 
       <Modal

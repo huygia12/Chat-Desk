@@ -152,6 +152,24 @@ async def update_product(
     return product
 
 
+@router.delete("")
+async def delete_all_products(
+    current_user: User = Depends(get_current_business),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Product).where(Product.business_id == current_user.id))
+    products = result.scalars().all()
+
+    for product in products:
+        try:
+            delete_embedding(str(product.id))
+        except Exception as e:
+            logger.warning("Failed to delete embedding for product %s: %s", product.id, e)
+        await db.delete(product)
+
+    return {"detail": t("Products deleted"), "deleted_count": len(products)}
+
+
 @router.delete("/{product_id}")
 async def delete_product(
     product_id: uuid.UUID,

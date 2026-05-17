@@ -10,7 +10,7 @@ from app.database import get_db
 from app.i18n import t
 from app.models.user import User
 from app.models.channel import Channel
-from app.schemas.channel import ChannelCreate, ChannelOut
+from app.schemas.channel import ChannelOut, TelegramConnect
 from app.api.deps import get_current_business
 from app.services.oauth_service import (
     get_facebook_oauth_url,
@@ -18,7 +18,6 @@ from app.services.oauth_service import (
     get_user_pages,
     subscribe_page_webhook,
     get_instagram_accounts,
-    validate_instagram_account,
 )
 from app.services.telegram_service import (
     get_telegram_bot_info,
@@ -63,7 +62,12 @@ async def list_channels(
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
-        select(Channel).where(Channel.business_id == current_user.id).order_by(Channel.created_at.desc())
+        select(Channel)
+        .where(
+            Channel.business_id == current_user.id,
+            Channel.platform != "widget",
+        )
+        .order_by(Channel.created_at.desc())
     )
     return result.scalars().all()
 
@@ -176,83 +180,6 @@ async def facebook_oauth_callback(
         return RedirectResponse(f"{settings.FRONTEND_URL}/channels?error={str(e)}")
 
 
-@router.post("/facebook", response_model=ChannelOut)
-async def connect_facebook(
-    data: ChannelCreate,
-    current_user: User = Depends(get_current_business),
-    db: AsyncSession = Depends(get_db),
-):
-    # Check if page already connected
-    result = await db.execute(
-        select(Channel).where(
-            Channel.business_id == current_user.id,
-            Channel.platform == "facebook",
-            Channel.platform_page_id == data.platform_page_id,
-        )
-    )
-    existing = result.scalar_one_or_none()
-    if existing:
-        raise HTTPException(status_code=400, detail="This Facebook Page is already connected")
-
-    channel = Channel(
-        business_id=current_user.id,
-        platform="facebook",
-        platform_page_id=data.platform_page_id,
-        page_name=data.page_name,
-        access_token=data.access_token,
-    )
-    db.add(channel)
-    await db.flush()
-    await subscribe_page_webhook(data.platform_page_id, data.access_token)
-    await db.refresh(channel)
-    return channel
-
-
-@router.post("/instagram", response_model=ChannelOut)
-async def connect_instagram(
-    data: ChannelCreate,
-    current_user: User = Depends(get_current_business),
-    db: AsyncSession = Depends(get_db),
-):
-    ig_account_id = data.platform_page_id.strip()
-    page_access_token = data.access_token.strip()
-    if not ig_account_id or not page_access_token:
-        raise HTTPException(status_code=400, detail="Instagram Account ID va Access Token la bat buoc")
-
-    ig_info = await validate_instagram_account(ig_account_id, page_access_token)
-    if not ig_info:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                "Khong the xac thuc Instagram account. Hay dung Instagram Professional "
-                "account da lien ket voi Facebook Page va Page Access Token co quyen messaging."
-            ),
-        )
-
-    result = await db.execute(
-        select(Channel).where(
-            Channel.business_id == current_user.id,
-            Channel.platform == "instagram",
-            Channel.platform_page_id == ig_info["id"],
-        )
-    )
-    existing = result.scalar_one_or_none()
-    if existing:
-        raise HTTPException(status_code=400, detail="This Instagram account is already connected")
-
-    channel = Channel(
-        business_id=current_user.id,
-        platform="instagram",
-        platform_page_id=ig_info["id"],
-        page_name=data.page_name or ig_info.get("username") or ig_info.get("name"),
-        access_token=page_access_token,
-    )
-    db.add(channel)
-    await db.flush()
-    await db.refresh(channel)
-    return channel
-
-
 @router.delete("/{channel_id}")
 async def disconnect_channel(
     channel_id: uuid.UUID,
@@ -272,13 +199,6 @@ async def disconnect_channel(
 
     await db.delete(channel)
     return {"detail": t("Channel disconnected")}
-
-
-# ==================== Telegram ====================
-
-class TelegramConnect(ChannelCreate):
-    """Only bot_token is required for Telegram."""
-    pass
 
 
 @router.post("/telegram/connect", response_model=ChannelOut)

@@ -109,6 +109,20 @@ export default function Products() {
   const columns = [
     { title: t('products.productName'), dataIndex: 'name', ellipsis: true },
     {
+      title: t('products.sku'),
+      dataIndex: 'sku',
+      ellipsis: true,
+      width: 120,
+      render: (v) => v || '-',
+    },
+    {
+      title: t('products.category'),
+      dataIndex: 'category',
+      ellipsis: true,
+      width: 140,
+      render: (v) => v || '-',
+    },
+    {
       title: t('products.description'),
       dataIndex: 'description',
       ellipsis: true,
@@ -119,6 +133,12 @@ export default function Products() {
       dataIndex: 'price',
       render: (v) => (v != null ? Number(v).toLocaleString('vi-VN') : '-'),
       width: 140,
+    },
+    {
+      title: t('products.stockQuantity'),
+      dataIndex: 'stock_quantity',
+      width: 120,
+      render: (v) => (v != null ? v : '-'),
     },
     {
       title: t('common.status'),
@@ -216,6 +236,12 @@ export default function Products() {
           >
             <Input placeholder={t('products.namePlaceholder')} />
           </Form.Item>
+          <Form.Item name="sku" label={t('products.sku')}>
+            <Input placeholder={t('products.skuPlaceholder')} />
+          </Form.Item>
+          <Form.Item name="category" label={t('products.category')}>
+            <Input placeholder={t('products.categoryPlaceholder')} />
+          </Form.Item>
           <Form.Item name="description" label={t('products.descriptionLabel')}>
             <Input.TextArea
               placeholder={t('products.descriptionPlaceholder')}
@@ -229,6 +255,14 @@ export default function Products() {
               min={0}
               formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
               parser={(value) => value.replace(/,/g, '')}
+            />
+          </Form.Item>
+          <Form.Item name="stock_quantity" label={t('products.stockQuantity')}>
+            <InputNumber
+              style={{ width: '100%' }}
+              placeholder="VD: 12"
+              min={0}
+              precision={0}
             />
           </Form.Item>
           <Form.Item name="status" label={t('common.status')}>

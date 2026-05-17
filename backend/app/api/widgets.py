@@ -47,6 +47,7 @@ class SendMessageRequest(BaseModel):
 def _message_payload(message: Message) -> dict:
     return {
         "id": str(message.id),
+        "conversation_id": str(message.conversation_id),
         "sender_type": message.sender_type,
         "content": message.content,
         "created_at": message.created_at.isoformat(),

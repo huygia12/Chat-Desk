@@ -1,4 +1,5 @@
 import logging
+import uuid
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.encoders import jsonable_encoder
@@ -6,7 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from app.api import auth, users, channels, contacts, conversations, messages, products, webhooks, admin, widgets, employees, labels, saved_replies, assignments, files
+from app.api import auth, users, channels, contacts, conversations, messages, products, webhooks, admin, widgets, employees, labels, saved_replies, assignments, files, ai_assistant
 from app.websocket.manager import manager
 from app.config import get_settings
 from app.i18n import (
@@ -131,6 +132,7 @@ app.include_router(labels.router)
 app.include_router(saved_replies.router)
 app.include_router(assignments.router)
 app.include_router(files.router)
+app.include_router(ai_assistant.router)
 app.include_router(webhooks.router)
 app.include_router(widgets.router)
 app.include_router(employees.router)
@@ -156,10 +158,12 @@ async def widget_websocket_endpoint(
     websocket: WebSocket,
     widget_id: str,
     widget_secret: str,
+    conversation_id: uuid.UUID | None = None,
 ):
     from sqlalchemy import select
     from app.database import async_session
     from app.models.channel import Channel
+    from app.models.conversation import Conversation
 
     async with async_session() as db:
         result = await db.execute(
@@ -171,14 +175,35 @@ async def widget_websocket_endpoint(
         )
         channel = result.scalar_one_or_none()
 
-    if not channel:
-        logger.warning(f"Widget WS rejected: invalid widget_id={widget_id}")
-        await websocket.close(code=4001)
-        return
+        if not channel:
+            logger.warning(f"Widget WS rejected: invalid widget_id={widget_id}")
+            await websocket.close(code=4001)
+            return
 
-    ws_key = f"widget:{widget_id}"
+        if not conversation_id:
+            logger.warning(f"Widget WS rejected: missing conversation_id for widget_id={widget_id}")
+            await websocket.close(code=4002)
+            return
+
+        conv_result = await db.execute(
+            select(Conversation.id).where(
+                Conversation.id == conversation_id,
+                Conversation.channel_id == channel.id,
+                Conversation.platform == "widget",
+            )
+        )
+        if not conv_result.scalar_one_or_none():
+            logger.warning(
+                "Widget WS rejected: conversation_id=%s does not belong to widget_id=%s",
+                conversation_id,
+                widget_id,
+            )
+            await websocket.close(code=4003)
+            return
+
+    ws_key = f"widget:{widget_id}:{conversation_id}"
     await manager.connect(ws_key, websocket)
-    logger.info(f"Widget WebSocket connected: {widget_id}")
+    logger.info(f"Widget WebSocket connected: {widget_id} conversation={conversation_id}")
     try:
         while True:
             # Keep alive — widget may send ping text
@@ -186,7 +211,7 @@ async def widget_websocket_endpoint(
             logger.debug(f"Widget WS ping from {widget_id}: {data}")
     except WebSocketDisconnect:
         manager.disconnect(ws_key, websocket)
-        logger.info(f"Widget WebSocket disconnected: {widget_id}")
+        logger.info(f"Widget WebSocket disconnected: {widget_id} conversation={conversation_id}")
 
 
 @app.get("/")

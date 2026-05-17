@@ -6,10 +6,35 @@ import {
   MessageOutlined,
   PaperClipOutlined,
   FileOutlined,
+  MenuOutlined,
+  UserOutlined,
+  MailOutlined,
 } from "@ant-design/icons";
 import { useI18n } from "../i18n/useI18n";
 import MessageMarkdown from "./MessageMarkdown";
 import "../styles/widget.css";
+
+const getWidgetApiUrl = () =>
+  (
+    window.__chatdesk_api_url__ ||
+    import.meta.env.VITE_API_URL ||
+    `${window.location.protocol}//${window.location.host}`
+  ).replace(/\/$/, "");
+
+const resolveWidgetAttachmentUrl = (url) => {
+  if (!url) return url;
+
+  const apiUrl = getWidgetApiUrl();
+  try {
+    const parsed = new URL(url, apiUrl);
+    if (parsed.pathname.startsWith("/api/files/")) {
+      return `${apiUrl}${parsed.pathname}${parsed.search}`;
+    }
+    return parsed.href;
+  } catch {
+    return url;
+  }
+};
 
 export default function WidgetChat({
   widgetId,
@@ -30,6 +55,7 @@ export default function WidgetChat({
   // Form state for visitor info (replaces prompt() which is blocked in cross-origin iframes)
   const [nameInput, setNameInput] = useState("");
   const [emailInput, setEmailInput] = useState("");
+  const [profileOpen, setProfileOpen] = useState(false);
   const messagesEndRef = useRef(null);
   const wsRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -78,17 +104,19 @@ export default function WidgetChat({
     }
   };
 
+  const visitorInitial = (visitorInfo?.name || businessName || "C").trim().charAt(0).toUpperCase();
+
   // Connect WebSocket to receive real-time replies from business/admin
   // Only after we have a conversationId (i.e., first message sent)
   useEffect(() => {
     if (!conversationId || !widgetId || !widgetSecret) return;
 
-    const apiUrl =
-      window.__chatdesk_api_url__ ||
-      import.meta.env.VITE_API_URL ||
-      `${window.location.protocol}//${window.location.host}`;
+    const apiUrl = getWidgetApiUrl();
     const wsBase = apiUrl.replace(/^http:/, "ws:").replace(/^https:/, "wss:");
-    const wsUrl = `${wsBase}/ws/widget/${widgetId}?widget_secret=${encodeURIComponent(widgetSecret)}`;
+    const wsUrl =
+      `${wsBase}/ws/widget/${widgetId}` +
+      `?widget_secret=${encodeURIComponent(widgetSecret)}` +
+      `&conversation_id=${encodeURIComponent(conversationId)}`;
 
     let ws;
     let reconnectTimer;
@@ -104,6 +132,10 @@ export default function WidgetChat({
           const data = JSON.parse(event.data);
           if (data.type === "new_message") {
             const msg = data.message;
+            const incomingConversationId = data.conversation_id || msg.conversation_id;
+            if (incomingConversationId && String(incomingConversationId) !== String(conversationId)) {
+              return;
+            }
             setMessages((prev) => {
               if (prev.some((m) => m.id === msg.id)) return prev;
               return [
@@ -146,10 +178,7 @@ export default function WidgetChat({
   useEffect(() => {
     if (!isReturningVisitor || !visitorInfo || !widgetId || !widgetSecret) return;
 
-    const apiUrl =
-      window.__chatdesk_api_url__ ||
-      import.meta.env.VITE_API_URL ||
-      `${window.location.protocol}//${window.location.host}`;
+    const apiUrl = getWidgetApiUrl();
 
     fetch(
       `${apiUrl}/api/widgets/${widgetId}/history` +
@@ -191,10 +220,7 @@ export default function WidgetChat({
     setLoading(true);
 
     try {
-      const apiUrl =
-        window.__chatdesk_api_url__ ||
-        import.meta.env.VITE_API_URL ||
-        `${window.location.protocol}//${window.location.host}`;
+      const apiUrl = getWidgetApiUrl();
 
       const response = await fetch(`${apiUrl}/api/widgets/send`, {
         method: "POST",
@@ -269,10 +295,7 @@ export default function WidgetChat({
 
     setLoading(true);
     try {
-      const apiUrl =
-        window.__chatdesk_api_url__ ||
-        import.meta.env.VITE_API_URL ||
-        `${window.location.protocol}//${window.location.host}`;
+      const apiUrl = getWidgetApiUrl();
 
       const formData = new FormData();
       formData.append("visitor_id", visitorInfo.id);
@@ -382,13 +405,14 @@ export default function WidgetChat({
 
     const fileName = msg.attachment_filename || msg.content || "attachment";
     const isImage = msg.attachment_kind === "image" || msg.attachment_mime_type?.startsWith("image/");
+    const attachmentUrl = resolveWidgetAttachmentUrl(msg.attachment_url);
 
     return (
       <>
         {msg.content && msg.content !== fileName && <MessageMarkdown>{msg.content}</MessageMarkdown>}
-        <a className="widget-attachment" href={msg.attachment_url} target="_blank" rel="noreferrer">
+        <a className="widget-attachment" href={attachmentUrl} target="_blank" rel="noreferrer">
           {isImage ? (
-            <img src={msg.attachment_url} alt={fileName} className="widget-attachment-image" />
+            <img src={attachmentUrl} alt={fileName} className="widget-attachment-image" />
           ) : (
             <span className="widget-attachment-file">
               <FileOutlined />
@@ -404,10 +428,40 @@ export default function WidgetChat({
   const renderChatPanel = () => (
     <>
       <div className="widget-header">
-        <div className="widget-title">{businessName}</div>
-        <button className="widget-close" onClick={handleClose} title={t("widget.closeChat")}>
-          <CloseOutlined />
-        </button>
+        <div className="widget-brand">
+          <div className="widget-brand-avatar">{visitorInitial}</div>
+          <div>
+            <div className="widget-title">{businessName}</div>
+            <div className="widget-subtitle">{t("widget.chatWithUs")}</div>
+          </div>
+        </div>
+        <div className="widget-header-actions">
+          <button
+            className={`widget-header-button ${profileOpen ? "widget-header-button-active" : ""}`}
+            onClick={() => setProfileOpen((value) => !value)}
+            title={t("widget.profileMenu")}
+            type="button"
+          >
+            <MenuOutlined />
+          </button>
+          <button className="widget-header-button" onClick={handleClose} title={t("widget.closeChat")} type="button">
+            <CloseOutlined />
+          </button>
+        </div>
+        {profileOpen && visitorInfo && (
+          <div className="widget-profile-popover">
+            <div className="widget-profile-row">
+              <UserOutlined />
+              <span>{visitorInfo.name}</span>
+            </div>
+            {visitorInfo.email && (
+              <div className="widget-profile-row">
+                <MailOutlined />
+                <span>{visitorInfo.email}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="widget-messages">
@@ -419,7 +473,12 @@ export default function WidgetChat({
           messages.map((msg) => (
             <div
               key={msg.id}
-              className={`widget-message widget-message-${msg.sender}`}
+              className={`widget-message widget-message-${msg.sender} ${
+                msg.attachment_url &&
+                (msg.attachment_kind === "image" || msg.attachment_mime_type?.startsWith("image/"))
+                  ? "widget-message-image"
+                  : ""
+              }`}
             >
               <div className="widget-message-bubble">{renderMessageContent(msg)}</div>
               <div className="widget-message-time">
@@ -442,6 +501,7 @@ export default function WidgetChat({
           style={{ display: "none" }}
         />
         <Button
+          className="widget-attach-button"
           icon={<PaperClipOutlined />}
           onClick={() => fileInputRef.current?.click()}
           disabled={loading}
@@ -456,6 +516,7 @@ export default function WidgetChat({
           style={{ resize: "none" }}
         />
         <Button
+          className="widget-send-button"
           type="primary"
           icon={<SendOutlined />}
           onClick={handleSendMessage}

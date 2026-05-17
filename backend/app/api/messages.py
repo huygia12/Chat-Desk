@@ -120,9 +120,10 @@ async def notify_message(conversation: Conversation, message: Message) -> None:
 
     if conversation.platform == "widget" and conversation.channel and conversation.channel.widget_id:
         await manager.send_message(
-            f"widget:{conversation.channel.widget_id}",
+            f"widget:{conversation.channel.widget_id}:{conversation.id}",
             {
                 "type": "new_message",
+                "conversation_id": str(conversation.id),
                 "message": payload,
             },
         )

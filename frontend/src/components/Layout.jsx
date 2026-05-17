@@ -24,6 +24,7 @@ import { useChatStore } from "../store/chatStore";
 import { useLanguageStore } from "../store/languageStore";
 import { useThemeStore } from "../store/themeStore";
 import { connectWebSocket, disconnectWebSocket } from "../utils/websocket";
+import AIAssistantModal from "./AIAssistantModal";
 
 const { Header, Sider, Content } = AntLayout;
 
@@ -191,6 +192,7 @@ export default function Layout() {
         >
           <Typography.Text strong>{displayName}</Typography.Text>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <AIAssistantModal />
             <Tooltip title={t("language.toggleTooltip")}>
               <button
                 type="button"

@@ -1,6 +1,15 @@
+.widget-page-root,
+.widget-page-root body,
+.widget-page-root #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
 .widget-page {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   position: relative;
   overflow: hidden;
   font-family:
@@ -12,7 +21,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   background: #fafafa;
   font-size: 16px;
   color: #666;
@@ -23,7 +32,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   background: #fafafa;
   font-size: 16px;
   color: #666;

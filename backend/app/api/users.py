@@ -19,11 +19,24 @@ async def update_profile(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    if data.business_name is not None:
+    update_fields = data.model_fields_set
+    if "business_name" in update_fields:
         current_user.business_name = data.business_name
-    if data.business_description is not None:
+    if "business_description" in update_fields:
         current_user.business_description = data.business_description
-    if data.phone is not None:
+    if "store_address" in update_fields:
+        current_user.store_address = data.store_address
+    if "opening_hours" in update_fields:
+        current_user.opening_hours = data.opening_hours
+    if "shipping_policy" in update_fields:
+        current_user.shipping_policy = data.shipping_policy
+    if "warranty_policy" in update_fields:
+        current_user.warranty_policy = data.warranty_policy
+    if "payment_methods" in update_fields:
+        current_user.payment_methods = data.payment_methods
+    if "hotline" in update_fields:
+        current_user.hotline = data.hotline
+    if "phone" in update_fields:
         current_user.phone = data.phone
 
     await db.flush()

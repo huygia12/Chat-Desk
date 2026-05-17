@@ -9,6 +9,12 @@ class UserOut(BaseModel):
     role: str
     business_name: str | None = None
     business_description: str | None = None
+    store_address: str | None = None
+    opening_hours: str | None = None
+    shipping_policy: str | None = None
+    warranty_policy: str | None = None
+    payment_methods: str | None = None
+    hotline: str | None = None
     phone: str | None = None
     full_name: str | None = None
     business_id: uuid.UUID | None = None
@@ -22,6 +28,12 @@ class UserOut(BaseModel):
 class UserUpdate(BaseModel):
     business_name: str | None = None
     business_description: str | None = None
+    store_address: str | None = None
+    opening_hours: str | None = None
+    shipping_policy: str | None = None
+    warranty_policy: str | None = None
+    payment_methods: str | None = None
+    hotline: str | None = None
     phone: str | None = None
 
 

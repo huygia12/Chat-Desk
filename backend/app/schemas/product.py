@@ -5,16 +5,22 @@ from pydantic import BaseModel
 
 class ProductCreate(BaseModel):
     name: str
+    sku: str | None = None
+    category: str | None = None
     description: str | None = None
     price: float | None = None
+    stock_quantity: int | None = None
     status: str = "available"
     extra_info: dict | None = None
 
 
 class ProductUpdate(BaseModel):
     name: str | None = None
+    sku: str | None = None
+    category: str | None = None
     description: str | None = None
     price: float | None = None
+    stock_quantity: int | None = None
     status: str | None = None
     extra_info: dict | None = None
 
@@ -23,8 +29,11 @@ class ProductOut(BaseModel):
     id: uuid.UUID
     business_id: uuid.UUID
     name: str
+    sku: str | None = None
+    category: str | None = None
     description: str | None = None
     price: float | None = None
+    stock_quantity: int | None = None
     status: str
     extra_info: dict | None = None
     created_at: datetime

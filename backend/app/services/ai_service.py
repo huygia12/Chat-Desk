@@ -1,4 +1,5 @@
 import logging
+import json
 from groq import AsyncGroq
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -32,10 +33,30 @@ async def _retrieve_relevant_products(
         return []
 
     # Fetch full product rows from PostgreSQL
-    result = await db.execute(
-        select(Product).where(Product.id.in_(product_ids))
-    )
-    return result.scalars().all()
+    result = await db.execute(select(Product).where(Product.id.in_(product_ids)))
+    products_by_id = {str(product.id): product for product in result.scalars().all()}
+    return [products_by_id[product_id] for product_id in product_ids if product_id in products_by_id]
+
+
+def _format_product_for_ai(product: Product, index: int | None = None) -> str:
+    prefix = f"{index}. " if index is not None else ""
+    line = f"{prefix}{product.name}"
+    if product.sku:
+        line += f" - SKU: {product.sku}"
+    if product.category:
+        line += f" - Danh mục: {product.category}"
+    if product.description:
+        line += f" - {product.description}"
+    if product.price is not None:
+        line += f" - Giá: {product.price:,.0f} VND"
+    line += f" - {'Còn hàng' if product.status == 'available' else 'Hết hàng'}"
+    if product.stock_quantity is not None:
+        line += f" - Tồn kho: {product.stock_quantity}"
+    else:
+        line += " - Tồn kho: không có thông tin số lượng"
+    if product.extra_info:
+        line += f" - Thông tin thêm: {json.dumps(product.extra_info, ensure_ascii=False, sort_keys=True)}"
+    return line
 
 
 async def _retrieve_products_without_vector_search(
@@ -70,6 +91,23 @@ async def _get_business_info(db: AsyncSession, business_id) -> User | None:
     return result.scalar_one_or_none()
 
 
+def _format_business_context_for_customer_ai(business: User | None) -> str:
+    if not business:
+        return ""
+
+    rows = [
+        ("Mô tả cửa hàng", business.business_description),
+        ("Địa chỉ", business.store_address),
+        ("Giờ mở cửa", business.opening_hours),
+        ("Chính sách vận chuyển", business.shipping_policy),
+        ("Chính sách bảo hành/đổi trả", business.warranty_policy),
+        ("Phương thức thanh toán", business.payment_methods),
+        ("Hotline", business.hotline or business.phone),
+    ]
+    lines = [f"- {label}: {value}" for label, value in rows if value]
+    return "\n".join(lines)
+
+
 async def generate_ai_response(
     db: AsyncSession,
     conversation: Conversation,
@@ -80,7 +118,7 @@ async def generate_ai_response(
         # 1. Get business info
         business = await _get_business_info(db, conversation.business_id)
         business_name = business.business_name or "Cửa hàng" if business else "Cửa hàng"
-        business_desc = business.business_description or "" if business else ""
+        business_context = _format_business_context_for_customer_ai(business)
 
         # 2. Retrieve relevant products (RAG). If Milvus is temporarily
         # unavailable, keep the AI reply working without product context.
@@ -97,17 +135,7 @@ async def generate_ai_response(
 
         product_context = ""
         if products:
-            product_lines = []
-            for i, p in enumerate(products, 1):
-                line = f"{i}. {p.name}"
-                if p.description:
-                    line += f" - {p.description}"
-                if p.price is not None:
-                    line += f" - Giá: {p.price:,.0f} VND"
-                line += f" - {'Còn hàng' if p.status == 'available' else 'Hết hàng'}"
-                if p.extra_info:
-                    line += f" - Thông tin thêm: {p.extra_info}"
-                product_lines.append(line)
+            product_lines = [_format_product_for_ai(p, i) for i, p in enumerate(products, 1)]
             product_context = "\n".join(product_lines)
 
         # 3. Get chat history
@@ -115,7 +143,7 @@ async def generate_ai_response(
 
         # 4. Build messages for LLM
         system_prompt = f"""Bạn là trợ lý bán hàng AI của "{business_name}".
-{f"Mô tả cửa hàng: {business_desc}" if business_desc else ""}
+{business_context}
 
 Nhiệm vụ:
 - Trả lời câu hỏi khách hàng về sản phẩm một cách thân thiện, chính xác.

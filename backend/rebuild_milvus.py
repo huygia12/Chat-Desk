@@ -28,11 +28,17 @@ logger = logging.getLogger(__name__)
 
 def _build_product_text(product: Product) -> str:
     parts = [product.name]
+    if product.sku:
+        parts.append(f"SKU: {product.sku}")
+    if product.category:
+        parts.append(f"Danh muc: {product.category}")
     if product.description:
         parts.append(product.description)
     if product.price is not None:
         parts.append(f"Gia: {product.price:,.0f} VND")
     parts.append(f"Tinh trang: {'Con hang' if product.status == 'available' else 'Het hang'}")
+    if product.stock_quantity is not None:
+        parts.append(f"So luong ton kho: {product.stock_quantity}")
     if product.extra_info:
         parts.append(f"Thong tin them: {product.extra_info}")
     return " - ".join(parts)

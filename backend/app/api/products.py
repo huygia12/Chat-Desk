@@ -1,3 +1,4 @@
+import json
 import uuid
 import logging
 from fastapi import APIRouter, Depends, HTTPException
@@ -16,14 +17,38 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/products", tags=["products"])
 
 
-def _build_product_text(name: str, description: str | None, price: float | None, status: str) -> str:
+def _format_extra_info(extra_info: dict | None) -> str | None:
+    if not extra_info:
+        return None
+    return json.dumps(extra_info, ensure_ascii=False, sort_keys=True)
+
+
+def _build_product_text(
+    name: str,
+    description: str | None,
+    price: float | None,
+    status: str,
+    extra_info: dict | None = None,
+    sku: str | None = None,
+    category: str | None = None,
+    stock_quantity: int | None = None,
+) -> str:
     """Build text for embedding from product fields."""
     parts = [name]
+    if sku:
+        parts.append(f"SKU: {sku}")
+    if category:
+        parts.append(f"Danh mục: {category}")
     if description:
         parts.append(description)
     if price is not None:
         parts.append(f"Giá: {price:,.0f} VND")
     parts.append(f"Tình trạng: {'Còn hàng' if status == 'available' else 'Hết hàng'}")
+    if stock_quantity is not None:
+        parts.append(f"Số lượng tồn kho: {stock_quantity}")
+    formatted_extra = _format_extra_info(extra_info)
+    if formatted_extra:
+        parts.append(f"Thông tin thêm: {formatted_extra}")
     return " - ".join(parts)
 
 
@@ -47,8 +72,11 @@ async def create_product(
     product = Product(
         business_id=current_user.id,
         name=data.name,
+        sku=data.sku,
+        category=data.category,
         description=data.description,
         price=data.price,
+        stock_quantity=data.stock_quantity,
         status=data.status,
         extra_info=data.extra_info,
     )
@@ -57,7 +85,16 @@ async def create_product(
     await db.refresh(product)
 
     # Store embedding in Milvus
-    text = _build_product_text(data.name, data.description, data.price, data.status)
+    text = _build_product_text(
+        data.name,
+        data.description,
+        data.price,
+        data.status,
+        data.extra_info,
+        data.sku,
+        data.category,
+        data.stock_quantity,
+    )
     embedding = await get_embedding(text)
     upsert_embedding(str(product.id), str(current_user.id), embedding)
 
@@ -78,19 +115,35 @@ async def update_product(
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    if data.name is not None:
+    update_fields = data.model_fields_set
+    if "name" in update_fields:
         product.name = data.name
-    if data.description is not None:
+    if "sku" in update_fields:
+        product.sku = data.sku
+    if "category" in update_fields:
+        product.category = data.category
+    if "description" in update_fields:
         product.description = data.description
-    if data.price is not None:
+    if "price" in update_fields:
         product.price = data.price
-    if data.status is not None:
+    if "stock_quantity" in update_fields:
+        product.stock_quantity = data.stock_quantity
+    if "status" in update_fields:
         product.status = data.status
-    if data.extra_info is not None:
+    if "extra_info" in update_fields:
         product.extra_info = data.extra_info
 
     # Re-generate embedding in Milvus
-    text = _build_product_text(product.name, product.description, product.price, product.status)
+    text = _build_product_text(
+        product.name,
+        product.description,
+        product.price,
+        product.status,
+        product.extra_info,
+        product.sku,
+        product.category,
+        product.stock_quantity,
+    )
     embedding = await get_embedding(text)
     upsert_embedding(str(product.id), str(current_user.id), embedding)
 
@@ -134,8 +187,11 @@ async def import_products(
         product = Product(
             business_id=current_user.id,
             name=data.name,
+            sku=data.sku,
+            category=data.category,
             description=data.description,
             price=data.price,
+            stock_quantity=data.stock_quantity,
             status=data.status,
             extra_info=data.extra_info,
         )
@@ -145,7 +201,16 @@ async def import_products(
 
         # Store embedding in Milvus
         try:
-            text = _build_product_text(data.name, data.description, data.price, data.status)
+            text = _build_product_text(
+                data.name,
+                data.description,
+                data.price,
+                data.status,
+                data.extra_info,
+                data.sku,
+                data.category,
+                data.stock_quantity,
+            )
             embedding = await get_embedding(text)
             upsert_embedding(str(product.id), str(current_user.id), embedding)
         except Exception as e:

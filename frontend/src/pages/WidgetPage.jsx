@@ -14,6 +14,15 @@ export default function WidgetPage() {
   const configReceivedRef = useRef(false);
   const { t } = useI18n();
 
+  useEffect(() => {
+    document.documentElement.classList.add("widget-page-root");
+    document.body.classList.add("widget-page-root");
+    return () => {
+      document.documentElement.classList.remove("widget-page-root");
+      document.body.classList.remove("widget-page-root");
+    };
+  }, []);
+
   // Get widget secret from parent window or request it
   useEffect(() => {
     if (!widgetId) {

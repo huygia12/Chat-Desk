@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { List, Avatar, Typography, Input, Button, Spin, Switch, Badge, Empty, Select, message, Segmented, theme, Space, Tooltip } from 'antd'
+import { List, Avatar, Typography, Input, Button, Spin, Switch, Badge, Empty, Select, message, Segmented, theme, Space, Tooltip, Popover } from 'antd'
 import {
   SendOutlined,
   FacebookOutlined,
@@ -10,11 +10,13 @@ import {
   InfoCircleOutlined,
   PaperClipOutlined,
   FileOutlined,
+  SmileOutlined,
 } from '@ant-design/icons'
 import { useChatStore } from '../store/chatStore'
 import { useAuthStore } from '../store/authStore'
 import { useI18n } from '../i18n/useI18n'
 import CustomerLabel from '../components/CustomerLabel'
+import MessageMarkdown from '../components/MessageMarkdown'
 import client from '../api/client'
 import dayjs from 'dayjs'
 
@@ -23,6 +25,24 @@ const CONVERSATION_MAX_WIDTH = 420
 const CONVERSATION_WIDTH_STORAGE_KEY = 'chatdesk_conversation_list_width'
 const CONVERSATION_DETAIL_STORAGE_KEY = 'chatdesk_conversation_detail_open'
 const MESSAGE_GROUP_WINDOW_MINUTES = 3
+const EMOJI_OPTIONS = [
+  '😀',
+  '😄',
+  '😊',
+  '😍',
+  '👍',
+  '🙏',
+  '🎉',
+  '🔥',
+  '❤️',
+  '✅',
+  '🤝',
+  '💬',
+  '📌',
+  '⭐',
+  '💡',
+  '🚀',
+]
 const WIDGET_AVATAR_STYLE = {
   background: '#f0f7ff',
   color: '#1677ff',
@@ -86,8 +106,20 @@ export default function Chat() {
   const { token } = theme.useToken()
   const chatContainerRef = useRef(null)
   const resizingConversationRef = useRef(false)
+  const messagesContainerRef = useRef(null)
   const messagesEndRef = useRef(null)
   const fileInputRef = useRef(null)
+  const messageInputRef = useRef(null)
+
+  const scrollToLatestMessage = (behavior = 'auto') => {
+    const container = messagesContainerRef.current
+    if (!container) return
+
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior,
+    })
+  }
 
   useEffect(() => {
     fetchConversations()
@@ -98,8 +130,20 @@ export default function Chat() {
   }, [])
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    scrollToLatestMessage('auto')
+
+    const frameId = window.requestAnimationFrame(() => {
+      scrollToLatestMessage('auto')
+    })
+    const timeoutId = window.setTimeout(() => {
+      scrollToLatestMessage('auto')
+    }, 120)
+
+    return () => {
+      window.cancelAnimationFrame(frameId)
+      window.clearTimeout(timeoutId)
+    }
+  }, [activeConversationId, messages.length, messages[messages.length - 1]?.id])
 
   useEffect(() => {
     const handleMouseMove = (event) => {
@@ -242,6 +286,20 @@ export default function Chat() {
   const applySavedReply = (reply) => {
     setInputValue(reply.content)
     setReplyPickerIndex(0)
+  }
+
+  const insertEmoji = (emoji) => {
+    const input = messageInputRef.current?.input
+    const selectionStart = input?.selectionStart ?? inputValue.length
+    const selectionEnd = input?.selectionEnd ?? selectionStart
+    const nextValue = `${inputValue.slice(0, selectionStart)}${emoji}${inputValue.slice(selectionEnd)}`
+
+    setInputValue(nextValue)
+    window.setTimeout(() => {
+      const nextCursor = selectionStart + emoji.length
+      messageInputRef.current?.focus()
+      messageInputRef.current?.input?.setSelectionRange(nextCursor, nextCursor)
+    }, 0)
   }
 
   const handleInputKeyDown = (event) => {
@@ -455,15 +513,62 @@ export default function Chat() {
     </div>
   )
 
+  const isImageAttachmentMessage = (msg) =>
+    Boolean(
+      msg.attachment_url &&
+        (msg.attachment_kind === 'image' || msg.attachment_mime_type?.startsWith('image/')),
+    )
+
   const renderMessageContent = (msg) => {
-    if (!msg.attachment_url) return <div>{msg.content}</div>
+    if (!msg.attachment_url) return <MessageMarkdown>{msg.content}</MessageMarkdown>
 
     const fileName = msg.attachment_filename || msg.content || 'attachment'
-    const isImage = msg.attachment_kind === 'image' || msg.attachment_mime_type?.startsWith('image/')
+    const isImage = isImageAttachmentMessage(msg)
+
+    if (isImage) {
+      return (
+        <div
+          style={{
+            display: 'inline-flex',
+            flexDirection: 'column',
+            alignItems: msg.sender_type === 'contact' ? 'flex-start' : 'flex-end',
+            gap: msg.content && msg.content !== fileName ? 8 : 0,
+            maxWidth: '100%',
+          }}
+        >
+          {msg.content && msg.content !== fileName && <MessageMarkdown>{msg.content}</MessageMarkdown>}
+          <a
+            href={msg.attachment_url}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              display: 'block',
+              width: 200,
+              maxWidth: '100%',
+              lineHeight: 0,
+              flex: '0 0 auto',
+            }}
+          >
+            <img
+              src={msg.attachment_url}
+              alt={fileName}
+              onLoad={() => scrollToLatestMessage('auto')}
+              style={{
+                display: 'block',
+                width: '100%',
+                height: 'auto',
+                borderRadius: 8,
+                objectFit: 'contain',
+              }}
+            />
+          </a>
+        </div>
+      )
+    }
 
     return (
       <div style={{ display: 'grid', gap: msg.content && msg.content !== fileName ? 8 : 0 }}>
-        {msg.content && msg.content !== fileName && <div>{msg.content}</div>}
+        {msg.content && msg.content !== fileName && <MessageMarkdown>{msg.content}</MessageMarkdown>}
         <a
           href={msg.attachment_url}
           target="_blank"
@@ -476,43 +581,91 @@ export default function Chat() {
             color: token.colorText,
           }}
         >
-          {isImage ? (
-            <img
-              src={msg.attachment_url}
-              alt={fileName}
-              style={{
-                maxWidth: 240,
-                maxHeight: 180,
-                borderRadius: 8,
-                objectFit: 'cover',
-              }}
-            />
-          ) : (
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '8px 10px',
-                borderRadius: 8,
-                background: token.colorFillTertiary,
-              }}
-            >
-              <FileOutlined />
-              <Typography.Text ellipsis style={{ maxWidth: 210 }}>
-                {fileName}
-              </Typography.Text>
-            </span>
-          )}
-          {isImage && (
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '8px 10px',
+              borderRadius: 8,
+              background: token.colorFillTertiary,
+            }}
+          >
+            <FileOutlined />
+            <Typography.Text ellipsis style={{ maxWidth: 210 }}>
               {fileName}
             </Typography.Text>
-          )}
+          </span>
         </a>
       </div>
     )
   }
+
+  const getMessageBubbleStyle = (msg) => {
+    const isImageAttachment = isImageAttachmentMessage(msg)
+
+    if (isImageAttachment) {
+      return {
+        maxWidth: 'calc(100% - 28px)',
+        width: 'fit-content',
+        minWidth: 0,
+        padding: 0,
+        borderRadius: 8,
+        background: 'transparent',
+        color: token.colorText,
+        overflow: 'visible',
+      }
+    }
+
+    return {
+      maxWidth: '60%',
+      minWidth: 0,
+      padding: '8px 12px',
+      borderRadius: 18,
+      ...getMessageBubbleRadius(msg),
+      color: token.colorText,
+      background:
+        msg.sender_type === 'contact'
+          ? token.colorFillSecondary
+          : msg.sender_type === 'ai'
+            ? token.colorPrimaryBg
+            : token.colorInfoBg,
+    }
+  }
+
+  const emojiPicker = (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 34px)',
+        gap: 6,
+      }}
+    >
+      {EMOJI_OPTIONS.map((emoji) => (
+        <button
+          key={emoji}
+          type="button"
+          onMouseDown={(event) => {
+            event.preventDefault()
+            insertEmoji(emoji)
+          }}
+          style={{
+            width: 34,
+            height: 34,
+            border: `1px solid ${token.colorBorderSecondary}`,
+            borderRadius: 8,
+            background: token.colorBgContainer,
+            color: token.colorText,
+            cursor: 'pointer',
+            fontSize: 18,
+            lineHeight: '30px',
+          }}
+        >
+          {emoji}
+        </button>
+      ))}
+    </div>
+  )
 
   const renderVisitorInfo = () => {
     const contact = activeConv?.contact
@@ -700,7 +853,10 @@ export default function Chat() {
               </div>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', padding: '16px', background: token.colorBgContainer }}>
+            <div
+              ref={messagesContainerRef}
+              style={{ flex: 1, overflowY: 'auto', padding: '16px', background: token.colorBgContainer }}
+            >
               {loading ? (
                 <div style={{ textAlign: 'center', marginTop: 40 }}>
                   <Spin />
@@ -742,7 +898,10 @@ export default function Chat() {
                         style={{
                           display: 'flex',
                           alignItems: 'flex-end',
-                          gap: 8,
+                          gap: 4,
+                          width: isImageAttachmentMessage(msg) ? 'fit-content' : '100%',
+                          maxWidth: '100%',
+                          minWidth: 0,
                           flexDirection: msg.sender_type === 'contact' ? 'row' : 'row-reverse',
                         }}
                       >
@@ -751,21 +910,7 @@ export default function Chat() {
                         ) : (
                           <div style={{ width: 24, flex: '0 0 24px' }} />
                         )}
-                        <div
-                          style={{
-                            maxWidth: '60%',
-                            padding: '8px 12px',
-                            borderRadius: 18,
-                            ...getMessageBubbleRadius(msg),
-                            color: token.colorText,
-                            background:
-                              msg.sender_type === 'contact'
-                                ? token.colorFillSecondary
-                                : msg.sender_type === 'ai'
-                                  ? token.colorPrimaryBg
-                                  : token.colorInfoBg,
-                          }}
-                        >
+                        <div style={getMessageBubbleStyle(msg)}>
                           {renderMessageContent(msg)}
                         </div>
                       </div>
@@ -870,7 +1015,16 @@ export default function Chat() {
                     size="large"
                   />
                 </Tooltip>
+                <Popover content={emojiPicker} trigger="click" placement="topLeft">
+                  <Button
+                    icon={<SmileOutlined />}
+                    disabled={!activeConversationId || sending}
+                    size="large"
+                    title={t('chat.addEmoji')}
+                  />
+                </Popover>
                 <Input
+                  ref={messageInputRef}
                   placeholder={t('chat.messagePlaceholder')}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}

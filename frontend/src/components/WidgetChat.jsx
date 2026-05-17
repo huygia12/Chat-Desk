@@ -8,6 +8,7 @@ import {
   FileOutlined,
 } from "@ant-design/icons";
 import { useI18n } from "../i18n/useI18n";
+import MessageMarkdown from "./MessageMarkdown";
 import "../styles/widget.css";
 
 export default function WidgetChat({
@@ -377,14 +378,14 @@ export default function WidgetChat({
   );
 
   const renderMessageContent = (msg) => {
-    if (!msg.attachment_url) return msg.content;
+    if (!msg.attachment_url) return <MessageMarkdown>{msg.content}</MessageMarkdown>;
 
     const fileName = msg.attachment_filename || msg.content || "attachment";
     const isImage = msg.attachment_kind === "image" || msg.attachment_mime_type?.startsWith("image/");
 
     return (
       <>
-        {msg.content && msg.content !== fileName && <div>{msg.content}</div>}
+        {msg.content && msg.content !== fileName && <MessageMarkdown>{msg.content}</MessageMarkdown>}
         <a className="widget-attachment" href={msg.attachment_url} target="_blank" rel="noreferrer">
           {isImage ? (
             <img src={msg.attachment_url} alt={fileName} className="widget-attachment-image" />

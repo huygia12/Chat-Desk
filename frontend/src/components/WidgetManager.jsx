@@ -1,31 +1,32 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import {
-  Card,
-  Table,
   Button,
-  Modal,
+  Card,
+  Empty,
   Form,
   Input,
-  message,
+  Modal,
+  Popconfirm,
   Space,
+  Table,
   Tag,
   Tooltip,
-  Popconfirm,
-  Empty,
+  message,
 } from "antd";
 import {
-  PlusOutlined,
+  CheckCircleOutlined,
   CopyOutlined,
   DeleteOutlined,
-  EditOutlined,
-  LinkOutlined,
-  CheckCircleOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
+import dayjs from "dayjs";
 import client from "../api/client";
 import { useI18n } from "../i18n/useI18n";
-import dayjs from "dayjs";
 
-export default function Widgets() {
+const WidgetManager = forwardRef(function WidgetManager(
+  { embedded = false, showCreateButton = true },
+  ref,
+) {
   const [widgets, setWidgets] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -51,12 +52,23 @@ export default function Widgets() {
     fetchWidgets();
   }, []);
 
+  const openCreateModal = () => {
+    setEditingWidget(null);
+    form.resetFields();
+    setIsModalOpen(true);
+  };
+
+  useImperativeHandle(ref, () => ({
+    openCreate: openCreateModal,
+    refresh: fetchWidgets,
+  }));
+
   const handleCreateWidget = async (values) => {
     try {
       const origins = values.allowed_origins
         .split("\n")
-        .map((o) => o.trim())
-        .filter((o) => o);
+        .map((origin) => origin.trim())
+        .filter(Boolean);
 
       if (origins.length === 0) {
         message.error(t("widgets.originRequired"));
@@ -69,7 +81,7 @@ export default function Widgets() {
       });
 
       message.success(t("widgets.createSuccess"));
-      setWidgets([response.data, ...widgets]);
+      setWidgets((current) => [response.data, ...current]);
       setIsModalOpen(false);
       form.resetFields();
     } catch (err) {
@@ -83,7 +95,7 @@ export default function Widgets() {
     try {
       await client.delete(`/api/widgets/${widgetId}`);
       message.success(t("widgets.deleteSuccess"));
-      setWidgets(widgets.filter((w) => w.widget_id !== widgetId));
+      setWidgets((current) => current.filter((widget) => widget.widget_id !== widgetId));
     } catch (err) {
       message.error(
         t("widgets.deleteError", { reason: err.response?.data?.detail || err.message }),
@@ -167,12 +179,12 @@ export default function Widgets() {
               icon={<CopyOutlined />}
               size="small"
               onClick={() => {
-                const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+                const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
                 const embedCode = `<script>
   window.ChatDeskWidget = {
     widgetId: '${record.widget_id}',
     widgetSecret: '${record.widget_secret}',
-    businessName: '${record.page_name || 'Your Business'}',
+    businessName: '${record.page_name || "Your Business"}',
     apiUrl: '${backendUrl}',
   };
 </script>
@@ -189,7 +201,7 @@ export default function Widgets() {
             okText={t("common.delete")}
             cancelText={t("common.cancel")}
           >
-            <Button type="danger" icon={<DeleteOutlined />} size="small" />
+            <Button danger icon={<DeleteOutlined />} size="small" />
           </Popconfirm>
         </Space>
       ),
@@ -197,34 +209,30 @@ export default function Widgets() {
   ];
 
   return (
-    <div style={{ padding: "24px" }}>
-      <Card
-        title="Widgets"
-        extra={
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsModalOpen(true)}
-          >
+    <Card
+      title="Widgets"
+      extra={
+        showCreateButton ? (
+          <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
             {t("widgets.createButton")}
           </Button>
-        }
-        loading={loading}
-      >
-        {widgets.length === 0 ? (
-          <Empty description={t("widgets.empty")} />
-        ) : (
-          <Table
-            columns={columns}
-            dataSource={widgets}
-            rowKey="widget_id"
-            pagination={{ pageSize: 10 }}
-            scroll={{ x: 1000 }}
-          />
-        )}
-      </Card>
+        ) : null
+      }
+      loading={loading}
+      style={embedded ? { marginTop: 24 } : undefined}
+    >
+      {widgets.length === 0 ? (
+        <Empty description={t("widgets.empty")} />
+      ) : (
+        <Table
+          columns={columns}
+          dataSource={widgets}
+          rowKey="widget_id"
+          pagination={{ pageSize: 10 }}
+          scroll={{ x: 1000 }}
+        />
+      )}
 
-      {/* Create Widget Modal */}
       <Modal
         title={editingWidget ? t("widgets.updateTitle") : t("widgets.createTitle")}
         open={isModalOpen}
@@ -270,7 +278,7 @@ export default function Widgets() {
           </Form.Item>
 
           <Card size="small" title={t("widgets.guide")} type="inner">
-            <p style={{ fontSize: "12px", color: "#666" }}>
+            <p style={{ fontSize: 12, color: "#666" }}>
               {t("widgets.guideStep1")}
               <br />
               {t("widgets.guideStep2")}
@@ -282,6 +290,8 @@ export default function Widgets() {
           </Card>
         </Form>
       </Modal>
-    </div>
+    </Card>
   );
-}
+});
+
+export default WidgetManager;

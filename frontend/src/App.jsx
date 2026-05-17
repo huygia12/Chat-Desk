@@ -9,7 +9,6 @@ import Products from "./pages/Products";
 import Settings from "./pages/Settings";
 import AdminDashboard from "./pages/AdminDashboard";
 import WidgetPage from "./pages/WidgetPage";
-import Widgets from "./pages/Widgets";
 import Employees from "./pages/Employees";
 import Labels from "./pages/Labels";
 import EmployeeSettings from "./pages/EmployeeSettings";
@@ -115,14 +114,7 @@ export default function App() {
             </BusinessOnlyRoute>
           }
         />
-        <Route
-          path="widgets"
-          element={
-            <BusinessOnlyRoute>
-              <Widgets />
-            </BusinessOnlyRoute>
-          }
-        />
+        <Route path="widgets" element={<Navigate to="/channels" replace />} />
         <Route
           path="employees"
           element={

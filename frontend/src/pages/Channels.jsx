@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Button,
@@ -24,6 +24,7 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import client from "../api/client";
+import WidgetManager from "../components/WidgetManager";
 import { useI18n } from "../i18n/useI18n";
 import { useChannelStore } from "../store/channelStore";
 
@@ -43,6 +44,7 @@ export default function Channels() {
   const [telegramToken, setTelegramToken] = useState("");
   const [telegramLoading, setTelegramLoading] = useState(false);
   const [platform, setPlatform] = useState("facebook");
+  const widgetManagerRef = useRef(null);
   const [form] = Form.useForm();
   const { t } = useI18n();
 
@@ -212,6 +214,13 @@ export default function Channels() {
             <Button icon={<PlusOutlined />} onClick={() => setManualModalOpen(true)}>
               {t("channels.manualToken")}
             </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => widgetManagerRef.current?.openCreate()}
+            >
+              {t("widgets.createButton")}
+            </Button>
           </Space>
         }
       >
@@ -231,6 +240,8 @@ export default function Channels() {
           locale={{ emptyText: t("channels.empty") }}
         />
       </Card>
+
+      <WidgetManager ref={widgetManagerRef} embedded showCreateButton={false} />
 
       <Modal
         title={t("channels.manualTitle")}

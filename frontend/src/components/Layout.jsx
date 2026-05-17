@@ -3,7 +3,6 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Layout as AntLayout, Button, Menu, Modal, Tag, Tooltip, Typography, theme } from "antd";
 import {
   ApiOutlined,
-  CodeOutlined,
   DashboardOutlined,
   FileTextOutlined,
   LogoutOutlined,
@@ -49,7 +48,6 @@ export default function Layout() {
     { key: "/chat", icon: <MessageOutlined />, label: t("nav.chat") },
     { key: "/channels", icon: <ApiOutlined />, label: t("nav.channels") },
     { key: "/products", icon: <ShoppingOutlined />, label: t("nav.products") },
-    { key: "/widgets", icon: <CodeOutlined />, label: t("nav.widgets") },
     { key: "/labels", icon: <TagsOutlined />, label: t("nav.labels") },
     { key: "/saved-replies", icon: <FileTextOutlined />, label: t("nav.savedReplies") },
     { key: "/assignment-settings", icon: <PartitionOutlined />, label: t("nav.assignmentSettings") },

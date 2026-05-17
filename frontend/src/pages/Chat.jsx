@@ -76,12 +76,15 @@ export default function Chat() {
     assignmentSettings,
     activeConversationId,
     messages,
+    messagesHasMore,
     loading,
+    loadingOlderMessages,
     fetchConversations,
     fetchLabels,
     fetchAssignees,
     fetchAssignmentSettings,
     setActiveConversation,
+    loadOlderMessages,
     sendMessage,
     uploadMessageFile,
     toggleAI,
@@ -110,6 +113,10 @@ export default function Chat() {
   const messagesEndRef = useRef(null)
   const fileInputRef = useRef(null)
   const messageInputRef = useRef(null)
+  const activeConversationRef = useRef(null)
+  const previousFirstMessageIdRef = useRef(null)
+  const previousLastMessageIdRef = useRef(null)
+  const restoreScrollHeightRef = useRef(null)
 
   const scrollToLatestMessage = (behavior = 'auto') => {
     const container = messagesContainerRef.current
@@ -129,21 +136,56 @@ export default function Chat() {
     fetchSavedReplies()
   }, [])
 
-  useEffect(() => {
-    scrollToLatestMessage('auto')
+  const handleMessagesScroll = () => {
+    const container = messagesContainerRef.current
+    if (!container || !activeConversationId || loading || loadingOlderMessages || !messagesHasMore) return
 
-    const frameId = window.requestAnimationFrame(() => {
+    if (container.scrollTop <= 48) {
+      restoreScrollHeightRef.current = container.scrollHeight
+      loadOlderMessages(activeConversationId)
+    }
+  }
+
+  useEffect(() => {
+    const firstMessageId = messages[0]?.id || null
+    const lastMessageId = messages[messages.length - 1]?.id || null
+    const activeConversationChanged = activeConversationRef.current !== activeConversationId
+    const loadedOlderMessages =
+      !activeConversationChanged &&
+      previousFirstMessageIdRef.current &&
+      firstMessageId &&
+      firstMessageId !== previousFirstMessageIdRef.current &&
+      lastMessageId === previousLastMessageIdRef.current
+
+    const restoreOrScroll = () => {
+      const container = messagesContainerRef.current
+      if (!container) return
+
+      if (loadedOlderMessages && restoreScrollHeightRef.current != null) {
+        container.scrollTop = container.scrollHeight - restoreScrollHeightRef.current
+        restoreScrollHeightRef.current = null
+        return
+      }
+
       scrollToLatestMessage('auto')
-    })
-    const timeoutId = window.setTimeout(() => {
-      scrollToLatestMessage('auto')
-    }, 120)
+    }
+
+    restoreOrScroll()
+
+    const frameId = window.requestAnimationFrame(restoreOrScroll)
+    const timeoutId = window.setTimeout(restoreOrScroll, 120)
 
     return () => {
       window.cancelAnimationFrame(frameId)
       window.clearTimeout(timeoutId)
     }
   }, [activeConversationId, messages.length, messages[messages.length - 1]?.id])
+
+  useEffect(() => {
+    activeConversationRef.current = activeConversationId
+    previousFirstMessageIdRef.current = messages[0]?.id || null
+    previousLastMessageIdRef.current = messages[messages.length - 1]?.id || null
+  }, [activeConversationId, messages])
 
   useEffect(() => {
     const handleMouseMove = (event) => {
@@ -855,6 +897,7 @@ export default function Chat() {
 
             <div
               ref={messagesContainerRef}
+              onScroll={handleMessagesScroll}
               style={{ flex: 1, overflowY: 'auto', padding: '16px', background: token.colorBgContainer }}
             >
               {loading ? (
@@ -862,61 +905,68 @@ export default function Chat() {
                   <Spin />
                 </div>
               ) : (
-                groupedMessages.map((msg) => (
-                  <div key={msg.id}>
-                    {msg.showTimeSeparator && (
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          margin: '18px 0 12px',
-                        }}
-                      >
-                        <Typography.Text
-                          type="secondary"
+                <>
+                  {loadingOlderMessages && (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 12px' }}>
+                      <Spin size="small" />
+                    </div>
+                  )}
+                  {groupedMessages.map((msg) => (
+                    <div key={msg.id}>
+                      {msg.showTimeSeparator && (
+                        <div
                           style={{
-                            fontSize: 12,
-                            color: token.colorTextSecondary,
-                            background: token.colorBgContainer,
-                            padding: '0 10px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            margin: '18px 0 12px',
                           }}
                         >
-                          {formatMessageSeparatorTime(msg.created_at)}
-                        </Typography.Text>
-                      </div>
-                    )}
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: msg.sender_type === 'contact' ? 'flex-start' : 'flex-end',
-                        marginTop: msg.startsGroup ? 2 : 2,
-                        marginBottom: msg.endsGroup ? 10 : 2,
-                      }}
-                    >
+                          <Typography.Text
+                            type="secondary"
+                            style={{
+                              fontSize: 12,
+                              color: token.colorTextSecondary,
+                              background: token.colorBgContainer,
+                              padding: '0 10px',
+                            }}
+                          >
+                            {formatMessageSeparatorTime(msg.created_at)}
+                          </Typography.Text>
+                        </div>
+                      )}
                       <div
                         style={{
                           display: 'flex',
-                          alignItems: 'flex-end',
-                          gap: 4,
-                          width: isImageAttachmentMessage(msg) ? 'fit-content' : '100%',
-                          maxWidth: '100%',
-                          minWidth: 0,
-                          flexDirection: msg.sender_type === 'contact' ? 'row' : 'row-reverse',
+                          justifyContent: msg.sender_type === 'contact' ? 'flex-start' : 'flex-end',
+                          marginTop: msg.startsGroup ? 2 : 2,
+                          marginBottom: msg.endsGroup ? 10 : 2,
                         }}
                       >
-                        {msg.endsGroup ? (
-                          getSenderIcon(msg.sender_type)
-                        ) : (
-                          <div style={{ width: 24, flex: '0 0 24px' }} />
-                        )}
-                        <div style={getMessageBubbleStyle(msg)}>
-                          {renderMessageContent(msg)}
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'flex-end',
+                            gap: 4,
+                            width: isImageAttachmentMessage(msg) ? 'fit-content' : '100%',
+                            maxWidth: '100%',
+                            minWidth: 0,
+                            flexDirection: msg.sender_type === 'contact' ? 'row' : 'row-reverse',
+                          }}
+                        >
+                          {msg.endsGroup ? (
+                            getSenderIcon(msg.sender_type)
+                          ) : (
+                            <div style={{ width: 24, flex: '0 0 24px' }} />
+                          )}
+                          <div style={getMessageBubbleStyle(msg)}>
+                            {renderMessageContent(msg)}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+                </>
               )}
               <div ref={messagesEndRef} />
             </div>

@@ -1,6 +1,24 @@
 import { create } from 'zustand'
 import client from '../api/client'
 
+const MESSAGE_PAGE_SIZE = 50
+
+const normalizeMessagePage = (payload) => {
+  if (Array.isArray(payload)) {
+    return {
+      items: payload,
+      has_more: false,
+      next_cursor: null,
+    }
+  }
+
+  return {
+    items: payload?.items || [],
+    has_more: Boolean(payload?.has_more),
+    next_cursor: payload?.next_cursor || null,
+  }
+}
+
 export const useChatStore = create((set, get) => ({
   conversations: [],
   labels: [],
@@ -8,7 +26,10 @@ export const useChatStore = create((set, get) => ({
   assignmentSettings: null,
   activeConversationId: null,
   messages: [],
+  messagesHasMore: false,
+  messagesNextCursor: null,
   loading: false,
+  loadingOlderMessages: false,
   labelsLoading: false,
   assigneesLoading: false,
 
@@ -61,17 +82,80 @@ export const useChatStore = create((set, get) => ({
 
   setActiveConversation: async (conversationId) => {
     if (!conversationId) {
-      set({ activeConversationId: null, messages: [] })
+      set({
+        activeConversationId: null,
+        messages: [],
+        messagesHasMore: false,
+        messagesNextCursor: null,
+        loadingOlderMessages: false,
+      })
       return
     }
-    set({ activeConversationId: conversationId, messages: [], loading: true })
+    set({
+      activeConversationId: conversationId,
+      messages: [],
+      messagesHasMore: false,
+      messagesNextCursor: null,
+      loadingOlderMessages: false,
+      loading: true,
+    })
     try {
-      const res = await client.get(`/api/conversations/${conversationId}/messages`)
-      set({ messages: res.data })
+      const res = await client.get(`/api/conversations/${conversationId}/messages`, {
+        params: { limit: MESSAGE_PAGE_SIZE },
+      })
+      const page = normalizeMessagePage(res.data)
+      if (String(get().activeConversationId) !== String(conversationId)) return
+      set({
+        messages: page.items,
+        messagesHasMore: page.has_more,
+        messagesNextCursor: page.next_cursor,
+      })
     } catch (err) {
       console.error('Failed to fetch messages:', err)
     } finally {
       set({ loading: false })
+    }
+  },
+
+  loadOlderMessages: async (conversationId) => {
+    const { activeConversationId, messagesNextCursor, messagesHasMore, loadingOlderMessages } = get()
+    if (
+      !conversationId ||
+      String(activeConversationId) !== String(conversationId) ||
+      !messagesHasMore ||
+      !messagesNextCursor ||
+      loadingOlderMessages
+    ) {
+      return false
+    }
+
+    set({ loadingOlderMessages: true })
+    try {
+      const res = await client.get(`/api/conversations/${conversationId}/messages`, {
+        params: { limit: MESSAGE_PAGE_SIZE, before: messagesNextCursor },
+      })
+      const page = normalizeMessagePage(res.data)
+      if (String(get().activeConversationId) !== String(conversationId)) {
+        set({ loadingOlderMessages: false })
+        return false
+      }
+
+      set((state) => {
+        const existingIds = new Set(state.messages.map((msg) => String(msg.id)))
+        const olderMessages = page.items.filter((msg) => !existingIds.has(String(msg.id)))
+
+        return {
+          messages: [...olderMessages, ...state.messages],
+          messagesHasMore: page.has_more,
+          messagesNextCursor: page.next_cursor,
+          loadingOlderMessages: false,
+        }
+      })
+      return true
+    } catch (err) {
+      console.error('Failed to fetch older messages:', err)
+      set({ loadingOlderMessages: false })
+      return false
     }
   },
 

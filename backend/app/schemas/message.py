@@ -21,3 +21,9 @@ class MessageOut(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class MessagePageOut(BaseModel):
+    items: list[MessageOut]
+    has_more: bool
+    next_cursor: uuid.UUID | None = None

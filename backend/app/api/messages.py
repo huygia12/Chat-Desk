@@ -3,13 +3,13 @@ import logging
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 from app.database import get_db
 from app.models.user import User
 from app.models.conversation import Conversation
 from app.models.message import Message
 from app.models.channel import Channel
-from app.schemas.message import MessageCreate, MessageOut
+from app.schemas.message import MessageCreate, MessageOut, MessagePageOut
 from app.api.deps import get_current_business_or_employee, get_effective_business_id
 from app.services.facebook_service import send_facebook_attachment, send_facebook_message
 from app.services.file_storage import save_upload_file
@@ -128,13 +128,13 @@ async def notify_message(conversation: Conversation, message: Message) -> None:
         )
 
 
-@router.get("/{conversation_id}/messages", response_model=list[MessageOut])
+@router.get("/{conversation_id}/messages", response_model=MessagePageOut)
 async def get_messages(
     conversation_id: uuid.UUID,
     current_user: User = Depends(get_current_business_or_employee),
     db: AsyncSession = Depends(get_db),
-    limit: int = 50,
-    offset: int = 0,
+    limit: int = Query(50, ge=1, le=100),
+    before: uuid.UUID | None = Query(None),
 ):
     business_id = get_effective_business_id(current_user)
     # Verify conversation belongs to this business
@@ -149,14 +149,38 @@ async def get_messages(
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
 
+    filters = [Message.conversation_id == conversation_id]
+    if before:
+        cursor_result = await db.execute(
+            select(Message).where(Message.id == before, Message.conversation_id == conversation_id)
+        )
+        cursor_message = cursor_result.scalar_one_or_none()
+        if not cursor_message:
+            raise HTTPException(status_code=400, detail="Invalid message cursor")
+
+        filters.append(
+            or_(
+                Message.created_at < cursor_message.created_at,
+                and_(Message.created_at == cursor_message.created_at, Message.id < cursor_message.id),
+            )
+        )
+
     result = await db.execute(
         select(Message)
-        .where(Message.conversation_id == conversation_id)
-        .order_by(Message.created_at.asc())
-        .offset(offset)
-        .limit(limit)
+        .where(*filters)
+        .order_by(Message.created_at.desc(), Message.id.desc())
+        .limit(limit + 1)
     )
-    return result.scalars().all()
+    messages_desc = result.scalars().all()
+    has_more = len(messages_desc) > limit
+    page_desc = messages_desc[:limit]
+    items = list(reversed(page_desc))
+
+    return {
+        "items": items,
+        "has_more": has_more,
+        "next_cursor": items[0].id if has_more and items else None,
+    }
 
 
 @router.post("/{conversation_id}/messages", response_model=MessageOut)

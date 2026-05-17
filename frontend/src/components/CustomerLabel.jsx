@@ -1,3 +1,5 @@
+import { useI18n } from '../i18n/useI18n'
+
 function getTextColor(hexColor) {
   const hex = hexColor?.replace('#', '') || 'd6e400'
   const r = parseInt(hex.slice(0, 2), 16)
@@ -8,6 +10,7 @@ function getTextColor(hexColor) {
 }
 
 export default function CustomerLabel({ label, closable = false, onClose, size = 'default' }) {
+  const { t } = useI18n()
   const background = label?.color || '#d6e400'
   const color = getTextColor(background)
   const padding = closable ? (size === 'small' ? '1px 3px 1px 6px' : '2px 3px 2px 8px') : (size === 'small' ? '1px 6px' : '2px 7px')
@@ -44,7 +47,7 @@ export default function CustomerLabel({ label, closable = false, onClose, size =
       {closable && (
         <button
           type="button"
-          aria-label={`Bỏ label ${label?.name}`}
+          aria-label={t('labelsPage.removeLabel', { name: label?.name || '' })}
           onClick={(event) => {
             event.stopPropagation()
             onClose?.(label)

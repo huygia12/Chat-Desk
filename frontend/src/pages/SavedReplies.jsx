@@ -14,14 +14,10 @@ import {
 } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import client from "../api/client";
+import { useI18n } from "../i18n/useI18n";
 import { useAuthStore } from "../store/authStore";
 
 const { Title, Text } = Typography;
-
-const visibilityLabel = {
-  business: "Doanh nghiệp",
-  personal: "Cá nhân",
-};
 
 export default function SavedReplies() {
   const user = useAuthStore((state) => state.user);
@@ -31,8 +27,13 @@ export default function SavedReplies() {
   const [editingReply, setEditingReply] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [form] = Form.useForm();
+  const { t } = useI18n();
 
   const isBusiness = user?.role === "business";
+  const visibilityLabel = {
+    business: t("savedReplies.business"),
+    personal: t("savedReplies.personal"),
+  };
 
   const fetchReplies = async () => {
     setLoading(true);
@@ -40,7 +41,7 @@ export default function SavedReplies() {
       const res = await client.get("/api/saved-replies");
       setReplies(res.data);
     } catch {
-      message.error("Không thể tải danh sách saved replies");
+      message.error(t("savedReplies.loadError"));
     } finally {
       setLoading(false);
     }
@@ -89,19 +90,19 @@ export default function SavedReplies() {
       };
       if (editingReply) {
         await client.put(`/api/saved-replies/${editingReply.id}`, payload);
-        message.success("Cập nhật template thành công");
+        message.success(t("savedReplies.updateSuccess"));
       } else {
         await client.post("/api/saved-replies", {
           ...payload,
           visibility: isBusiness ? "business" : "personal",
         });
-        message.success("Tạo template thành công");
+        message.success(t("savedReplies.createSuccess"));
       }
       closeModal();
       fetchReplies();
     } catch (err) {
       if (err.errorFields) return;
-      message.error(err.response?.data?.detail || "Thao tác thất bại");
+      message.error(err.response?.data?.detail || t("savedReplies.actionError"));
     } finally {
       setSubmitting(false);
     }
@@ -110,10 +111,10 @@ export default function SavedReplies() {
   const handleDelete = async (replyId) => {
     try {
       await client.delete(`/api/saved-replies/${replyId}`);
-      message.success("Đã xóa template");
+      message.success(t("savedReplies.deleteSuccess"));
       fetchReplies();
     } catch (err) {
-      message.error(err.response?.data?.detail || "Xóa template thất bại");
+      message.error(err.response?.data?.detail || t("savedReplies.deleteError"));
     }
   };
 
@@ -124,7 +125,7 @@ export default function SavedReplies() {
 
   const columns = [
     {
-      title: "Tiêu đề",
+      title: t("savedReplies.title"),
       dataIndex: "title",
       ellipsis: true,
     },
@@ -135,7 +136,7 @@ export default function SavedReplies() {
       render: (shortcut) => <Text code>/{shortcut}</Text>,
     },
     {
-      title: "Phạm vi",
+      title: t("savedReplies.scope"),
       dataIndex: "visibility",
       width: 150,
       render: (visibility) => (
@@ -145,31 +146,31 @@ export default function SavedReplies() {
       ),
     },
     {
-      title: "Nội dung",
+      title: t("savedReplies.content"),
       dataIndex: "content",
       ellipsis: true,
       render: (content) => content,
     },
     {
-      title: "Thao tác",
+      title: t("common.actions"),
       width: 150,
       render: (_, record) =>
         canModify(record) ? (
           <Space>
             <Button size="small" icon={<EditOutlined />} onClick={() => openEditModal(record)}>
-              Sửa
+              {t("common.edit")}
             </Button>
             <Popconfirm
-              title="Xóa template này?"
+              title={t("savedReplies.deleteTitle")}
               onConfirm={() => handleDelete(record.id)}
-              okText="Đồng ý"
-              cancelText="Hủy"
+              okText={t("common.confirm")}
+              cancelText={t("common.cancel")}
             >
               <Button size="small" danger icon={<DeleteOutlined />} />
             </Popconfirm>
           </Space>
         ) : (
-          <Text type="secondary">Chỉ sử dụng</Text>
+          <Text type="secondary">{t("savedReplies.readOnly")}</Text>
         ),
     },
   ];
@@ -185,10 +186,10 @@ export default function SavedReplies() {
         }}
       >
         <Title level={4} style={{ margin: 0 }}>
-          Saved Replies
+          {t("savedReplies.pageTitle")}
         </Title>
         <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
-          Thêm template
+          {t("savedReplies.add")}
         </Button>
       </div>
 
@@ -198,43 +199,43 @@ export default function SavedReplies() {
         rowKey="id"
         loading={loading}
         pagination={{ pageSize: 10 }}
-        locale={{ emptyText: "Chưa có template nào" }}
+        locale={{ emptyText: t("savedReplies.empty") }}
       />
 
       <Modal
-        title={editingReply ? "Chỉnh sửa template" : "Thêm template"}
+        title={editingReply ? t("savedReplies.editTitle") : t("savedReplies.addTitle")}
         open={modalOpen}
         onCancel={closeModal}
         onOk={handleSubmit}
-        okText={editingReply ? "Cập nhật" : "Tạo"}
-        cancelText="Hủy"
+        okText={editingReply ? t("common.update") : t("common.create")}
+        cancelText={t("common.cancel")}
         confirmLoading={submitting}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="visibility" label="Phạm vi">
+          <Form.Item name="visibility" label={t("savedReplies.scope")}>
             <Select
               disabled
               options={[
-                { value: "business", label: "Doanh nghiệp" },
-                { value: "personal", label: "Cá nhân" },
+                { value: "business", label: t("savedReplies.business") },
+                { value: "personal", label: t("savedReplies.personal") },
               ]}
             />
           </Form.Item>
           <Form.Item
             name="title"
-            label="Tiêu đề"
-            rules={[{ required: true, message: "Nhập tiêu đề" }]}
+            label={t("savedReplies.title")}
+            rules={[{ required: true, message: t("savedReplies.titleRequired") }]}
           >
-            <Input placeholder="VD: Báo giá vận chuyển" />
+            <Input placeholder={t("savedReplies.titlePlaceholder")} />
           </Form.Item>
           <Form.Item
             name="shortcut"
             label="Shortcut"
             rules={[
-              { required: true, message: "Nhập shortcut" },
+              { required: true, message: t("savedReplies.shortcutRequired") },
               {
                 pattern: /^\/?[a-zA-Z0-9_-]+$/,
-                message: "Chỉ dùng chữ, số, dấu gạch ngang hoặc gạch dưới",
+                message: t("savedReplies.shortcutInvalid"),
               },
             ]}
           >
@@ -242,10 +243,10 @@ export default function SavedReplies() {
           </Form.Item>
           <Form.Item
             name="content"
-            label="Nội dung"
-            rules={[{ required: true, message: "Nhập nội dung" }]}
+            label={t("savedReplies.content")}
+            rules={[{ required: true, message: t("savedReplies.contentRequired") }]}
           >
-            <Input.TextArea rows={5} placeholder="Nội dung sẽ được chèn vào ô chat..." />
+            <Input.TextArea rows={5} placeholder={t("savedReplies.contentPlaceholder")} />
           </Form.Item>
         </Form>
       </Modal>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import WidgetChat from "../components/WidgetChat";
+import { useI18n } from "../i18n/useI18n";
 import "../styles/widget-page.css";
 
 export default function WidgetPage() {
@@ -11,11 +12,12 @@ export default function WidgetPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const configReceivedRef = useRef(false);
+  const { t } = useI18n();
 
   // Get widget secret from parent window or request it
   useEffect(() => {
     if (!widgetId) {
-      setError("Widget ID not provided");
+      setError(t("widget.missingId"));
       setLoading(false);
       return;
     }
@@ -26,7 +28,7 @@ export default function WidgetPage() {
         configReceivedRef.current = true;
         const { widgetSecret, apiUrl, parentOrigin } = event.data;
         if (!widgetSecret) {
-          setError("Widget configuration is invalid (missing secret)");
+          setError(t("widget.invalidConfig"));
           setLoading(false);
           return;
         }
@@ -77,7 +79,7 @@ export default function WidgetPage() {
         // All retries exhausted
         if (!configReceivedRef.current) {
           configReceivedRef.current = true;
-          setError("Unable to connect to chat support. Please refresh the page.");
+          setError(t("widget.connectError"));
           setLoading(false);
         }
       }
@@ -87,10 +89,10 @@ export default function WidgetPage() {
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, [widgetId]);
+  }, [t, widgetId]);
 
   if (loading) {
-    return <div className="widget-page-loading">Loading...</div>;
+    return <div className="widget-page-loading">{t("widget.loading")}</div>;
   }
 
   if (error) {
@@ -104,7 +106,7 @@ export default function WidgetPage() {
   if (!widgetId) {
     return (
       <div className="widget-page-error">
-        <p>Widget ID not provided</p>
+        <p>{t("widget.missingId")}</p>
       </div>
     );
   }

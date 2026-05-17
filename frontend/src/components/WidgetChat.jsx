@@ -4,7 +4,10 @@ import {
   SendOutlined,
   CloseOutlined,
   MessageOutlined,
+  PaperClipOutlined,
+  FileOutlined,
 } from "@ant-design/icons";
+import { useI18n } from "../i18n/useI18n";
 import "../styles/widget.css";
 
 export default function WidgetChat({
@@ -28,6 +31,8 @@ export default function WidgetChat({
   const [emailInput, setEmailInput] = useState("");
   const messagesEndRef = useRef(null);
   const wsRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const { t, language } = useI18n();
 
   // Load visitor info from localStorage on mount (no prompt)
   useEffect(() => {
@@ -107,6 +112,11 @@ export default function WidgetChat({
                   content: msg.content,
                   sender: msg.sender_type === "contact" ? "customer" : msg.sender_type,
                   timestamp: new Date(msg.created_at),
+                  attachment_url: msg.attachment_url,
+                  attachment_filename: msg.attachment_filename,
+                  attachment_mime_type: msg.attachment_mime_type,
+                  attachment_size: msg.attachment_size,
+                  attachment_kind: msg.attachment_kind,
                 },
               ];
             });
@@ -160,6 +170,11 @@ export default function WidgetChat({
               content: m.content,
               sender: m.sender_type === "contact" ? "customer" : m.sender_type,
               timestamp: new Date(m.created_at),
+              attachment_url: m.attachment_url,
+              attachment_filename: m.attachment_filename,
+              attachment_mime_type: m.attachment_mime_type,
+              attachment_size: m.attachment_size,
+              attachment_kind: m.attachment_kind,
             }))
           );
         }
@@ -188,6 +203,9 @@ export default function WidgetChat({
           "x-widget-origin":
             window.__chatdesk_parent_origin__ || window.location.origin,
           "Content-Type": "application/json",
+          "X-Language": language,
+          "Accept-Language":
+            language === "vi" ? "vi-VN,vi;q=0.9,en;q=0.8" : "en-US,en;q=0.9,vi;q=0.8",
         },
         body: JSON.stringify({
           visitor_id: visitorInfo.id,
@@ -233,7 +251,79 @@ export default function WidgetChat({
         ...prev,
         {
           id: Math.random().toString(36).substr(2, 9),
-          content: `⚠️ Lỗi: ${error.message}`,
+        content: `⚠️ ${t("widget.sendError", { reason: error.message })}`,
+          sender: "system",
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendFile = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !visitorInfo) return;
+
+    setLoading(true);
+    try {
+      const apiUrl =
+        window.__chatdesk_api_url__ ||
+        import.meta.env.VITE_API_URL ||
+        `${window.location.protocol}//${window.location.host}`;
+
+      const formData = new FormData();
+      formData.append("visitor_id", visitorInfo.id);
+      formData.append("visitor_name", visitorInfo.name);
+      formData.append("visitor_email", visitorInfo.email || "");
+      formData.append("message_text", inputValue.trim());
+      formData.append("file", file);
+
+      const response = await fetch(`${apiUrl}/api/widgets/send-file`, {
+        method: "POST",
+        headers: {
+          "widget-id": widgetId,
+          "widget-secret": widgetSecret,
+          "x-widget-origin":
+            window.__chatdesk_parent_origin__ || window.location.origin,
+          "X-Language": language,
+          "Accept-Language":
+            language === "vi" ? "vi-VN,vi;q=0.9,en;q=0.8" : "en-US,en;q=0.9,vi;q=0.8",
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to send file");
+      }
+
+      const result = await response.json();
+      setInputValue("");
+      setConversationId(result.conversation_id);
+      localStorage.setItem("widget_conversation_id", result.conversation_id);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: result.message_id,
+          content: inputValue.trim() || result.attachment_filename,
+          sender: "customer",
+          timestamp: new Date(),
+          attachment_url: result.attachment_url,
+          attachment_filename: result.attachment_filename,
+          attachment_mime_type: result.attachment_mime_type,
+          attachment_size: result.attachment_size,
+          attachment_kind: result.attachment_kind,
+        },
+      ]);
+    } catch (error) {
+      console.error("Error sending file:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Math.random().toString(36).substr(2, 9),
+          content: `⚠️ ${t("widget.sendError", { reason: error.message })}`,
           sender: "system",
           timestamp: new Date(),
         },
@@ -257,19 +347,19 @@ export default function WidgetChat({
   // --- Visitor form (shown when visitorInfo not yet set) ---
   const renderVisitorForm = () => (
     <div className="widget-visitor-form">
-      <div className="widget-visitor-title">Bắt đầu trò chuyện</div>
+      <div className="widget-visitor-title">{t("widget.visitorTitle")}</div>
       <div className="widget-visitor-subtitle">
-        Vui lòng cho chúng tôi biết về bạn
+        {t("widget.visitorSubtitle")}
       </div>
       <Input
-        placeholder="Tên của bạn *"
+        placeholder={t("widget.namePlaceholder")}
         value={nameInput}
         onChange={(e) => setNameInput(e.target.value)}
         onPressEnter={handleVisitorSubmit}
         style={{ marginBottom: 12 }}
       />
       <Input
-        placeholder="Email (tùy chọn)"
+        placeholder={t("widget.emailPlaceholder")}
         value={emailInput}
         onChange={(e) => setEmailInput(e.target.value)}
         onPressEnter={handleVisitorSubmit}
@@ -281,17 +371,40 @@ export default function WidgetChat({
         onClick={handleVisitorSubmit}
         disabled={!nameInput.trim()}
       >
-        Bắt đầu chat
+        {t("widget.startChat")}
       </Button>
     </div>
   );
+
+  const renderMessageContent = (msg) => {
+    if (!msg.attachment_url) return msg.content;
+
+    const fileName = msg.attachment_filename || msg.content || "attachment";
+    const isImage = msg.attachment_kind === "image" || msg.attachment_mime_type?.startsWith("image/");
+
+    return (
+      <>
+        {msg.content && msg.content !== fileName && <div>{msg.content}</div>}
+        <a className="widget-attachment" href={msg.attachment_url} target="_blank" rel="noreferrer">
+          {isImage ? (
+            <img src={msg.attachment_url} alt={fileName} className="widget-attachment-image" />
+          ) : (
+            <span className="widget-attachment-file">
+              <FileOutlined />
+              {fileName}
+            </span>
+          )}
+        </a>
+      </>
+    );
+  };
 
   // --- Chat panel (header + messages + input) ---
   const renderChatPanel = () => (
     <>
       <div className="widget-header">
         <div className="widget-title">{businessName}</div>
-        <button className="widget-close" onClick={handleClose} title="Close chat">
+        <button className="widget-close" onClick={handleClose} title={t("widget.closeChat")}>
           <CloseOutlined />
         </button>
       </div>
@@ -299,7 +412,7 @@ export default function WidgetChat({
       <div className="widget-messages">
         {messages.length === 0 ? (
           <div className="widget-empty-msg">
-            Xin chào! Chúng tôi có thể giúp gì cho bạn? 👋
+            {t("widget.emptyMessage")}
           </div>
         ) : (
           messages.map((msg) => (
@@ -307,9 +420,9 @@ export default function WidgetChat({
               key={msg.id}
               className={`widget-message widget-message-${msg.sender}`}
             >
-              <div className="widget-message-bubble">{msg.content}</div>
+              <div className="widget-message-bubble">{renderMessageContent(msg)}</div>
               <div className="widget-message-time">
-                {msg.timestamp.toLocaleTimeString("vi-VN", {
+                {msg.timestamp.toLocaleTimeString(language === "vi" ? "vi-VN" : "en-US", {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
@@ -321,11 +434,22 @@ export default function WidgetChat({
       </div>
 
       <div className="widget-input-area">
+        <input
+          ref={fileInputRef}
+          type="file"
+          onChange={handleSendFile}
+          style={{ display: "none" }}
+        />
+        <Button
+          icon={<PaperClipOutlined />}
+          onClick={() => fileInputRef.current?.click()}
+          disabled={loading}
+        />
         <Input.TextArea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Nhập tin nhắn..."
+          placeholder={t("widget.inputPlaceholder")}
           disabled={loading}
           rows={1}
           style={{ resize: "none" }}
@@ -361,7 +485,7 @@ export default function WidgetChat({
         <button
           className="widget-button"
           onClick={() => setIsOpen(true)}
-          title="Open chat"
+          title={t("widget.openChat")}
         >
           <MessageOutlined style={{ fontSize: "20px" }} />
         </button>

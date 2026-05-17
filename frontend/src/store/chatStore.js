@@ -92,6 +92,25 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
+  uploadMessageFile: async (conversationId, file, content = '') => {
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('content', content)
+      const res = await client.post(`/api/conversations/${conversationId}/messages/upload`, formData)
+      set((state) => {
+        const exists = state.messages.some((m) => String(m.id) === String(res.data.id))
+        if (exists) return state
+        return { messages: [...state.messages, res.data] }
+      })
+      get().fetchConversations()
+      return res.data
+    } catch (err) {
+      console.error('Failed to upload message file:', err)
+      throw err
+    }
+  },
+
   addMessage: (message) => {
     set((state) => {
       // Only add if it's for the active conversation

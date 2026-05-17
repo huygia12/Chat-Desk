@@ -24,6 +24,7 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import client from "../api/client";
+import { useI18n } from "../i18n/useI18n";
 import { useChannelStore } from "../store/channelStore";
 
 export default function Channels() {
@@ -43,6 +44,7 @@ export default function Channels() {
   const [telegramLoading, setTelegramLoading] = useState(false);
   const [platform, setPlatform] = useState("facebook");
   const [form] = Form.useForm();
+  const { t } = useI18n();
 
   useEffect(() => {
     fetchChannels();
@@ -58,20 +60,20 @@ export default function Channels() {
         pages != null && instagram != null
           ? ` (${pages} Facebook Page, ${instagram} Instagram)`
           : "";
-      message.success(`Ket noi Meta thanh cong${detail}`);
+      message.success(t("channels.metaSuccess", { detail }));
       fetchChannels();
       window.history.replaceState({}, "", "/channels");
     } else if (error) {
       if (error === "no_pages") {
         message.error(
-          "Khong tim thay Facebook Page. Hay tao Page va lien ket Instagram Professional account truoc.",
+          t("channels.noPages"),
         );
       } else {
-        message.error(`Loi ket noi Meta: ${error}`);
+        message.error(t("channels.metaError", { error }));
       }
       window.history.replaceState({}, "", "/channels");
     }
-  }, []);
+  }, [fetchChannels, t]);
 
   const handleConnectOAuth = async () => {
     try {
@@ -79,25 +81,25 @@ export default function Channels() {
       window.location.href = res.data.url;
     } catch (err) {
       message.error(
-        "Khong the khoi tao OAuth: " + (err.response?.data?.detail || err.message),
+        t("channels.oauthError", { reason: err.response?.data?.detail || err.message }),
       );
     }
   };
 
   const handleConnectTelegram = async () => {
     if (!telegramToken.trim()) {
-      message.error("Vui long nhap Bot Token");
+      message.error(t("channels.botTokenRequired"));
       return;
     }
 
     setTelegramLoading(true);
     try {
       await connectTelegram(telegramToken.trim());
-      message.success("Ket noi Telegram Bot thanh cong");
+      message.success(t("channels.telegramSuccess"));
       setTelegramModalOpen(false);
       setTelegramToken("");
     } catch (err) {
-      message.error(err.response?.data?.detail || "Ket noi Telegram that bai");
+      message.error(err.response?.data?.detail || t("channels.telegramError"));
     } finally {
       setTelegramLoading(false);
     }
@@ -111,26 +113,26 @@ export default function Channels() {
       } else {
         await connectInstagram(values);
       }
-      message.success(`Ket noi ${platform} thanh cong`);
+      message.success(t("channels.manualSuccess", { platform }));
       setManualModalOpen(false);
       form.resetFields();
     } catch (err) {
-      message.error(err.response?.data?.detail || "Ket noi that bai");
+      message.error(err.response?.data?.detail || t("channels.connectError"));
     }
   };
 
   const handleDisconnect = async (channelId) => {
     try {
       await disconnectChannel(channelId);
-      message.success("Da ngat ket noi");
+      message.success(t("channels.disconnectSuccess"));
     } catch {
-      message.error("Ngat ket noi that bai");
+      message.error(t("channels.disconnectError"));
     }
   };
 
   const columns = [
     {
-      title: "Nen tang",
+      title: t("channels.platform"),
       dataIndex: "platform",
       render: (value) => {
         if (value === "facebook") {
@@ -157,20 +159,20 @@ export default function Channels() {
         return <Tag>{value}</Tag>;
       },
     },
-    { title: "Ten kenh", dataIndex: "page_name", render: (value) => value || "-" },
+    { title: t("channels.channelName"), dataIndex: "page_name", render: (value) => value || "-" },
     {
       title: "Platform ID",
       dataIndex: "platform_page_id",
       render: (value) => <Typography.Text copyable>{value}</Typography.Text>,
     },
     {
-      title: "Trang thai",
+      title: t("common.status"),
       dataIndex: "is_active",
       render: (value) =>
-        value ? <Tag color="green">Hoat dong</Tag> : <Tag color="red">Tat</Tag>,
+        value ? <Tag color="green">{t("channels.enabled")}</Tag> : <Tag color="red">{t("channels.disabled")}</Tag>,
     },
     {
-      title: "Ngay ket noi",
+      title: t("channels.connectedAt"),
       dataIndex: "created_at",
       render: (value) => dayjs(value).format("DD/MM/YYYY HH:mm"),
     },
@@ -178,13 +180,13 @@ export default function Channels() {
       title: "",
       render: (_, record) => (
         <Popconfirm
-          title="Ngat ket noi kenh nay?"
+          title={t("channels.disconnectTitle")}
           onConfirm={() => handleDisconnect(record.id)}
-          okText="Dong y"
-          cancelText="Huy"
+          okText={t("common.confirm")}
+          cancelText={t("common.cancel")}
         >
           <Button danger icon={<DeleteOutlined />} size="small">
-            Ngat
+            {t("channels.disconnectButton")}
           </Button>
         </Popconfirm>
       ),
@@ -194,28 +196,28 @@ export default function Channels() {
   return (
     <div style={{ padding: 24 }}>
       <Card
-        title="Kenh ket noi"
+        title={t("channels.title")}
         extra={
           <Space wrap>
             <Button type="primary" icon={<LinkOutlined />} onClick={handleConnectOAuth}>
-              Ket noi Meta
+              {t("channels.connectMeta")}
             </Button>
             <Button
               icon={<SendOutlined />}
               onClick={() => setTelegramModalOpen(true)}
               style={{ borderColor: "#0088cc", color: "#0088cc" }}
             >
-              Ket noi Telegram
+              {t("channels.connectTelegram")}
             </Button>
             <Button icon={<PlusOutlined />} onClick={() => setManualModalOpen(true)}>
-              Nhap token thu cong
+              {t("channels.manualToken")}
             </Button>
           </Space>
         }
       >
         <Alert
-          message="Ket noi Meta se tu dong them Facebook Page va Instagram Professional account da lien ket voi Page."
-          description="Instagram can Business hoac Creator account, da lien ket voi Facebook Page va da bat webhook messages trong Meta Developer."
+          message={t("channels.metaInfo")}
+          description={t("channels.metaDescription")}
           type="info"
           showIcon
           style={{ marginBottom: 16 }}
@@ -226,30 +228,30 @@ export default function Channels() {
           rowKey="id"
           loading={loading}
           pagination={false}
-          locale={{ emptyText: "Chua ket noi kenh nao" }}
+          locale={{ emptyText: t("channels.empty") }}
         />
       </Card>
 
       <Modal
-        title="Ket noi kenh thu cong"
+        title={t("channels.manualTitle")}
         open={manualModalOpen}
         onOk={handleManualConnect}
         onCancel={() => {
           setManualModalOpen(false);
           form.resetFields();
         }}
-        okText="Ket noi"
-        cancelText="Huy"
+        okText={t("channels.connectMeta").replace("Meta", "").trim() || t("common.confirm")}
+        cancelText={t("common.cancel")}
       >
         <Alert
-          message="Nen dung OAuth Meta truoc. Cach thu cong chi phu hop khi ban da co Page Access Token hop le."
+          message={t("channels.manualWarning")}
           type="warning"
           showIcon
           style={{ marginBottom: 16 }}
         />
         <Space direction="vertical" style={{ width: "100%" }} size="middle">
           <div>
-            <Typography.Text>Chon nen tang:</Typography.Text>
+            <Typography.Text>{t("channels.choosePlatform")}</Typography.Text>
             <Select
               value={platform}
               onChange={setPlatform}
@@ -264,26 +266,26 @@ export default function Channels() {
             <Form.Item
               name="platform_page_id"
               label={platform === "instagram" ? "Instagram Account ID" : "Facebook Page ID"}
-              rules={[{ required: true, message: "Nhap Platform ID" }]}
+              rules={[{ required: true, message: t("channels.platformIdRequired") }]}
             >
               <Input
                 placeholder={
                   platform === "instagram"
-                    ? "Nhap Instagram Professional Account ID"
-                    : "Nhap Facebook Page ID"
+                    ? t("channels.instagramIdPlaceholder")
+                    : t("channels.facebookIdPlaceholder")
                 }
               />
             </Form.Item>
-            <Form.Item name="page_name" label="Ten hien thi (tuy chon)">
-              <Input placeholder="Nhap ten hien thi" />
+            <Form.Item name="page_name" label={t("channels.displayName")}>
+              <Input placeholder={t("channels.displayNamePlaceholder")} />
             </Form.Item>
             <Form.Item
               name="access_token"
               label="Page Access Token"
-              rules={[{ required: true, message: "Nhap Page Access Token" }]}
+              rules={[{ required: true, message: t("channels.tokenRequired") }]}
             >
               <Input.TextArea
-                placeholder="Dan Page Access Token co quyen messaging"
+                placeholder={t("channels.tokenPlaceholder")}
                 rows={3}
               />
             </Form.Item>
@@ -292,24 +294,24 @@ export default function Channels() {
       </Modal>
 
       <Modal
-        title="Ket noi Telegram Bot"
+        title={t("channels.telegramTitle")}
         open={telegramModalOpen}
         onOk={handleConnectTelegram}
         onCancel={() => {
           setTelegramModalOpen(false);
           setTelegramToken("");
         }}
-        okText="Ket noi"
-        cancelText="Huy"
+        okText={t("channels.connectTelegram").replace("Telegram", "").trim() || t("common.confirm")}
+        cancelText={t("common.cancel")}
         confirmLoading={telegramLoading}
       >
         <Alert
-          message="Cach lay Bot Token"
+          message={t("channels.tokenGuide")}
           description={
             <ol style={{ paddingLeft: 20, margin: "8px 0 0" }}>
-              <li>Mo Telegram va tim @BotFather.</li>
-              <li>Gui /newbot va lam theo huong dan.</li>
-              <li>Copy Bot Token va dan vao o ben duoi.</li>
+              <li>{t("channels.telegramStep1")}</li>
+              <li>{t("channels.telegramStep2")}</li>
+              <li>{t("channels.telegramStep3")}</li>
             </ol>
           }
           type="info"
@@ -317,7 +319,7 @@ export default function Channels() {
           style={{ marginBottom: 16 }}
         />
         <Input.TextArea
-          placeholder="Dan Bot Token vao day, vi du: 7123456789:AAF..."
+          placeholder={t("channels.botTokenPlaceholder")}
           rows={2}
           value={telegramToken}
           onChange={(event) => setTelegramToken(event.target.value)}

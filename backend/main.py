@@ -1,10 +1,21 @@
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.api import auth, users, channels, contacts, conversations, messages, products, webhooks, admin, widgets, employees, labels, saved_replies, assignments
 from app.websocket.manager import manager
 from app.config import get_settings
+from app.i18n import (
+    get_request_language,
+    reset_current_language,
+    set_current_language,
+    translate_detail,
+    translate_validation_message,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -58,6 +69,55 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def language_middleware(request: Request, call_next):
+    language = get_request_language(request)
+    language_token = set_current_language(language)
+    try:
+        response = await call_next(request)
+        response.headers["Content-Language"] = language
+        return response
+    finally:
+        reset_current_language(language_token)
+
+
+@app.exception_handler(HTTPException)
+async def localized_http_exception_handler(request: Request, exc: HTTPException):
+    language = get_request_language(request)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": translate_detail(exc.detail, language)},
+        headers=exc.headers,
+    )
+
+
+@app.exception_handler(StarletteHTTPException)
+async def localized_starlette_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    language = get_request_language(request)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": translate_detail(exc.detail, language)},
+        headers=exc.headers,
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def localized_validation_exception_handler(request: Request, exc: RequestValidationError):
+    language = get_request_language(request)
+    errors = []
+    for error in exc.errors():
+        localized_error = dict(error)
+        localized_error["msg"] = translate_validation_message(localized_error.get("msg", ""), language)
+        errors.append(localized_error)
+
+    return JSONResponse(
+        status_code=422,
+        content=jsonable_encoder({"detail": errors}),
+        headers={"Content-Language": language},
+    )
+
 
 # Routers
 app.include_router(auth.router)
@@ -134,9 +194,6 @@ async def root():
 
 
 # === Facebook App Required Pages ===
-from fastapi.responses import HTMLResponse
-
-
 @app.get("/privacy", response_class=HTMLResponse)
 async def privacy_policy():
     """Privacy Policy page (required by Facebook App)."""

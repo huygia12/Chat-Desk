@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Button, Divider, Form, Input, Typography, message } from "antd";
 import client from "../api/client";
+import { useI18n } from "../i18n/useI18n";
 import { useAuthStore } from "../store/authStore";
 
 const { Title } = Typography;
@@ -10,6 +11,7 @@ export default function EmployeeSettings() {
   const fetchUser = useAuthStore((state) => state.fetchUser);
   const [profileForm] = Form.useForm();
   const [passwordForm] = Form.useForm();
+  const { t } = useI18n();
 
   useEffect(() => {
     profileForm.setFieldsValue({
@@ -22,9 +24,9 @@ export default function EmployeeSettings() {
     try {
       await client.patch("/api/employees/me/profile", values);
       await fetchUser();
-      message.success("Cập nhật thông tin thành công");
+      message.success(t("employees.profileSuccess"));
     } catch (err) {
-      message.error(err.response?.data?.detail || "Cập nhật thông tin thất bại");
+      message.error(err.response?.data?.detail || t("employees.profileError"));
     }
   };
 
@@ -35,83 +37,83 @@ export default function EmployeeSettings() {
         password: values.password,
       });
       passwordForm.resetFields();
-      message.success("Đổi mật khẩu thành công");
+      message.success(t("employees.ownPasswordSuccess"));
     } catch (err) {
-      message.error(err.response?.data?.detail || "Đổi mật khẩu thất bại");
+      message.error(err.response?.data?.detail || t("employees.passwordError"));
     }
   };
 
   return (
     <div style={{ padding: 24, maxWidth: 640 }}>
       <Title level={4} style={{ marginTop: 0 }}>
-        Cài đặt
+        {t("employees.settingsTitle")}
       </Title>
 
-      <Title level={5}>Thông tin cơ bản</Title>
+      <Title level={5}>{t("employees.basicInfo")}</Title>
       <Form form={profileForm} layout="vertical" onFinish={handleUpdateProfile}>
         <Form.Item
           name="full_name"
-          label="Họ tên"
-          rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
+          label={t("employees.fullName")}
+          rules={[{ required: true, message: t("employees.fullNameRequired") }]}
         >
           <Input placeholder="Nguyễn Văn A" />
         </Form.Item>
         <Form.Item
           name="email"
-          label="Email đăng nhập"
+          label={t("employees.emailLogin")}
           rules={[
-            { required: true, message: "Vui lòng nhập email" },
-            { type: "email", message: "Email không hợp lệ" },
+            { required: true, message: t("employees.emailRequired") },
+            { type: "email", message: t("employees.emailInvalid") },
           ]}
         >
           <Input placeholder="nhanvien@example.com" />
         </Form.Item>
         <Button type="primary" htmlType="submit">
-          Lưu thông tin
+          {t("employees.saveInfo")}
         </Button>
       </Form>
 
       <Divider />
 
-      <Title level={5}>Đổi mật khẩu</Title>
+      <Title level={5}>{t("employees.changePassword")}</Title>
       <Form form={passwordForm} layout="vertical" onFinish={handleUpdatePassword}>
         <Form.Item
           name="current_password"
-          label="Mật khẩu hiện tại"
-          rules={[{ required: true, message: "Vui lòng nhập mật khẩu hiện tại" }]}
+          label={t("employees.currentPassword")}
+          rules={[{ required: true, message: t("employees.currentPasswordRequired") }]}
         >
-          <Input.Password placeholder="Mật khẩu hiện tại" />
+          <Input.Password placeholder={t("employees.currentPassword")} />
         </Form.Item>
         <Form.Item
           name="password"
-          label="Mật khẩu mới"
+          label={t("employees.newPassword")}
           rules={[
-            { required: true, message: "Vui lòng nhập mật khẩu mới" },
-            { min: 6, message: "Mật khẩu tối thiểu 6 ký tự" },
+            { required: true, message: t("employees.newPasswordRequired") },
+            { min: 6, message: t("employees.passwordMin") },
           ]}
         >
-          <Input.Password placeholder="Mật khẩu mới" />
+          <Input.Password placeholder={t("employees.newPassword")} />
         </Form.Item>
         <Form.Item
           name="confirm_password"
-          label="Nhập lại mật khẩu mới"
+          label={t("employees.confirmPassword")}
           dependencies={["password"]}
           rules={[
-            { required: true, message: "Vui lòng nhập lại mật khẩu mới" },
+            { required: true, message: t("employees.confirmPasswordRequired") },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 if (!value || getFieldValue("password") === value) {
                   return Promise.resolve();
                 }
-                return Promise.reject(new Error("Mật khẩu nhập lại không khớp"));
+                return Promise.reject(new Error(t("employees.passwordMismatch")));
               },
             }),
           ]}
         >
-          <Input.Password placeholder="Nhập lại mật khẩu mới" />
+          <Input.Password placeholder={t("employees.confirmPassword")} />
         </Form.Item>
         <Button type="primary" htmlType="submit">
-          Đổi mật khẩu
+          {t("employees.changePassword")}
         </Button>
       </Form>
     </div>

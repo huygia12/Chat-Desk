@@ -1,51 +1,31 @@
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { Layout as AntLayout, Menu, Button, Typography, Tag, Modal, Tooltip, theme } from "antd";
+import { useEffect, useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Layout as AntLayout, Button, Menu, Modal, Tag, Tooltip, Typography, theme } from "antd";
 import {
-  MessageOutlined,
   ApiOutlined,
-  ShoppingOutlined,
-  SettingOutlined,
-  LogoutOutlined,
-  MoonOutlined,
-  DashboardOutlined,
   CodeOutlined,
+  DashboardOutlined,
   FileTextOutlined,
+  LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  MessageOutlined,
+  MoonOutlined,
   PartitionOutlined,
+  SettingOutlined,
+  ShoppingOutlined,
   SunOutlined,
-  TeamOutlined,
   TagsOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
+import { useI18n } from "../i18n/useI18n";
 import { useAuthStore } from "../store/authStore";
-import { useEffect, useState } from "react";
-import { connectWebSocket, disconnectWebSocket } from "../utils/websocket";
 import { useChatStore } from "../store/chatStore";
+import { useLanguageStore } from "../store/languageStore";
 import { useThemeStore } from "../store/themeStore";
+import { connectWebSocket, disconnectWebSocket } from "../utils/websocket";
 
 const { Header, Sider, Content } = AntLayout;
-
-const businessMenuItems = [
-  { key: "/chat", icon: <MessageOutlined />, label: "Tin nhắn" },
-  { key: "/channels", icon: <ApiOutlined />, label: "Kênh kết nối" },
-  { key: "/products", icon: <ShoppingOutlined />, label: "Sản phẩm" },
-  { key: "/widgets", icon: <CodeOutlined />, label: "Widgets" },
-  { key: "/labels", icon: <TagsOutlined />, label: "Labels" },
-  { key: "/saved-replies", icon: <FileTextOutlined />, label: "Saved Replies" },
-  { key: "/assignment-settings", icon: <PartitionOutlined />, label: "Quản lý assign" },
-  { key: "/employees", icon: <TeamOutlined />, label: "Nhân viên" },
-  { key: "/settings", icon: <SettingOutlined />, label: "Cài đặt" },
-];
-
-const employeeMenuItems = [
-  { key: "/chat", icon: <MessageOutlined />, label: "Tin nhắn" },
-  { key: "/saved-replies", icon: <FileTextOutlined />, label: "Saved Replies" },
-  { key: "/employee-settings", icon: <SettingOutlined />, label: "Cài đặt" },
-];
-
-const adminMenuItems = [
-  { key: "/admin", icon: <DashboardOutlined />, label: "Dashboard" },
-];
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -53,6 +33,8 @@ export default function Layout() {
   const { user, logout } = useAuthStore();
   const addMessage = useChatStore((s) => s.addMessage);
   const fetchConversations = useChatStore((s) => s.fetchConversations);
+  const { language, t } = useI18n();
+  const toggleLanguage = useLanguageStore((s) => s.toggleLanguage);
   const themeMode = useThemeStore((s) => s.mode);
   const toggleTheme = useThemeStore((s) => s.toggleMode);
   const { token } = theme.useToken();
@@ -62,16 +44,37 @@ export default function Layout() {
   const isEmployee = user?.role === "employee";
   const isBusiness = user?.role === "business";
 
+  const businessMenuItems = [
+    { key: "/chat", icon: <MessageOutlined />, label: t("nav.chat") },
+    { key: "/channels", icon: <ApiOutlined />, label: t("nav.channels") },
+    { key: "/products", icon: <ShoppingOutlined />, label: t("nav.products") },
+    { key: "/widgets", icon: <CodeOutlined />, label: t("nav.widgets") },
+    { key: "/labels", icon: <TagsOutlined />, label: t("nav.labels") },
+    { key: "/saved-replies", icon: <FileTextOutlined />, label: t("nav.savedReplies") },
+    { key: "/assignment-settings", icon: <PartitionOutlined />, label: t("nav.assignmentSettings") },
+    { key: "/employees", icon: <TeamOutlined />, label: t("nav.employees") },
+    { key: "/settings", icon: <SettingOutlined />, label: t("nav.settings") },
+  ];
+
+  const employeeMenuItems = [
+    { key: "/chat", icon: <MessageOutlined />, label: t("nav.chat") },
+    { key: "/saved-replies", icon: <FileTextOutlined />, label: t("nav.savedReplies") },
+    { key: "/employee-settings", icon: <SettingOutlined />, label: t("nav.settings") },
+  ];
+
+  const adminMenuItems = [
+    { key: "/admin", icon: <DashboardOutlined />, label: t("nav.dashboard") },
+  ];
+
   let menuItems = adminMenuItems;
   if (isBusiness) menuItems = businessMenuItems;
   else if (isEmployee) menuItems = employeeMenuItems;
 
-  // WebSocket key: employee uses their business_id, business uses own id
   const wsBusinessId = isEmployee ? user?.business_id : user?.id;
 
   useEffect(() => {
     if (wsBusinessId && !isAdmin) {
-      const ws = connectWebSocket(wsBusinessId, (data) => {
+      connectWebSocket(wsBusinessId, (data) => {
         if (data.type === "new_message") {
           addMessage({
             ...data.message,
@@ -82,7 +85,7 @@ export default function Layout() {
       });
       return () => disconnectWebSocket();
     }
-  }, [wsBusinessId, isAdmin]);
+  }, [addMessage, fetchConversations, isAdmin, wsBusinessId]);
 
   const handleLogout = () => {
     logout();
@@ -91,21 +94,20 @@ export default function Layout() {
 
   const confirmLogout = () => {
     Modal.confirm({
-      title: "Đăng xuất?",
-      content: "Bạn có chắc muốn đăng xuất?",
+      title: t("layout.logoutTitle"),
+      content: t("layout.logoutContent"),
       centered: true,
-      okText: "Đồng ý",
-      cancelText: "Hủy",
+      okText: t("layout.confirm"),
+      cancelText: t("layout.cancel"),
       onOk: handleLogout,
     });
   };
 
-  // Display name in header
   const displayName = isEmployee
-    ? (user?.full_name || user?.email)
+    ? user?.full_name || user?.email
     : isAdmin
-    ? "Admin Panel"
-    : (user?.business_name || user?.email);
+      ? t("layout.adminPanel")
+      : user?.business_name || user?.email;
 
   return (
     <AntLayout style={{ minHeight: "100vh", background: token.colorBgLayout }}>
@@ -143,7 +145,7 @@ export default function Layout() {
           )}
           {!collapsed && isEmployee && (
             <Tag color="blue" style={{ marginTop: 8 }}>
-              Nhân viên
+              {t("layout.employee")}
             </Tag>
           )}
         </div>
@@ -167,17 +169,12 @@ export default function Layout() {
               icon={<LogoutOutlined />}
               onClick={confirmLogout}
               style={{ width: 40, paddingInline: 0 }}
-              aria-label="Đăng xuất"
+              aria-label={t("layout.logout")}
             />
           ) : (
-          <Button
-            icon={<LogoutOutlined />}
-            onClick={confirmLogout}
-            block
-            style={{ overflow: "hidden", paddingInline: collapsed ? 0 : undefined }}
-          >
-            Đăng xuất
-          </Button>
+            <Button icon={<LogoutOutlined />} onClick={confirmLogout} block>
+              {t("layout.logout")}
+            </Button>
           )}
         </div>
       </Sider>
@@ -193,12 +190,25 @@ export default function Layout() {
           }}
         >
           <Typography.Text strong>{displayName}</Typography.Text>
-          <Tooltip title={themeMode === "dark" ? "Chế độ sáng" : "Chế độ tối"}>
-            <Button
-              icon={themeMode === "dark" ? <SunOutlined /> : <MoonOutlined />}
-              onClick={toggleTheme}
-            />
-          </Tooltip>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Tooltip title={t("language.toggleTooltip")}>
+              <button
+                type="button"
+                className={`language-toggle language-toggle-${language}`}
+                onClick={toggleLanguage}
+                aria-label={t("language.toggleTooltip")}
+              >
+                <span className="language-toggle__label">{language === "vi" ? "VIE" : "ENG"}</span>
+                <span className="language-toggle__knob" />
+              </button>
+            </Tooltip>
+            <Tooltip title={themeMode === "dark" ? t("theme.light") : t("theme.dark")}>
+              <Button
+                icon={themeMode === "dark" ? <SunOutlined /> : <MoonOutlined />}
+                onClick={toggleTheme}
+              />
+            </Tooltip>
+          </div>
         </Header>
         <Content
           style={{

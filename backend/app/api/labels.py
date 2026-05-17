@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_business, get_current_business_or_employee, get_effective_business_id
 from app.database import get_db
+from app.i18n import t
 from app.models.label import Label
 from app.models.user import User
 from app.schemas.label import LabelCreate, LabelOut, LabelUpdate
@@ -99,4 +100,4 @@ async def delete_label(
         raise HTTPException(status_code=404, detail="Label not found")
 
     await db.delete(label)
-    return {"detail": "Label deleted"}
+    return {"detail": t("Label deleted")}

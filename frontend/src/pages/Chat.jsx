@@ -8,9 +8,12 @@ import {
   UserOutlined,
   ShopOutlined,
   InfoCircleOutlined,
+  PaperClipOutlined,
+  FileOutlined,
 } from '@ant-design/icons'
 import { useChatStore } from '../store/chatStore'
 import { useAuthStore } from '../store/authStore'
+import { useI18n } from '../i18n/useI18n'
 import CustomerLabel from '../components/CustomerLabel'
 import client from '../api/client'
 import dayjs from 'dayjs'
@@ -60,6 +63,7 @@ export default function Chat() {
     fetchAssignmentSettings,
     setActiveConversation,
     sendMessage,
+    uploadMessageFile,
     toggleAI,
     assignConversation,
     assignLabel,
@@ -78,10 +82,12 @@ export default function Chat() {
   const [detailCollapsed, setDetailCollapsed] = useState(getStoredDetailCollapsed)
   const [assigningConversation, setAssigningConversation] = useState(false)
   const [conversationQueue, setConversationQueue] = useState('all')
+  const { t } = useI18n()
   const { token } = theme.useToken()
   const chatContainerRef = useRef(null)
   const resizingConversationRef = useRef(false)
   const messagesEndRef = useRef(null)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     fetchConversations()
@@ -217,6 +223,22 @@ export default function Chat() {
     }
   }
 
+  const handleFileChange = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file || !activeConversationId) return
+
+    setSending(true)
+    try {
+      await uploadMessageFile(activeConversationId, file, inputValue.trim())
+      setInputValue('')
+    } catch (err) {
+      message.error(err.response?.data?.detail || t('chat.uploadFailed'))
+    } finally {
+      setSending(false)
+    }
+  }
+
   const applySavedReply = (reply) => {
     setInputValue(reply.content)
     setReplyPickerIndex(0)
@@ -253,7 +275,7 @@ export default function Chat() {
     try {
       await assignLabel(activeConv.contact_id, labelId, activeConversationId)
     } catch (err) {
-      message.error(err.response?.data?.detail || 'Gán label thất bại')
+      message.error(err.response?.data?.detail || t('chat.assignLabelFailed'))
     } finally {
       setLabelSelectValue(undefined)
       setLabelSearchText('')
@@ -268,7 +290,7 @@ export default function Chat() {
       setLabelSelectValue(undefined)
       setLabelSearchText('')
     } catch (err) {
-      message.error(err.response?.data?.detail || 'Gỡ label thất bại')
+      message.error(err.response?.data?.detail || t('chat.removeLabelFailed'))
     }
   }
 
@@ -282,7 +304,7 @@ export default function Chat() {
         setActiveConversation(null)
       }
     } catch (err) {
-      message.error(err.response?.data?.detail || 'Cập nhật assignee thất bại')
+      message.error(err.response?.data?.detail || t('chat.updateAssigneeFailed'))
     } finally {
       setAssigningConversation(false)
     }
@@ -291,7 +313,7 @@ export default function Chat() {
   const activeAssigneeName =
     activeConv?.assigned_to?.full_name ||
     activeConv?.assigned_to?.email ||
-    'Doanh nghiệp'
+    t('chat.business')
 
   const getPlatformIcon = (platform) =>
     platform === 'facebook' ? (
@@ -433,21 +455,80 @@ export default function Chat() {
     </div>
   )
 
+  const renderMessageContent = (msg) => {
+    if (!msg.attachment_url) return <div>{msg.content}</div>
+
+    const fileName = msg.attachment_filename || msg.content || 'attachment'
+    const isImage = msg.attachment_kind === 'image' || msg.attachment_mime_type?.startsWith('image/')
+
+    return (
+      <div style={{ display: 'grid', gap: msg.content && msg.content !== fileName ? 8 : 0 }}>
+        {msg.content && msg.content !== fileName && <div>{msg.content}</div>}
+        <a
+          href={msg.attachment_url}
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            display: 'inline-flex',
+            flexDirection: 'column',
+            gap: 6,
+            maxWidth: 260,
+            color: token.colorText,
+          }}
+        >
+          {isImage ? (
+            <img
+              src={msg.attachment_url}
+              alt={fileName}
+              style={{
+                maxWidth: 240,
+                maxHeight: 180,
+                borderRadius: 8,
+                objectFit: 'cover',
+              }}
+            />
+          ) : (
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '8px 10px',
+                borderRadius: 8,
+                background: token.colorFillTertiary,
+              }}
+            >
+              <FileOutlined />
+              <Typography.Text ellipsis style={{ maxWidth: 210 }}>
+                {fileName}
+              </Typography.Text>
+            </span>
+          )}
+          {isImage && (
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              {fileName}
+            </Typography.Text>
+          )}
+        </a>
+      </div>
+    )
+  }
+
   const renderVisitorInfo = () => {
     const contact = activeConv?.contact
     if (!contact) return null
 
-    const idLabel = activeConv?.platform === 'widget' ? 'Visitor ID' : 'Platform ID'
+    const idLabel = activeConv?.platform === 'widget' ? t('chat.visitorId') : t('chat.platformId')
 
     return (
       <div style={{ marginTop: 18, paddingBottom: 18 }}>
-        <Typography.Text strong>Thông tin visitor</Typography.Text>
+        <Typography.Text strong>{t('chat.visitorInfo')}</Typography.Text>
         <div style={{ marginTop: 8 }}>
-          {renderDetailRow('Tên', contact.display_name)}
+          {renderDetailRow(t('chat.name'), contact.display_name)}
           {renderDetailRow('Email', contact.visitor_email, { copyable: Boolean(contact.visitor_email) })}
-          {renderDetailRow('SĐT', contact.visitor_phone, { copyable: Boolean(contact.visitor_phone) })}
+          {renderDetailRow(t('chat.phone'), contact.visitor_phone, { copyable: Boolean(contact.visitor_phone) })}
           {renderDetailRow(idLabel, contact.platform_user_id, { copyable: Boolean(contact.platform_user_id) })}
-          {renderDetailRow('Kênh', activeConv?.channel?.page_name || activeConv?.platform)}
+          {renderDetailRow(t('chat.channel'), activeConv?.channel?.page_name || activeConv?.platform)}
         </div>
       </div>
     )
@@ -468,7 +549,7 @@ export default function Chat() {
         }}
       >
         <div style={{ padding: '12px 16px', borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
-          <Typography.Text strong>Hội thoại ({conversations.length})</Typography.Text>
+          <Typography.Text strong>{t('chat.conversations')} ({conversations.length})</Typography.Text>
         </div>
         {user?.role === 'business' && (
           <div style={{ padding: '10px 16px', borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
@@ -477,16 +558,16 @@ export default function Chat() {
               value={conversationQueue}
               onChange={setConversationQueue}
               options={[
-                { label: 'Tất cả', value: 'all' },
-                { label: 'Unassigned', value: 'unassigned' },
-                { label: 'Assigned', value: 'assigned' },
+                { label: t('chat.all'), value: 'all' },
+                { label: t('chat.unassigned'), value: 'unassigned' },
+                { label: t('chat.assigned'), value: 'assigned' },
               ]}
               block
             />
           </div>
         )}
         {visibleConversations.length === 0 ? (
-          <Empty description="Chưa có hội thoại" style={{ marginTop: 40 }} />
+          <Empty description={t('chat.emptyConversations')} style={{ marginTop: 40 }} />
         ) : (
           <List
             dataSource={visibleConversations}
@@ -506,14 +587,14 @@ export default function Chat() {
                       {getConversationAvatar(conv)}
                     </Badge>
                   }
-                  title={conv.contact?.display_name || 'Unknown'}
+                  title={conv.contact?.display_name || t('chat.unknown')}
                   description={
                     <div>
                       <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                         {conv.platform} &middot;{' '}
                         {conv.last_message_at
                           ? dayjs(conv.last_message_at).format('HH:mm DD/MM')
-                          : 'Mới'}
+                          : t('chat.new')}
                       </Typography.Text>
                       {renderConversationLabels(conv)}
                     </div>
@@ -527,7 +608,7 @@ export default function Chat() {
       <div
         role="separator"
         aria-orientation="vertical"
-        title="Kéo để đổi độ rộng danh sách hội thoại"
+        title={t('chat.resizeConversations')}
         onMouseDown={(event) => {
           event.preventDefault()
           resizingConversationRef.current = true
@@ -564,10 +645,10 @@ export default function Chat() {
                   <span style={{ minWidth: 0, display: 'block', flex: 1 }}>
                     <Typography.Text
                       strong
-                      ellipsis={{ tooltip: activeConv?.contact?.display_name || 'Unknown' }}
+                      ellipsis={{ tooltip: activeConv?.contact?.display_name || t('chat.unknown') }}
                       style={{ display: 'block', maxWidth: '100%' }}
                     >
-                      {activeConv?.contact?.display_name || 'Unknown'}
+                      {activeConv?.contact?.display_name || t('chat.unknown')}
                     </Typography.Text>
                     <span
                       style={{
@@ -600,20 +681,20 @@ export default function Chat() {
                   justifyContent: 'flex-end',
                 }}
               >
-                <Typography.Text style={{ whiteSpace: 'nowrap' }}>AI tự động:</Typography.Text>
+                <Typography.Text style={{ whiteSpace: 'nowrap' }}>{t('chat.aiAuto')}</Typography.Text>
                 <Switch
                   checked={activeConv?.is_ai_enabled}
                   onChange={(checked) => toggleAI(activeConversationId, checked)}
                   checkedChildren={<RobotOutlined />}
                 />
-                <Tooltip title={detailCollapsed ? 'Mở chi tiết hội thoại' : 'Đóng chi tiết hội thoại'}>
+                <Tooltip title={detailCollapsed ? t('chat.openDetail') : t('chat.closeDetail')}>
                   <Button
                     size="small"
                     icon={<InfoCircleOutlined />}
                     type={detailCollapsed ? 'default' : 'primary'}
                     onClick={() => updateDetailCollapsed(!detailCollapsed)}
                   >
-                    <span style={{ whiteSpace: 'nowrap' }}>Chi tiết</span>
+                    <span style={{ whiteSpace: 'nowrap' }}>{t('chat.detail')}</span>
                   </Button>
                 </Tooltip>
               </div>
@@ -685,7 +766,7 @@ export default function Chat() {
                                   : token.colorInfoBg,
                           }}
                         >
-                          <div>{msg.content}</div>
+                          {renderMessageContent(msg)}
                         </div>
                       </div>
                     </div>
@@ -775,8 +856,22 @@ export default function Chat() {
                 </div>
               )}
               <div style={{ display: 'flex', gap: 8 }}>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                />
+                <Tooltip title={t('chat.attachFile')}>
+                  <Button
+                    icon={<PaperClipOutlined />}
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={!activeConversationId || sending}
+                    size="large"
+                  />
+                </Tooltip>
                 <Input
-                  placeholder="Nhập tin nhắn..."
+                  placeholder={t('chat.messagePlaceholder')}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleInputKeyDown}
@@ -804,7 +899,7 @@ export default function Chat() {
               alignItems: 'center',
             }}
           >
-            <Empty description="Chọn một hội thoại để bắt đầu" />
+            <Empty description={t('chat.pickConversation')} />
           </div>
         )}
       </div>
@@ -820,15 +915,15 @@ export default function Chat() {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography.Text strong>Chi tiết</Typography.Text>
+              <Typography.Text strong>{t('chat.detail')}</Typography.Text>
             </div>
 
             <div style={{ marginTop: 18, paddingBottom: 18, borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <Typography.Text strong>Assignee</Typography.Text>
+                <Typography.Text strong>{t('chat.assignee')}</Typography.Text>
                 {employeeAssignmentLocked && (
                   <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    Đã khóa
+                    {t('chat.assignmentLocked')}
                   </Typography.Text>
                 )}
               </div>
@@ -857,11 +952,11 @@ export default function Chat() {
 
             <div style={{ marginTop: 18, paddingBottom: 18, borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <Typography.Text strong>Labels</Typography.Text>
+                <Typography.Text strong>{t('chat.labels')}</Typography.Text>
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
                 {activeContactLabels.length === 0 ? (
-                  <Typography.Text type="secondary">Chưa có label</Typography.Text>
+                  <Typography.Text type="secondary">{t('chat.noLabels')}</Typography.Text>
                 ) : (
                   activeContactLabels.map((label) => (
                     <CustomerLabel
@@ -877,7 +972,7 @@ export default function Chat() {
                 key={labelSelectorKey}
                 size="small"
                 showSearch
-                placeholder="Thêm label"
+                placeholder={t('chat.addLabel')}
                 value={labelSelectValue}
                 searchValue={labelSearchText}
                 optionFilterProp="label"

@@ -4,6 +4,7 @@ import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import client from '../api/client'
 import CustomerLabel from '../components/CustomerLabel'
+import { useI18n } from '../i18n/useI18n'
 
 const DEFAULT_COLOR = '#d6e400'
 
@@ -14,6 +15,7 @@ export default function Labels() {
   const [editingLabel, setEditingLabel] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [form] = Form.useForm()
+  const { t } = useI18n()
 
   const fetchLabels = async () => {
     setLoading(true)
@@ -21,7 +23,7 @@ export default function Labels() {
       const res = await client.get('/api/labels')
       setLabels(res.data)
     } catch {
-      message.error('Không thể tải danh sách label')
+      message.error(t('labelsPage.loadError'))
     } finally {
       setLoading(false)
     }
@@ -57,10 +59,10 @@ export default function Labels() {
       }
       if (editingLabel) {
         await client.put(`/api/labels/${editingLabel.id}`, payload)
-        message.success('Cập nhật label thành công')
+        message.success(t('labelsPage.updateSuccess'))
       } else {
         await client.post('/api/labels', payload)
-        message.success('Tạo label thành công')
+        message.success(t('labelsPage.createSuccess'))
       }
       setModalOpen(false)
       setEditingLabel(null)
@@ -68,7 +70,7 @@ export default function Labels() {
       fetchLabels()
     } catch (err) {
       if (err.errorFields) return
-      message.error(err.response?.data?.detail || 'Thao tác thất bại')
+      message.error(err.response?.data?.detail || t('labelsPage.actionError'))
     } finally {
       setSubmitting(false)
     }
@@ -77,10 +79,10 @@ export default function Labels() {
   const handleDelete = async (labelId) => {
     try {
       await client.delete(`/api/labels/${labelId}`)
-      message.success('Đã xóa label')
+      message.success(t('labelsPage.deleteSuccess'))
       fetchLabels()
     } catch {
-      message.error('Xóa label thất bại')
+      message.error(t('labelsPage.deleteError'))
     }
   }
 
@@ -94,7 +96,7 @@ export default function Labels() {
       render: (_, record) => <CustomerLabel label={record} />,
     },
     {
-      title: 'Màu',
+      title: t('labelsPage.color'),
       dataIndex: 'color',
       width: 150,
       render: (color) => (
@@ -137,13 +139,13 @@ export default function Labels() {
       ),
     },
     {
-      title: 'Internal note',
+      title: t('labelsPage.note'),
       dataIndex: 'internal_note',
       ellipsis: true,
       render: (value) => value || '-',
     },
     {
-      title: 'Cập nhật',
+      title: t('common.updatedAt'),
       dataIndex: 'updated_at',
       width: 150,
       render: (value) => dayjs(value).format('DD/MM/YYYY HH:mm'),
@@ -160,11 +162,11 @@ export default function Labels() {
             style={{ marginRight: 8 }}
           />
           <Popconfirm
-            title="Xóa label này?"
-            description="Label sẽ được gỡ khỏi các khách hàng đang dùng."
+            title={t('labelsPage.deleteTitle')}
+            description={t('labelsPage.deleteDescription')}
             onConfirm={() => handleDelete(record.id)}
-            okText="Xóa"
-            cancelText="Hủy"
+            okText={t('common.delete')}
+            cancelText={t('common.cancel')}
             okButtonProps={{ danger: true }}
           >
             <Button danger icon={<DeleteOutlined />} size="small" />
@@ -177,15 +179,15 @@ export default function Labels() {
   return (
     <div style={{ padding: 24 }}>
       <Card
-        title={`Quản lý label (${labels.length})`}
+        title={`${t('labelsPage.title')} (${labels.length})`}
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
-            Thêm label
+            {t('labelsPage.add')}
           </Button>
         }
       >
         <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
-          Tạo bộ label riêng để phân loại khách hàng trong hội thoại.
+          {t('labelsPage.helper')}
         </Typography.Text>
         <Table
           dataSource={labels}
@@ -193,12 +195,12 @@ export default function Labels() {
           rowKey="id"
           loading={loading}
           pagination={{ pageSize: 10 }}
-          locale={{ emptyText: 'Chưa có label nào' }}
+          locale={{ emptyText: t('labelsPage.empty') }}
         />
       </Card>
 
       <Modal
-        title={editingLabel ? 'Chỉnh sửa label' : 'Thêm label mới'}
+        title={editingLabel ? t('labelsPage.editTitle') : t('labelsPage.addTitle')}
         open={modalOpen}
         onOk={handleSubmit}
         onCancel={() => {
@@ -206,27 +208,27 @@ export default function Labels() {
           setEditingLabel(null)
           form.resetFields()
         }}
-        okText={editingLabel ? 'Cập nhật' : 'Tạo label'}
-        cancelText="Hủy"
+        okText={editingLabel ? t('common.update') : t('labelsPage.createButton')}
+        cancelText={t('common.cancel')}
         confirmLoading={submitting}
       >
         <Form form={form} layout="vertical" initialValues={{ color: DEFAULT_COLOR }}>
           <Form.Item
             name="name"
-            label="Tên label"
+            label={t('labelsPage.name')}
             rules={[
-              { required: true, message: 'Nhập tên label' },
-              { max: 80, message: 'Tên label tối đa 80 ký tự' },
+              { required: true, message: t('labelsPage.nameRequired') },
+              { max: 80, message: t('labelsPage.nameMax') },
             ]}
           >
             <Input placeholder="VD: Doing" />
           </Form.Item>
-          <Form.Item name="color" label="Màu label" rules={[{ required: true }]}>
+          <Form.Item name="color" label={t('labelsPage.colorLabel')} rules={[{ required: true }]}>
             <Input type="color" style={{ width: 72, height: 36, padding: 4 }} />
           </Form.Item>
           <div style={{ marginBottom: 16 }}>
             <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>
-              Xem trước
+              {t('labelsPage.preview')}
             </Typography.Text>
             <CustomerLabel
               label={{
@@ -239,7 +241,7 @@ export default function Labels() {
           <Form.Item name="internal_note" label="Internal note">
             <Input.TextArea
               rows={4}
-              placeholder="Ghi chú nội bộ về cách dùng label này..."
+              placeholder={t('labelsPage.notePlaceholder')}
               maxLength={1000}
               showCount
             />

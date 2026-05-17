@@ -5,6 +5,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_business_or_employee, get_effective_business_id
 from app.database import get_db
+from app.i18n import t
 from app.models.saved_reply import SavedReply
 from app.models.user import User
 from app.schemas.saved_reply import SavedReplyCreate, SavedReplyOut, SavedReplyUpdate
@@ -176,4 +177,4 @@ async def delete_saved_reply(
         raise HTTPException(status_code=404, detail="Saved reply not found")
 
     await db.delete(reply)
-    return {"detail": "Saved reply deleted"}
+    return {"detail": t("Saved reply deleted")}

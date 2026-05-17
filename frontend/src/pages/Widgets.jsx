@@ -22,6 +22,7 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import client from "../api/client";
+import { useI18n } from "../i18n/useI18n";
 import dayjs from "dayjs";
 
 export default function Widgets() {
@@ -30,6 +31,7 @@ export default function Widgets() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [editingWidget, setEditingWidget] = useState(null);
+  const { t } = useI18n();
 
   const fetchWidgets = async () => {
     setLoading(true);
@@ -38,7 +40,7 @@ export default function Widgets() {
       setWidgets(response.data || []);
     } catch (err) {
       message.error(
-        "Lỗi tải widgets: " + (err.response?.data?.detail || err.message),
+        t("widgets.loadError", { reason: err.response?.data?.detail || err.message }),
       );
     } finally {
       setLoading(false);
@@ -57,7 +59,7 @@ export default function Widgets() {
         .filter((o) => o);
 
       if (origins.length === 0) {
-        message.error("Vui lòng nhập ít nhất một allowed origin");
+        message.error(t("widgets.originRequired"));
         return;
       }
 
@@ -66,13 +68,13 @@ export default function Widgets() {
         widget_name: values.widget_name || null,
       });
 
-      message.success("Tạo widget thành công!");
+      message.success(t("widgets.createSuccess"));
       setWidgets([response.data, ...widgets]);
       setIsModalOpen(false);
       form.resetFields();
     } catch (err) {
       message.error(
-        "Lỗi tạo widget: " + (err.response?.data?.detail || err.message),
+        t("widgets.createError", { reason: err.response?.data?.detail || err.message }),
       );
     }
   };
@@ -80,18 +82,18 @@ export default function Widgets() {
   const handleDeleteWidget = async (widgetId) => {
     try {
       await client.delete(`/api/widgets/${widgetId}`);
-      message.success("Xóa widget thành công!");
+      message.success(t("widgets.deleteSuccess"));
       setWidgets(widgets.filter((w) => w.widget_id !== widgetId));
     } catch (err) {
       message.error(
-        "Lỗi xóa widget: " + (err.response?.data?.detail || err.message),
+        t("widgets.deleteError", { reason: err.response?.data?.detail || err.message }),
       );
     }
   };
 
   const copyToClipboard = (text, label) => {
     navigator.clipboard.writeText(text);
-    message.success(`Đã sao chép ${label}`);
+    message.success(t("widgets.copied", { label }));
   };
 
   const columns = [
@@ -100,7 +102,7 @@ export default function Widgets() {
       dataIndex: "widget_id",
       key: "widget_id",
       render: (id) => (
-        <Tooltip title="Click để sao chép">
+        <Tooltip title={t("widgets.clickToCopy")}>
           <span
             style={{ cursor: "pointer", color: "#1890ff" }}
             onClick={() => copyToClipboard(id, "Widget ID")}
@@ -111,13 +113,13 @@ export default function Widgets() {
       ),
     },
     {
-      title: "Tên",
+      title: t("widgets.name"),
       dataIndex: "page_name",
       key: "page_name",
       render: (name) => name || "Widget",
     },
     {
-      title: "Origins",
+      title: t("widgets.origins"),
       dataIndex: "allowed_origins",
       key: "allowed_origins",
       render: (origins) => {
@@ -135,7 +137,7 @@ export default function Widgets() {
       },
     },
     {
-      title: "Trạng thái",
+      title: t("common.status"),
       dataIndex: "is_active",
       key: "is_active",
       align: "center",
@@ -149,17 +151,17 @@ export default function Widgets() {
         ),
     },
     {
-      title: "Tạo lúc",
+      title: t("widgets.createdAt"),
       dataIndex: "created_at",
       key: "created_at",
       render: (date) => dayjs(date).format("DD/MM/YYYY HH:mm"),
     },
     {
-      title: "Thao tác",
+      title: t("common.actions"),
       key: "action",
       render: (_, record) => (
         <Space>
-          <Tooltip title="Sao chép embed code">
+          <Tooltip title={t("widgets.copyEmbed")}>
             <Button
               type="primary"
               icon={<CopyOutlined />}
@@ -181,11 +183,11 @@ export default function Widgets() {
           </Tooltip>
 
           <Popconfirm
-            title="Xóa widget"
-            description="Bạn có chắc muốn xóa widget này không?"
+            title={t("widgets.deleteTitle")}
+            description={t("widgets.deleteDescription")}
             onConfirm={() => handleDeleteWidget(record.widget_id)}
-            okText="Xóa"
-            cancelText="Hủy"
+            okText={t("common.delete")}
+            cancelText={t("common.cancel")}
           >
             <Button type="danger" icon={<DeleteOutlined />} size="small" />
           </Popconfirm>
@@ -204,13 +206,13 @@ export default function Widgets() {
             icon={<PlusOutlined />}
             onClick={() => setIsModalOpen(true)}
           >
-            Tạo Widget
+            {t("widgets.createButton")}
           </Button>
         }
         loading={loading}
       >
         {widgets.length === 0 ? (
-          <Empty description="Chưa có widget nào" />
+          <Empty description={t("widgets.empty")} />
         ) : (
           <Table
             columns={columns}
@@ -224,7 +226,7 @@ export default function Widgets() {
 
       {/* Create Widget Modal */}
       <Modal
-        title={editingWidget ? "Cập nhật Widget" : "Tạo Widget Mới"}
+        title={editingWidget ? t("widgets.updateTitle") : t("widgets.createTitle")}
         open={isModalOpen}
         onOk={() => form.submit()}
         onCancel={() => {
@@ -243,9 +245,9 @@ export default function Widgets() {
           }}
         >
           <Form.Item
-            label="Tên Widget (tùy chọn)"
+            label={t("widgets.nameLabel")}
             name="widget_name"
-            tooltip="Tên để nhận diện widget của bạn"
+            tooltip={t("widgets.nameTooltip")}
           >
             <Input placeholder="VD: Customer Support Widget" />
           </Form.Item>
@@ -256,10 +258,10 @@ export default function Widgets() {
             rules={[
               {
                 required: true,
-                message: "Vui lòng nhập ít nhất một allowed origin",
+                message: t("widgets.originRequired"),
               },
             ]}
-            tooltip="Danh sách các domain được phép sử dụng widget (một dòng một domain)"
+            tooltip={t("widgets.originsTooltip")}
           >
             <Input.TextArea
               placeholder="https://example.com&#10;https://www.example.com&#10;https://app.example.com"
@@ -267,15 +269,15 @@ export default function Widgets() {
             />
           </Form.Item>
 
-          <Card size="small" title="Hướng dẫn" type="inner">
+          <Card size="small" title={t("widgets.guide")} type="inner">
             <p style={{ fontSize: "12px", color: "#666" }}>
-              1. Nhập các domain website của khách hàng (với https://)
+              {t("widgets.guideStep1")}
               <br />
-              2. Một domain một dòng
+              {t("widgets.guideStep2")}
               <br />
-              3. Widget chỉ hoạt động trên các domain được phép
+              {t("widgets.guideStep3")}
               <br />
-              4. Để test local, thêm: <code>http://localhost:5173</code>
+              {t("widgets.guideStep4")} <code>http://localhost:5173</code>
             </p>
           </Card>
         </Form>

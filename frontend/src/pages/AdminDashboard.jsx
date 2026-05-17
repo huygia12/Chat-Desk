@@ -19,6 +19,7 @@ import {
   CheckCircleOutlined,
 } from '@ant-design/icons'
 import client from '../api/client'
+import { useI18n } from '../i18n/useI18n'
 import dayjs from 'dayjs'
 
 const { Title } = Typography
@@ -27,6 +28,7 @@ export default function AdminDashboard() {
   const [businesses, setBusinesses] = useState([])
   const [statistics, setStatistics] = useState(null)
   const [loading, setLoading] = useState(false)
+  const { t } = useI18n()
 
   const fetchData = async () => {
     setLoading(true)
@@ -38,7 +40,7 @@ export default function AdminDashboard() {
       setStatistics(statsRes.data)
       setBusinesses(businessesRes.data)
     } catch (err) {
-      message.error('Lỗi tải dữ liệu: ' + (err.response?.data?.detail || err.message))
+      message.error(t('admin.loadError', { reason: err.response?.data?.detail || err.message }))
     } finally {
       setLoading(false)
     }
@@ -50,10 +52,10 @@ export default function AdminDashboard() {
 
   const columns = [
     {
-      title: 'Tên doanh nghiệp',
+      title: t('admin.businessName'),
       dataIndex: 'business_name',
       key: 'business_name',
-      render: (name) => name || <i style={{ color: '#999' }}>Chưa đặt tên</i>,
+      render: (name) => name || <i style={{ color: '#999' }}>{t('admin.unnamedBusiness')}</i>,
     },
     {
       title: 'Email',
@@ -61,34 +63,34 @@ export default function AdminDashboard() {
       key: 'email',
     },
     {
-      title: 'Ngày đăng ký',
+      title: t('admin.registeredAt'),
       dataIndex: 'created_at',
       key: 'created_at',
       render: (date) => dayjs(date).format('DD/MM/YYYY HH:mm'),
     },
     {
-      title: 'Số kênh',
+      title: t('admin.channelCount'),
       dataIndex: 'channel_count',
       key: 'channel_count',
       align: 'center',
       render: (count) => <Tag color="blue">{count}</Tag>,
     },
     {
-      title: 'Số hội thoại',
+      title: t('admin.conversationCount'),
       dataIndex: 'conversation_count',
       key: 'conversation_count',
       align: 'center',
       render: (count) => <Tag color="green">{count}</Tag>,
     },
     {
-      title: 'Số sản phẩm',
+      title: t('admin.productCount'),
       dataIndex: 'product_count',
       key: 'product_count',
       align: 'center',
       render: (count) => <Tag color="orange">{count}</Tag>,
     },
     {
-      title: 'Trạng thái',
+      title: t('common.status'),
       dataIndex: 'is_active',
       key: 'is_active',
       align: 'center',
@@ -115,7 +117,7 @@ export default function AdminDashboard() {
           <Col xs={24} sm={12} lg={8}>
             <Card>
               <Statistic
-                title="Tổng doanh nghiệp"
+                title={t('admin.totalBusinesses')}
                 value={statistics.total_businesses}
                 prefix={<ShopOutlined />}
                 valueStyle={{ color: '#1890ff' }}
@@ -125,7 +127,7 @@ export default function AdminDashboard() {
           <Col xs={24} sm={12} lg={8}>
             <Card>
               <Statistic
-                title="Doanh nghiệp Active"
+                title={t('admin.activeBusinesses')}
                 value={statistics.active_businesses}
                 prefix={<CheckCircleOutlined />}
                 valueStyle={{ color: '#52c41a' }}
@@ -135,7 +137,7 @@ export default function AdminDashboard() {
           <Col xs={24} sm={12} lg={8}>
             <Card>
               <Statistic
-                title="Tổng kênh kết nối"
+                title={t('admin.totalChannels')}
                 value={statistics.total_channels}
                 prefix={<LinkOutlined />}
                 valueStyle={{ color: '#722ed1' }}
@@ -145,7 +147,7 @@ export default function AdminDashboard() {
           <Col xs={24} sm={12} lg={8}>
             <Card>
               <Statistic
-                title="Tổng hội thoại"
+                title={t('admin.totalConversations')}
                 value={statistics.total_conversations}
                 prefix={<MessageOutlined />}
                 valueStyle={{ color: '#13c2c2' }}
@@ -155,7 +157,7 @@ export default function AdminDashboard() {
           <Col xs={24} sm={12} lg={8}>
             <Card>
               <Statistic
-                title="Tổng tin nhắn"
+                title={t('admin.totalMessages')}
                 value={statistics.total_messages}
                 prefix={<MessageOutlined />}
                 valueStyle={{ color: '#faad14' }}
@@ -165,7 +167,7 @@ export default function AdminDashboard() {
           <Col xs={24} sm={12} lg={8}>
             <Card>
               <Statistic
-                title="Tổng sản phẩm"
+                title={t('admin.totalProducts')}
                 value={statistics.total_products}
                 prefix={<ShoppingOutlined />}
                 valueStyle={{ color: '#fa541c' }}
@@ -180,7 +182,7 @@ export default function AdminDashboard() {
         title={
           <Space>
             <ShopOutlined />
-            <span>Danh sách Doanh nghiệp</span>
+            <span>{t('admin.businessList')}</span>
           </Space>
         }
       >
@@ -192,7 +194,7 @@ export default function AdminDashboard() {
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
-            showTotal: (total) => `Tổng ${total} doanh nghiệp`,
+            showTotal: (total) => t('admin.totalBusinessCount', { total }),
           }}
         />
       </Card>

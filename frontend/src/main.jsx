@@ -3,23 +3,31 @@ import { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { ConfigProvider, theme } from 'antd'
+import enUS from 'antd/locale/en_US'
 import viVN from 'antd/locale/vi_VN'
 import App from './App'
+import { useLanguageStore } from './store/languageStore'
 import { useThemeStore } from './store/themeStore'
 import './styles/global.css'
 
 function RootProviders() {
   const mode = useThemeStore((state) => state.mode)
+  const language = useLanguageStore((state) => state.language)
   const isDark = mode === 'dark'
+  const antdLocale = language === 'vi' ? viVN : enUS
 
   useEffect(() => {
     document.documentElement.dataset.theme = mode
     document.body.style.background = isDark ? '#141414' : '#fff'
   }, [isDark, mode])
 
+  useEffect(() => {
+    document.documentElement.lang = language === 'vi' ? 'vi' : 'en'
+  }, [language])
+
   return (
     <ConfigProvider
-      locale={viVN}
+      locale={antdLocale}
       theme={{
         algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
       }}

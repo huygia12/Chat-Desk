@@ -2,21 +2,23 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Card, Form, Input, Button, Typography, message } from 'antd'
 import { UserOutlined, LockOutlined, ShopOutlined, PhoneOutlined } from '@ant-design/icons'
+import { useI18n } from '../i18n/useI18n'
 import { useAuthStore } from '../store/authStore'
 
 export default function Register() {
   const [loading, setLoading] = useState(false)
   const register = useAuthStore((s) => s.register)
   const navigate = useNavigate()
+  const { t } = useI18n()
 
   const onFinish = async (values) => {
     setLoading(true)
     try {
       await register(values.email, values.password, values.business_name, values.phone)
-      message.success('Đăng ký thành công!')
+      message.success(t('auth.registerSuccess'))
       navigate('/chat')
     } catch (err) {
-      message.error(err.response?.data?.detail || 'Đăng ký thất bại')
+      message.error(err.response?.data?.detail || t('auth.registerFailed'))
     } finally {
       setLoading(false)
     }
@@ -40,32 +42,32 @@ export default function Register() {
           type="secondary"
           style={{ display: 'block', textAlign: 'center', marginBottom: 24 }}
         >
-          Đăng ký tài khoản Doanh nghiệp
+          {t('auth.registerSubtitle')}
         </Typography.Text>
         <Form onFinish={onFinish} layout="vertical">
           <Form.Item
             name="business_name"
-            rules={[{ required: true, message: 'Nhập tên doanh nghiệp' }]}
+            rules={[{ required: true, message: t('auth.businessNameRequired') }]}
           >
-            <Input prefix={<ShopOutlined />} placeholder="Tên doanh nghiệp" size="large" />
+            <Input prefix={<ShopOutlined />} placeholder={t('auth.businessNamePlaceholder')} size="large" />
           </Form.Item>
-          <Form.Item name="email" rules={[{ required: true, message: 'Nhập email' }]}>
+          <Form.Item name="email" rules={[{ required: true, message: t('auth.emailRequired') }]}>
             <Input prefix={<UserOutlined />} placeholder="Email" size="large" />
           </Form.Item>
-          <Form.Item name="password" rules={[{ required: true, min: 6, message: 'Tối thiểu 6 ký tự' }]}>
-            <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu" size="large" />
+          <Form.Item name="password" rules={[{ required: true, min: 6, message: t('auth.minPassword') }]}>
+            <Input.Password prefix={<LockOutlined />} placeholder={t('auth.passwordPlaceholder')} size="large" />
           </Form.Item>
           <Form.Item name="phone">
-            <Input prefix={<PhoneOutlined />} placeholder="Số điện thoại (tùy chọn)" size="large" />
+            <Input prefix={<PhoneOutlined />} placeholder={t('auth.phonePlaceholder')} size="large" />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={loading} block size="large">
-              Đăng ký
+              {t('auth.registerButton')}
             </Button>
           </Form.Item>
         </Form>
         <div style={{ textAlign: 'center' }}>
-          Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+          {t('auth.hasAccount')} <Link to="/login">{t('auth.loginButton')}</Link>
         </div>
       </Card>
     </div>

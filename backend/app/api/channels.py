@@ -7,6 +7,7 @@ from sqlalchemy import select
 from jose import jwt, JWTError
 from app.config import get_settings
 from app.database import get_db
+from app.i18n import t
 from app.models.user import User
 from app.models.channel import Channel
 from app.schemas.channel import ChannelCreate, ChannelOut
@@ -270,7 +271,7 @@ async def disconnect_channel(
         await delete_telegram_webhook(channel.access_token)
 
     await db.delete(channel)
-    return {"detail": "Channel disconnected"}
+    return {"detail": t("Channel disconnected")}
 
 
 # ==================== Telegram ====================

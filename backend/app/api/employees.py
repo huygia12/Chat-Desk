@@ -4,6 +4,7 @@ from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.database import get_db
+from app.i18n import t
 from app.models.user import User
 from app.schemas.user import (
     EmployeeCreate,
@@ -115,7 +116,7 @@ async def update_my_employee_password(
 
     current_user.password_hash = pwd_context.hash(data.password)
     await db.flush()
-    return {"detail": "Password updated"}
+    return {"detail": t("Password updated")}
 
 
 @router.patch("/{employee_id}/profile", response_model=EmployeeOut)
@@ -167,7 +168,7 @@ async def update_employee_password(
 
     employee.password_hash = pwd_context.hash(data.password)
     await db.flush()
-    return {"detail": "Password updated"}
+    return {"detail": t("Password updated")}
 
 
 @router.patch("/{employee_id}", response_model=EmployeeOut)

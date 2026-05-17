@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, Form, Input, Button, Typography, message } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
+import { useI18n } from "../i18n/useI18n";
 import { useAuthStore } from "../store/authStore";
 
 export default function Login() {
@@ -9,12 +10,13 @@ export default function Login() {
   const login = useAuthStore((s) => s.login);
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const onFinish = async (values) => {
     setLoading(true);
     try {
       await login(values.email, values.password);
-      message.success("Đăng nhập thành công!");
+      message.success(t("auth.loginSuccess"));
 
       // Redirect based on role
       const currentUser = useAuthStore.getState().user;
@@ -24,7 +26,7 @@ export default function Login() {
         navigate("/chat");
       }
     } catch (err) {
-      message.error(err.response?.data?.detail || "Đăng nhập thất bại");
+      message.error(err.response?.data?.detail || t("auth.loginFailed"));
     } finally {
       setLoading(false);
     }
@@ -51,22 +53,22 @@ export default function Login() {
           type="secondary"
           style={{ display: "block", textAlign: "center", marginBottom: 24 }}
         >
-          Đăng nhập vào hệ thống
+          {t("auth.loginSubtitle")}
         </Typography.Text>
         <Form onFinish={onFinish} layout="vertical">
           <Form.Item
             name="email"
-            rules={[{ required: true, message: "Nhập email" }]}
+            rules={[{ required: true, message: t("auth.emailRequired") }]}
           >
             <Input prefix={<UserOutlined />} placeholder="Email" size="large" />
           </Form.Item>
           <Form.Item
             name="password"
-            rules={[{ required: true, message: "Nhập mật khẩu", min: 6 }]}
+            rules={[{ required: true, message: t("auth.passwordRequired"), min: 6 }]}
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="Mật khẩu"
+              placeholder={t("auth.passwordPlaceholder")}
               size="large"
             />
           </Form.Item>
@@ -78,12 +80,12 @@ export default function Login() {
               block
               size="large"
             >
-              Đăng nhập
+              {t("auth.loginButton")}
             </Button>
           </Form.Item>
         </Form>
         <div style={{ textAlign: "center" }}>
-          Chưa có tài khoản? <Link to="/register">Đăng ký doanh nghiệp</Link>
+          {t("auth.noAccount")} <Link to="/register">{t("auth.registerBusiness")}</Link>
         </div>
       </Card>
     </div>

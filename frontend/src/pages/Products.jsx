@@ -15,6 +15,7 @@ import {
 } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons'
 import client from '../api/client'
+import { useI18n } from '../i18n/useI18n'
 import dayjs from 'dayjs'
 
 export default function Products() {
@@ -24,6 +25,7 @@ export default function Products() {
   const [editingProduct, setEditingProduct] = useState(null)
   const [importing, setImporting] = useState(false)
   const [form] = Form.useForm()
+  const { t } = useI18n()
 
   const fetchProducts = async () => {
     setLoading(true)
@@ -31,7 +33,7 @@ export default function Products() {
       const res = await client.get('/api/products')
       setProducts(res.data)
     } catch (err) {
-      message.error('Lỗi tải danh sách sản phẩm')
+      message.error(t('products.loadError'))
     } finally {
       setLoading(false)
     }
@@ -46,17 +48,17 @@ export default function Products() {
       const values = await form.validateFields()
       if (editingProduct) {
         await client.put(`/api/products/${editingProduct.id}`, values)
-        message.success('Cập nhật sản phẩm thành công')
+        message.success(t('products.updateSuccess'))
       } else {
         await client.post('/api/products', values)
-        message.success('Thêm sản phẩm thành công')
+        message.success(t('products.createSuccess'))
       }
       setModalOpen(false)
       setEditingProduct(null)
       form.resetFields()
       fetchProducts()
     } catch (err) {
-      message.error(err.response?.data?.detail || 'Thao tác thất bại')
+      message.error(err.response?.data?.detail || t('products.actionError'))
     }
   }
 
@@ -69,10 +71,10 @@ export default function Products() {
   const handleDelete = async (id) => {
     try {
       await client.delete(`/api/products/${id}`)
-      message.success('Xóa sản phẩm thành công')
+      message.success(t('products.deleteSuccess'))
       fetchProducts()
     } catch {
-      message.error('Xóa thất bại')
+      message.error(t('products.deleteError'))
     }
   }
 
@@ -89,14 +91,14 @@ export default function Products() {
         const data = JSON.parse(text)
         const products = Array.isArray(data) ? data : data.products || []
         if (products.length === 0) {
-          message.warning('File JSON không có sản phẩm')
+          message.warning(t('products.emptyJson'))
           return
         }
         await client.post('/api/products/import', products)
-        message.success(`Import thành công ${products.length} sản phẩm`)
+        message.success(t('products.importSuccess', { count: products.length }))
         fetchProducts()
       } catch (err) {
-        message.error(err.response?.data?.detail || 'Import thất bại, kiểm tra lại file JSON')
+        message.error(err.response?.data?.detail || t('products.importError'))
       } finally {
         setImporting(false)
       }
@@ -105,32 +107,32 @@ export default function Products() {
   }
 
   const columns = [
-    { title: 'Tên sản phẩm', dataIndex: 'name', ellipsis: true },
+    { title: t('products.productName'), dataIndex: 'name', ellipsis: true },
     {
-      title: 'Mô tả',
+      title: t('products.description'),
       dataIndex: 'description',
       ellipsis: true,
       render: (v) => v || '-',
     },
     {
-      title: 'Giá (VND)',
+      title: t('products.price'),
       dataIndex: 'price',
       render: (v) => (v != null ? Number(v).toLocaleString('vi-VN') : '-'),
       width: 140,
     },
     {
-      title: 'Trạng thái',
+      title: t('common.status'),
       dataIndex: 'status',
       width: 120,
       render: (v) =>
         v === 'available' ? (
-          <Tag color="green">Còn hàng</Tag>
+          <Tag color="green">{t('products.inStock')}</Tag>
         ) : (
-          <Tag color="red">Hết hàng</Tag>
+          <Tag color="red">{t('products.outOfStock')}</Tag>
         ),
     },
     {
-      title: 'Cập nhật',
+      title: t('common.updatedAt'),
       dataIndex: 'updated_at',
       width: 150,
       render: (v) => dayjs(v).format('DD/MM/YYYY HH:mm'),
@@ -146,7 +148,7 @@ export default function Products() {
             onClick={() => handleEdit(record)}
             style={{ marginRight: 8 }}
           />
-          <Popconfirm title="Xóa sản phẩm này?" onConfirm={() => handleDelete(record.id)}>
+          <Popconfirm title={t('products.deleteTitle')} onConfirm={() => handleDelete(record.id)}>
             <Button danger icon={<DeleteOutlined />} size="small" />
           </Popconfirm>
         </>
@@ -157,7 +159,7 @@ export default function Products() {
   return (
     <div style={{ padding: 24 }}>
       <Card
-        title={`Sản phẩm (${products.length})`}
+        title={`${t('products.title')} (${products.length})`}
         extra={
           <div style={{ display: 'flex', gap: 8 }}>
             <Button
@@ -176,13 +178,13 @@ export default function Products() {
                 setModalOpen(true)
               }}
             >
-              Thêm sản phẩm
+              {t('products.addProduct')}
             </Button>
           </div>
         }
       >
         <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
-          Thêm sản phẩm để AI có thể tự động trả lời khách hàng về giá cả, tình trạng hàng.
+          {t('products.helper')}
         </Typography.Text>
         <Table
           dataSource={products}
@@ -190,12 +192,12 @@ export default function Products() {
           rowKey="id"
           loading={loading}
           pagination={{ pageSize: 10 }}
-          locale={{ emptyText: 'Chưa có sản phẩm nào' }}
+          locale={{ emptyText: t('products.empty') }}
         />
       </Card>
 
       <Modal
-        title={editingProduct ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
+        title={editingProduct ? t('products.editTitle') : t('products.addTitle')}
         open={modalOpen}
         onOk={handleSubmit}
         onCancel={() => {
@@ -203,24 +205,24 @@ export default function Products() {
           setEditingProduct(null)
           form.resetFields()
         }}
-        okText={editingProduct ? 'Cập nhật' : 'Thêm'}
-        cancelText="Hủy"
+        okText={editingProduct ? t('common.update') : t('common.add')}
+        cancelText={t('common.cancel')}
       >
         <Form form={form} layout="vertical" initialValues={{ status: 'available' }}>
           <Form.Item
             name="name"
-            label="Tên sản phẩm"
-            rules={[{ required: true, message: 'Nhập tên sản phẩm' }]}
+            label={t('products.productName')}
+            rules={[{ required: true, message: t('products.nameRequired') }]}
           >
-            <Input placeholder="VD: Giày Nike Air Force 1" />
+            <Input placeholder={t('products.namePlaceholder')} />
           </Form.Item>
-          <Form.Item name="description" label="Mô tả chi tiết">
+          <Form.Item name="description" label={t('products.descriptionLabel')}>
             <Input.TextArea
-              placeholder="Mô tả sản phẩm chi tiết để AI hiểu rõ hơn..."
+              placeholder={t('products.descriptionPlaceholder')}
               rows={3}
             />
           </Form.Item>
-          <Form.Item name="price" label="Giá (VND)">
+          <Form.Item name="price" label={t('products.price')}>
             <InputNumber
               style={{ width: '100%' }}
               placeholder="VD: 2500000"
@@ -229,11 +231,11 @@ export default function Products() {
               parser={(value) => value.replace(/,/g, '')}
             />
           </Form.Item>
-          <Form.Item name="status" label="Trạng thái">
+          <Form.Item name="status" label={t('common.status')}>
             <Select
               options={[
-                { label: 'Còn hàng', value: 'available' },
-                { label: 'Hết hàng', value: 'out_of_stock' },
+                { label: t('products.inStock'), value: 'available' },
+                { label: t('products.outOfStock'), value: 'out_of_stock' },
               ]}
             />
           </Form.Item>

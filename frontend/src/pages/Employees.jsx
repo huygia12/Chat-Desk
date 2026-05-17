@@ -20,6 +20,7 @@ import {
   EditOutlined,
 } from "@ant-design/icons";
 import client from "../api/client";
+import { useI18n } from "../i18n/useI18n";
 
 const { Title } = Typography;
 
@@ -35,6 +36,7 @@ export default function Employees() {
   const [form] = Form.useForm();
   const [profileForm] = Form.useForm();
   const [passwordForm] = Form.useForm();
+  const { t } = useI18n();
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -42,7 +44,7 @@ export default function Employees() {
       const res = await client.get("/api/employees");
       setEmployees(res.data);
     } catch {
-      message.error("Không thể tải danh sách nhân viên");
+      message.error(t("employees.loadError"));
     } finally {
       setLoading(false);
     }
@@ -56,12 +58,12 @@ export default function Employees() {
     setSubmitting(true);
     try {
       await client.post("/api/employees", values);
-      message.success("Tạo tài khoản nhân viên thành công");
+      message.success(t("employees.createSuccess"));
       setModalOpen(false);
       form.resetFields();
       fetchEmployees();
     } catch (err) {
-      message.error(err.response?.data?.detail || "Tạo tài khoản thất bại");
+      message.error(err.response?.data?.detail || t("employees.createError"));
     } finally {
       setSubmitting(false);
     }
@@ -89,10 +91,10 @@ export default function Employees() {
     setProfileSubmitting(true);
     try {
       await client.patch(`/api/employees/${editingEmployee.id}/profile`, values);
-      message.success("Cập nhật thông tin nhân viên thành công");
+      message.success(t("employees.updateSuccess"));
       fetchEmployees();
     } catch (err) {
-      message.error(err.response?.data?.detail || "Cập nhật thông tin thất bại");
+      message.error(err.response?.data?.detail || t("employees.updateError"));
     } finally {
       setProfileSubmitting(false);
     }
@@ -105,10 +107,10 @@ export default function Employees() {
       await client.patch(`/api/employees/${editingEmployee.id}/password`, {
         password: values.password,
       });
-      message.success("Đổi mật khẩu nhân viên thành công");
+      message.success(t("employees.passwordSuccess"));
       passwordForm.resetFields();
     } catch (err) {
-      message.error(err.response?.data?.detail || "Đổi mật khẩu thất bại");
+      message.error(err.response?.data?.detail || t("employees.passwordError"));
     } finally {
       setPasswordSubmitting(false);
     }
@@ -120,27 +122,27 @@ export default function Employees() {
         is_active: !employee.is_active,
       });
       message.success(
-        employee.is_active ? "Đã khóa tài khoản" : "Đã mở khóa tài khoản"
+        employee.is_active ? t("employees.lockedSuccess") : t("employees.unlockedSuccess")
       );
       fetchEmployees();
     } catch {
-      message.error("Thao tác thất bại");
+      message.error(t("employees.actionError"));
     }
   };
 
   const handleDelete = async (id) => {
     try {
       await client.delete(`/api/employees/${id}`);
-      message.success("Đã xóa tài khoản nhân viên");
+      message.success(t("employees.deleteSuccess"));
       fetchEmployees();
     } catch {
-      message.error("Xóa tài khoản thất bại");
+      message.error(t("employees.deleteError"));
     }
   };
 
   const columns = [
     {
-      title: "Họ tên",
+      title: t("employees.fullName"),
       dataIndex: "full_name",
       key: "full_name",
       render: (name) => name || "—",
@@ -151,24 +153,24 @@ export default function Employees() {
       key: "email",
     },
     {
-      title: "Trạng thái",
+      title: t("common.status"),
       dataIndex: "is_active",
       key: "is_active",
       render: (active) =>
         active ? (
-          <Tag color="green">Hoạt động</Tag>
+          <Tag color="green">{t("employees.active")}</Tag>
         ) : (
-          <Tag color="red">Đã khóa</Tag>
+          <Tag color="red">{t("employees.locked")}</Tag>
         ),
     },
     {
-      title: "Ngày tạo",
+      title: t("employees.createdAt"),
       dataIndex: "created_at",
       key: "created_at",
       render: (date) => new Date(date).toLocaleDateString("vi-VN"),
     },
     {
-      title: "Thao tác",
+      title: t("common.actions"),
       key: "actions",
       render: (_, record) => (
         <Space>
@@ -177,25 +179,25 @@ export default function Employees() {
             icon={<EditOutlined />}
             onClick={() => openEditModal(record)}
           >
-            Sửa
+            {t("common.edit")}
           </Button>
           <Button
             size="small"
             icon={record.is_active ? <LockOutlined /> : <UnlockOutlined />}
             onClick={() => handleToggleStatus(record)}
           >
-            {record.is_active ? "Khóa" : "Mở khóa"}
+            {record.is_active ? t("employees.lock") : t("employees.unlock")}
           </Button>
           <Popconfirm
-            title="Xác nhận xóa"
-            description="Bạn có chắc muốn xóa tài khoản nhân viên này?"
+            title={t("employees.deleteTitle")}
+            description={t("employees.deleteDescription")}
             onConfirm={() => handleDelete(record.id)}
-            okText="Xóa"
-            cancelText="Hủy"
+            okText={t("common.delete")}
+            cancelText={t("common.cancel")}
             okButtonProps={{ danger: true }}
           >
             <Button size="small" danger icon={<DeleteOutlined />}>
-              Xóa
+              {t("common.delete")}
             </Button>
           </Popconfirm>
         </Space>
@@ -214,14 +216,14 @@ export default function Employees() {
         }}
       >
         <Title level={4} style={{ margin: 0 }}>
-          Quản lý nhân viên
+          {t("employees.title")}
         </Title>
         <Button
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => setModalOpen(true)}
         >
-          Thêm nhân viên
+          {t("employees.add")}
         </Button>
       </div>
 
@@ -231,119 +233,119 @@ export default function Employees() {
         rowKey="id"
         loading={loading}
         pagination={{ pageSize: 20 }}
-        locale={{ emptyText: "Chưa có nhân viên nào" }}
+        locale={{ emptyText: t("employees.empty") }}
       />
 
       <Modal
-        title="Tạo tài khoản nhân viên"
+        title={t("employees.createTitle")}
         open={modalOpen}
         onCancel={() => {
           setModalOpen(false);
           form.resetFields();
         }}
         onOk={() => form.submit()}
-        okText="Tạo tài khoản"
-        cancelText="Hủy"
+        okText={t("employees.createButton")}
+        cancelText={t("common.cancel")}
         confirmLoading={submitting}
       >
         <Form form={form} layout="vertical" onFinish={handleCreate}>
           <Form.Item
             name="full_name"
-            label="Họ tên"
-            rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
+            label={t("employees.fullName")}
+            rules={[{ required: true, message: t("employees.fullNameRequired") }]}
           >
             <Input placeholder="Nguyễn Văn A" />
           </Form.Item>
           <Form.Item
             name="email"
-            label="Email đăng nhập"
+            label={t("employees.emailLogin")}
             rules={[
-              { required: true, message: "Vui lòng nhập email" },
-              { type: "email", message: "Email không hợp lệ" },
+              { required: true, message: t("employees.emailRequired") },
+              { type: "email", message: t("employees.emailInvalid") },
             ]}
           >
             <Input placeholder="nhanvien@example.com" />
           </Form.Item>
           <Form.Item
             name="password"
-            label="Mật khẩu"
+            label={t("employees.password")}
             rules={[
-              { required: true, message: "Vui lòng nhập mật khẩu" },
-              { min: 6, message: "Mật khẩu tối thiểu 6 ký tự" },
+              { required: true, message: t("employees.passwordRequired") },
+              { min: 6, message: t("employees.passwordMin") },
             ]}
           >
-            <Input.Password placeholder="Mật khẩu tạm thời" />
+            <Input.Password placeholder={t("employees.tempPassword")} />
           </Form.Item>
         </Form>
       </Modal>
 
       <Modal
-        title="Chỉnh sửa nhân viên"
+        title={t("employees.editTitle")}
         open={editModalOpen}
         onCancel={closeEditModal}
         footer={null}
         destroyOnClose
       >
         <Typography.Title level={5} style={{ marginTop: 0 }}>
-          Thông tin cơ bản
+          {t("employees.basicInfo")}
         </Typography.Title>
         <Form form={profileForm} layout="vertical" onFinish={handleUpdateProfile}>
           <Form.Item
             name="full_name"
-            label="Họ tên"
-            rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
+            label={t("employees.fullName")}
+            rules={[{ required: true, message: t("employees.fullNameRequired") }]}
           >
             <Input placeholder="Nguyễn Văn A" />
           </Form.Item>
           <Form.Item
             name="email"
-            label="Email đăng nhập"
+            label={t("employees.emailLogin")}
             rules={[
-              { required: true, message: "Vui lòng nhập email" },
-              { type: "email", message: "Email không hợp lệ" },
+              { required: true, message: t("employees.emailRequired") },
+              { type: "email", message: t("employees.emailInvalid") },
             ]}
           >
             <Input placeholder="nhanvien@example.com" />
           </Form.Item>
           <Button type="primary" htmlType="submit" loading={profileSubmitting}>
-            Lưu thông tin
+            {t("employees.saveInfo")}
           </Button>
         </Form>
 
         <Divider />
 
-        <Typography.Title level={5}>Đổi mật khẩu</Typography.Title>
+        <Typography.Title level={5}>{t("employees.changePassword")}</Typography.Title>
         <Form form={passwordForm} layout="vertical" onFinish={handleUpdatePassword}>
           <Form.Item
             name="password"
-            label="Mật khẩu mới"
+            label={t("employees.newPassword")}
             rules={[
-              { required: true, message: "Vui lòng nhập mật khẩu mới" },
-              { min: 6, message: "Mật khẩu tối thiểu 6 ký tự" },
+              { required: true, message: t("employees.newPasswordRequired") },
+              { min: 6, message: t("employees.passwordMin") },
             ]}
           >
-            <Input.Password placeholder="Mật khẩu mới" />
+            <Input.Password placeholder={t("employees.newPassword")} />
           </Form.Item>
           <Form.Item
             name="confirm_password"
-            label="Nhập lại mật khẩu mới"
+            label={t("employees.confirmPassword")}
             dependencies={["password"]}
             rules={[
-              { required: true, message: "Vui lòng nhập lại mật khẩu mới" },
+              { required: true, message: t("employees.confirmPasswordRequired") },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue("password") === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(new Error("Mật khẩu nhập lại không khớp"));
+                  return Promise.reject(new Error(t("employees.passwordMismatch")));
                 },
               }),
             ]}
           >
-            <Input.Password placeholder="Nhập lại mật khẩu mới" />
+            <Input.Password placeholder={t("employees.confirmPassword")} />
           </Form.Item>
           <Button type="primary" htmlType="submit" loading={passwordSubmitting}>
-            Đổi mật khẩu
+            {t("employees.changePassword")}
           </Button>
         </Form>
       </Modal>

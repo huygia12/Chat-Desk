@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.database import get_db
+from app.i18n import t
 from app.models.user import User
 from app.models.product import Product
 from app.schemas.product import ProductCreate, ProductUpdate, ProductOut
@@ -115,7 +116,7 @@ async def delete_product(
     delete_embedding(str(product.id))
 
     await db.delete(product)
-    return {"detail": "Product deleted"}
+    return {"detail": t("Product deleted")}
 
 
 @router.post("/import", response_model=list[ProductOut])

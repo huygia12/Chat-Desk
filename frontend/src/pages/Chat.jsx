@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { List, Avatar, Typography, Input, Button, Spin, Switch, Badge, Empty, Select, message, Segmented, theme } from 'antd'
+import { List, Avatar, Typography, Input, Button, Spin, Switch, Badge, Empty, Select, message, Segmented, theme, Space, Tooltip } from 'antd'
 import {
   SendOutlined,
   FacebookOutlined,
@@ -7,6 +7,7 @@ import {
   RobotOutlined,
   UserOutlined,
   ShopOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons'
 import { useChatStore } from '../store/chatStore'
 import { useAuthStore } from '../store/authStore'
@@ -16,7 +17,31 @@ import dayjs from 'dayjs'
 
 const CONVERSATION_MIN_WIDTH = 240
 const CONVERSATION_MAX_WIDTH = 420
+const CONVERSATION_WIDTH_STORAGE_KEY = 'chatdesk_conversation_list_width'
+const CONVERSATION_DETAIL_STORAGE_KEY = 'chatdesk_conversation_detail_open'
 const MESSAGE_GROUP_WINDOW_MINUTES = 3
+const WIDGET_AVATAR_STYLE = {
+  background: '#f0f7ff',
+  color: '#1677ff',
+  border: '1px solid #b7d8ff',
+}
+
+const clampConversationWidth = (value) =>
+  Math.min(CONVERSATION_MAX_WIDTH, Math.max(CONVERSATION_MIN_WIDTH, value))
+
+const getStoredConversationWidth = () => {
+  const fallbackWidth = 320
+  if (typeof window === 'undefined') return fallbackWidth
+
+  const stored = Number(window.localStorage.getItem(CONVERSATION_WIDTH_STORAGE_KEY))
+  if (!Number.isFinite(stored)) return fallbackWidth
+  return clampConversationWidth(stored)
+}
+
+const getStoredDetailCollapsed = () => {
+  if (typeof window === 'undefined') return true
+  return window.localStorage.getItem(CONVERSATION_DETAIL_STORAGE_KEY) !== 'true'
+}
 
 export default function Chat() {
   const {
@@ -49,8 +74,8 @@ export default function Chat() {
   const [labelSearchText, setLabelSearchText] = useState('')
   const [savedReplies, setSavedReplies] = useState([])
   const [replyPickerIndex, setReplyPickerIndex] = useState(0)
-  const [conversationWidth, setConversationWidth] = useState(320)
-  const [detailCollapsed, setDetailCollapsed] = useState(false)
+  const [conversationWidth, setConversationWidth] = useState(getStoredConversationWidth)
+  const [detailCollapsed, setDetailCollapsed] = useState(getStoredDetailCollapsed)
   const [assigningConversation, setAssigningConversation] = useState(false)
   const [conversationQueue, setConversationQueue] = useState('all')
   const { token } = theme.useToken()
@@ -74,11 +99,9 @@ export default function Chat() {
     const handleMouseMove = (event) => {
       if (!resizingConversationRef.current) return
       const containerLeft = chatContainerRef.current?.getBoundingClientRect().left || 0
-      const nextWidth = Math.min(
-        CONVERSATION_MAX_WIDTH,
-        Math.max(CONVERSATION_MIN_WIDTH, event.clientX - containerLeft),
-      )
+      const nextWidth = clampConversationWidth(event.clientX - containerLeft)
       setConversationWidth(nextWidth)
+      window.localStorage.setItem(CONVERSATION_WIDTH_STORAGE_KEY, String(nextWidth))
     }
 
     const handleMouseUp = () => {
@@ -121,6 +144,11 @@ export default function Chat() {
     setLabelSelectValue(undefined)
     setLabelSearchText('')
   }, [activeConv?.contact_id])
+
+  const updateDetailCollapsed = (nextValue) => {
+    setDetailCollapsed(nextValue)
+    window.localStorage.setItem(CONVERSATION_DETAIL_STORAGE_KEY, String(!nextValue))
+  }
 
   const quickReplyQuery = inputValue.startsWith('/') ? inputValue.slice(1).toLowerCase() : null
   const filteredReplies = useMemo(() => {
@@ -270,14 +298,56 @@ export default function Chat() {
       <FacebookOutlined style={{ color: '#1877F2' }} />
     ) : platform === 'telegram' ? (
       <SendOutlined style={{ color: '#0088cc' }} />
+    ) : platform === 'widget' ? (
+      <ShopOutlined style={{ color: '#1677ff' }} />
     ) : (
       <InstagramOutlined style={{ color: '#E4405F' }} />
     )
 
+  const parseAllowedOrigins = (value) => {
+    if (!value) return []
+    if (Array.isArray(value)) return value
+    try {
+      const parsed = JSON.parse(value)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  }
+
+  const getWidgetFaviconUrl = (conv) => {
+    if (conv?.platform !== 'widget') return null
+    const origin = parseAllowedOrigins(conv.channel?.allowed_origins)
+      .find((item) => item && item !== '*')
+    if (!origin) return null
+
+    try {
+      const url = new URL(origin.startsWith('http') ? origin : `https://${origin}`)
+      return `${url.origin}/favicon.ico`
+    } catch {
+      return null
+    }
+  }
+
+  const getConversationAvatar = (conv, size = 'default') => {
+    const widgetFaviconUrl = getWidgetFaviconUrl(conv)
+    const avatarSrc = conv?.contact?.profile_pic_url || widgetFaviconUrl || undefined
+    const isDefaultWidgetAvatar = conv?.platform === 'widget' && !avatarSrc
+
+    return (
+      <Avatar
+        size={size}
+        src={avatarSrc}
+        icon={avatarSrc ? undefined : getPlatformIcon(conv?.platform)}
+        style={isDefaultWidgetAvatar ? WIDGET_AVATAR_STYLE : undefined}
+      />
+    )
+  }
+
   const getSenderIcon = (senderType) => {
     switch (senderType) {
       case 'contact':
-        return <Avatar size="small" icon={<UserOutlined />} style={{ background: '#87d068' }} />
+        return getConversationAvatar(activeConv, 'small')
       case 'business':
         return <Avatar size="small" icon={<ShopOutlined />} style={{ background: '#1890ff' }} />
       case 'ai':
@@ -335,6 +405,54 @@ export default function Chat() {
     )
   }
 
+  const renderDetailRow = (label, value, options = {}) => (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '84px 1fr',
+        gap: 8,
+        alignItems: 'start',
+        marginTop: 8,
+      }}
+    >
+      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+        {label}
+      </Typography.Text>
+      {value ? (
+        <Typography.Text
+          copyable={options.copyable ? { text: String(value) } : false}
+          style={{ fontSize: 12, wordBreak: 'break-word' }}
+        >
+          {value}
+        </Typography.Text>
+      ) : (
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+          -
+        </Typography.Text>
+      )}
+    </div>
+  )
+
+  const renderVisitorInfo = () => {
+    const contact = activeConv?.contact
+    if (!contact) return null
+
+    const idLabel = activeConv?.platform === 'widget' ? 'Visitor ID' : 'Platform ID'
+
+    return (
+      <div style={{ marginTop: 18, paddingBottom: 18 }}>
+        <Typography.Text strong>Thông tin visitor</Typography.Text>
+        <div style={{ marginTop: 8 }}>
+          {renderDetailRow('Tên', contact.display_name)}
+          {renderDetailRow('Email', contact.visitor_email, { copyable: Boolean(contact.visitor_email) })}
+          {renderDetailRow('SĐT', contact.visitor_phone, { copyable: Boolean(contact.visitor_phone) })}
+          {renderDetailRow(idLabel, contact.platform_user_id, { copyable: Boolean(contact.platform_user_id) })}
+          {renderDetailRow('Kênh', activeConv?.channel?.page_name || activeConv?.platform)}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       ref={chatContainerRef}
@@ -385,7 +503,7 @@ export default function Chat() {
                 <List.Item.Meta
                   avatar={
                     <Badge dot={conv.is_ai_enabled} color="green">
-                      <Avatar icon={getPlatformIcon(conv.platform)} />
+                      {getConversationAvatar(conv)}
                     </Badge>
                   }
                   title={conv.contact?.display_name || 'Unknown'}
@@ -435,25 +553,69 @@ export default function Chat() {
                 borderBottom: `1px solid ${token.colorBorderSecondary}`,
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: 16,
+                alignItems: 'flex-start',
+                gap: 12,
+                flexWrap: 'wrap',
               }}
             >
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <Typography.Text strong>
-                  {activeConv?.contact?.display_name || 'Unknown'}
-                </Typography.Text>
-                <Typography.Text type="secondary" style={{ marginLeft: 8 }}>
-                  {getPlatformIcon(activeConv?.platform)} {activeConv?.platform}
-                </Typography.Text>
+              <div style={{ minWidth: 180, flex: '1 1 240px', overflow: 'hidden' }}>
+                <Space size={8} style={{ width: '100%', minWidth: 0 }} align="start">
+                  {getConversationAvatar(activeConv)}
+                  <span style={{ minWidth: 0, display: 'block', flex: 1 }}>
+                    <Typography.Text
+                      strong
+                      ellipsis={{ tooltip: activeConv?.contact?.display_name || 'Unknown' }}
+                      style={{ display: 'block', maxWidth: '100%' }}
+                    >
+                      {activeConv?.contact?.display_name || 'Unknown'}
+                    </Typography.Text>
+                    <span
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        minWidth: 0,
+                        marginTop: 2,
+                      }}
+                    >
+                      {getPlatformIcon(activeConv?.platform)}
+                      <Typography.Text
+                        type="secondary"
+                        ellipsis
+                        style={{ fontSize: 12, maxWidth: '100%' }}
+                      >
+                        {activeConv?.platform}
+                      </Typography.Text>
+                    </span>
+                  </span>
+                </Space>
               </div>
-              <div style={{ flexShrink: 0 }}>
-                <Typography.Text style={{ marginRight: 8 }}>AI tự động:</Typography.Text>
+              <div
+                style={{
+                  flex: '0 0 auto',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  flexWrap: 'wrap',
+                  justifyContent: 'flex-end',
+                }}
+              >
+                <Typography.Text style={{ whiteSpace: 'nowrap' }}>AI tự động:</Typography.Text>
                 <Switch
                   checked={activeConv?.is_ai_enabled}
                   onChange={(checked) => toggleAI(activeConversationId, checked)}
                   checkedChildren={<RobotOutlined />}
                 />
+                <Tooltip title={detailCollapsed ? 'Mở chi tiết hội thoại' : 'Đóng chi tiết hội thoại'}>
+                  <Button
+                    size="small"
+                    icon={<InfoCircleOutlined />}
+                    type={detailCollapsed ? 'default' : 'primary'}
+                    onClick={() => updateDetailCollapsed(!detailCollapsed)}
+                  >
+                    <span style={{ whiteSpace: 'nowrap' }}>Chi tiết</span>
+                  </Button>
+                </Tooltip>
               </div>
             </div>
 
@@ -646,24 +808,7 @@ export default function Chat() {
           </div>
         )}
       </div>
-      {activeConversationId && (
-        detailCollapsed ? (
-          <div
-            style={{
-              width: 42,
-              flex: '0 0 42px',
-              borderLeft: `1px solid ${token.colorBorderSecondary}`,
-              display: 'flex',
-              justifyContent: 'center',
-              paddingTop: 12,
-              background: token.colorBgContainer,
-            }}
-          >
-            <Button size="small" onClick={() => setDetailCollapsed(false)}>
-              &lt;
-            </Button>
-          </div>
-        ) : (
+      {activeConversationId && !detailCollapsed && (
           <aside
             style={{
               width: 300,
@@ -676,9 +821,6 @@ export default function Chat() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography.Text strong>Chi tiết</Typography.Text>
-              <Button size="small" onClick={() => setDetailCollapsed(true)}>
-                &gt;
-              </Button>
             </div>
 
             <div style={{ marginTop: 18, paddingBottom: 18, borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
@@ -756,8 +898,8 @@ export default function Chat() {
                 }))}
               />
             </div>
+            {renderVisitorInfo()}
           </aside>
-        )
       )}
     </div>
   )

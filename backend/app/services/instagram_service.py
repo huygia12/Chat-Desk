@@ -49,3 +49,35 @@ async def send_instagram_message(
         response.raise_for_status()
         data = response.json()
         return data.get("message_id")
+
+
+async def get_instagram_user_profile(page_access_token: str, user_id: str) -> dict | None:
+    """Get Instagram messaging user profile from an Instagram-scoped sender ID."""
+    url = f"{IG_GRAPH_API}/{user_id}"
+    params = {
+        "fields": "name,username,profile_pic",
+        "access_token": page_access_token,
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(url, params=params)
+            if response.status_code >= 400:
+                detail = _meta_error_detail(response)
+                logger.warning(
+                    "Failed to get Instagram user profile for %s (%s): %s",
+                    user_id,
+                    response.status_code,
+                    detail,
+                )
+                return None
+            data = response.json()
+            logger.info(
+                "Instagram profile lookup for %s returned fields=%s",
+                user_id,
+                sorted(data.keys()),
+            )
+            return data
+    except Exception as e:
+        logger.warning(f"Failed to get Instagram user profile for {user_id}: {e}")
+        return None

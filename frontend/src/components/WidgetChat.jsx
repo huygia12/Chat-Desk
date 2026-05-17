@@ -143,7 +143,8 @@ export default function WidgetChat({
     fetch(
       `${apiUrl}/api/widgets/${widgetId}/history` +
         `?widget_secret=${encodeURIComponent(widgetSecret)}` +
-        `&visitor_id=${encodeURIComponent(visitorInfo.id)}`
+        `&visitor_id=${encodeURIComponent(visitorInfo.id)}` +
+        `&visitor_email=${encodeURIComponent(visitorInfo.email || "")}`
     )
       .then((r) => r.json())
       .then((data) => {

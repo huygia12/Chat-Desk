@@ -6,6 +6,7 @@ import { ConfigProvider, theme } from 'antd'
 import viVN from 'antd/locale/vi_VN'
 import App from './App'
 import { useThemeStore } from './store/themeStore'
+import './styles/global.css'
 
 function RootProviders() {
   const mode = useThemeStore((state) => state.mode)

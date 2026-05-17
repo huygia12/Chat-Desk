@@ -190,6 +190,7 @@ async def _process_incoming_message(
                 return
 
             # 2. Find or create contact
+            sender_profile = None
             contact_result = await db.execute(
                 select(Contact).where(
                     Contact.business_id == channel.business_id,
@@ -199,15 +200,30 @@ async def _process_incoming_message(
             )
             contact = contact_result.scalar_one_or_none()
             if not contact:
+                sender_profile = await _get_sender_profile(platform, channel.access_token, sender_id)
                 contact = Contact(
                     business_id=channel.business_id,
                     platform=platform,
                     platform_user_id=sender_id,
-                    display_name=sender_name or f"User {sender_id[-6:]}",
+                    display_name=(
+                        sender_name
+                        or _profile_display_name(sender_profile)
+                        or f"User {sender_id[-6:]}"
+                    ),
+                    profile_pic_url=_profile_pic_url(sender_profile),
                 )
                 db.add(contact)
                 await db.flush()
                 await db.refresh(contact)
+            elif not contact.profile_pic_url or not contact.display_name or contact.display_name.startswith("User "):
+                sender_profile = await _get_sender_profile(platform, channel.access_token, sender_id)
+                if sender_profile:
+                    contact.display_name = (
+                        sender_name
+                        or _profile_display_name(sender_profile)
+                        or contact.display_name
+                    )
+                    contact.profile_pic_url = _profile_pic_url(sender_profile) or contact.profile_pic_url
 
             # 3. Find or create conversation
             conv_result = await db.execute(
@@ -240,8 +256,10 @@ async def _process_incoming_message(
             conversation.last_message_at = datetime.now(timezone.utc)
             await db.flush()
             await db.refresh(message)
+            await db.commit()
 
-            # 5. Notify frontend via WebSocket
+            # 5. Notify frontend via WebSocket after commit so refetches see
+            # the updated contact profile and message.
             await manager.send_message(
                 str(channel.business_id),
                 {
@@ -256,6 +274,7 @@ async def _process_incoming_message(
                     "contact": {
                         "id": str(contact.id),
                         "display_name": contact.display_name,
+                        "profile_pic_url": contact.profile_pic_url,
                         "platform": contact.platform,
                     },
                 },
@@ -311,8 +330,9 @@ async def _process_incoming_message(
                     conversation.last_message_at = datetime.now(timezone.utc)
                     await db.flush()
                     await db.refresh(ai_message)
+                    await db.commit()
 
-                    # Notify frontend
+                    # Notify frontend after the AI message is committed.
                     await manager.send_message(
                         str(channel.business_id),
                         {
@@ -332,3 +352,45 @@ async def _process_incoming_message(
         except Exception as e:
             await db.rollback()
             logger.error(f"Error processing incoming message: {e}", exc_info=True)
+
+
+async def _get_sender_profile(
+    platform: str,
+    page_access_token: str,
+    sender_id: str,
+) -> dict | None:
+    try:
+        if platform == "facebook":
+            from app.services.facebook_service import get_facebook_user_profile
+
+            return await get_facebook_user_profile(page_access_token, sender_id)
+        if platform == "instagram":
+            from app.services.instagram_service import get_instagram_user_profile
+
+            return await get_instagram_user_profile(page_access_token, sender_id)
+    except Exception as e:
+        logger.warning("Failed to fetch %s sender profile for %s: %s", platform, sender_id, e)
+    return None
+
+
+def _profile_display_name(profile: dict | None) -> str | None:
+    if not profile:
+        return None
+
+    name = profile.get("name")
+    if name:
+        return name
+
+    first_name = profile.get("first_name")
+    last_name = profile.get("last_name")
+    full_name = " ".join(part for part in [first_name, last_name] if part).strip()
+    if full_name:
+        return full_name
+
+    return profile.get("username")
+
+
+def _profile_pic_url(profile: dict | None) -> str | None:
+    if not profile:
+        return None
+    return profile.get("profile_pic") or profile.get("profile_picture_url")

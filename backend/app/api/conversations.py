@@ -35,6 +35,7 @@ def _conversation_query():
     return select(Conversation).options(
         joinedload(Conversation.contact).selectinload(Contact.labels),
         joinedload(Conversation.assigned_to),
+        joinedload(Conversation.channel),
     )
 
 

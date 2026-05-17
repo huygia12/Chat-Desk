@@ -14,6 +14,16 @@ class AssigneeOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ConversationChannelOut(BaseModel):
+    id: uuid.UUID
+    platform: str
+    page_name: str | None = None
+    widget_id: str | None = None
+    allowed_origins: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
 class ConversationOut(BaseModel):
     id: uuid.UUID
     business_id: uuid.UUID
@@ -27,6 +37,7 @@ class ConversationOut(BaseModel):
     created_at: datetime
     contact: ContactOut | None = None
     assigned_to: AssigneeOut | None = None
+    channel: ConversationChannelOut | None = None
 
     model_config = {"from_attributes": True}
 

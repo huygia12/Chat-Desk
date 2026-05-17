@@ -341,8 +341,12 @@ async def test_facebook_integration():
             <td class="ok">Set</td></tr>
         <tr><td>FB_OAUTH_REDIRECT_URI</td><td><code>{settings.FB_OAUTH_REDIRECT_URI}</code></td>
             <td class="{'ok' if 'railway' in settings.FB_OAUTH_REDIRECT_URI else 'warn'}">{'Production' if 'railway' in settings.FB_OAUTH_REDIRECT_URI else 'Localhost'}</td></tr>
+        <tr><td>LLM_PROVIDER</td><td><code>{settings.LLM_PROVIDER}</code></td>
+            <td class="{'ok' if settings.LLM_PROVIDER.strip().lower() in ('groq', 'openai') else 'err'}">{'Set' if settings.LLM_PROVIDER.strip().lower() in ('groq', 'openai') else 'INVALID'}</td></tr>
         <tr><td>GROQ_API_KEY</td><td><code>{'***' + settings.GROQ_API_KEY[-4:] if settings.GROQ_API_KEY else ''}</code></td>
-            <td class="{'ok' if settings.GROQ_API_KEY else 'err'}">{'Set' if settings.GROQ_API_KEY else 'MISSING'}</td></tr>
+            <td class="{'ok' if settings.GROQ_API_KEY else 'warn'}">{'Set' if settings.GROQ_API_KEY else 'Not set'}</td></tr>
+        <tr><td>OPENAI_API_KEY</td><td><code>{'***' + settings.OPENAI_API_KEY[-4:] if settings.OPENAI_API_KEY else ''}</code></td>
+            <td class="{'ok' if settings.OPENAI_API_KEY else 'warn'}">{'Set' if settings.OPENAI_API_KEY else 'Not set'}</td></tr>
         <tr><td>MILVUS_URI</td><td><code>{settings.MILVUS_URI[:30]}...</code></td>
             <td class="{'ok' if settings.MILVUS_URI else 'warn'}">{'Set' if settings.MILVUS_URI else 'Not set'}</td></tr>
       </table>

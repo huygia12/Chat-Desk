@@ -26,9 +26,16 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
 
+    # LLM provider: "groq" or "openai"
+    LLM_PROVIDER: str = "groq"
+
     # Groq LLM
     GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
+
+    # OpenAI LLM
+    OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = "gpt-5.5"
 
     # Embedding
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"

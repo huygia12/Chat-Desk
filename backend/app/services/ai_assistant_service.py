@@ -1,15 +1,14 @@
 import logging
 
-from groq import AsyncGroq
 from sqlalchemy import case, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import get_settings
 from app.models.ai_assistant_message import AIAssistantMessage
 from app.models.conversation import Conversation
 from app.models.message import Message
 from app.models.product import Product
 from app.models.user import User
+from app.services.llm_service import create_chat_completion
 from app.services.ai_service import (
     _format_product_for_ai,
     _retrieve_products_without_vector_search,
@@ -17,9 +16,6 @@ from app.services.ai_service import (
 )
 
 logger = logging.getLogger(__name__)
-settings = get_settings()
-
-client = AsyncGroq(api_key=settings.GROQ_API_KEY)
 
 ASSISTANT_ROLE_ORDER = case(
     (AIAssistantMessage.role == "assistant", 1),
@@ -189,8 +185,7 @@ Mục tiêu:
         messages.append({"role": role, "content": item.content})
     messages.append({"role": "user", "content": question})
 
-    chat_completion = await client.chat.completions.create(
-        model=settings.GROQ_MODEL,
+    chat_completion = await create_chat_completion(
         messages=messages,
         temperature=0.2,
         max_tokens=800,

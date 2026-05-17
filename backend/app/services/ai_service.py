@@ -1,20 +1,16 @@
 import logging
 import json
-from groq import AsyncGroq
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.config import get_settings
 from app.models.conversation import Conversation
 from app.models.message import Message
 from app.models.product import Product
 from app.models.user import User
 from app.services.embedding_service import get_embedding
+from app.services.llm_service import create_chat_completion
 from app.services.milvus_service import search_similar
 
 logger = logging.getLogger(__name__)
-settings = get_settings()
-
-client = AsyncGroq(api_key=settings.GROQ_API_KEY)
 
 
 async def _retrieve_relevant_products(
@@ -171,9 +167,8 @@ Nhiệm vụ:
         if not history or history[-1].content != user_message:
             messages.append({"role": "user", "content": user_message})
 
-        # 5. Call Groq LLM
-        chat_completion = await client.chat.completions.create(
-            model=settings.GROQ_MODEL,
+        # 5. Call selected LLM provider
+        chat_completion = await create_chat_completion(
             messages=messages,
             temperature=0.7,
             max_tokens=1024,

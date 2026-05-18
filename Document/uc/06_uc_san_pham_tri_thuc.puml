@@ -1,0 +1,36 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+title Use Case phân rã: Quản lý sản phẩm và tri thức AI
+actor "Chủ doanh nghiệp" as A1
+rectangle "Milvus Vector DB" as A2
+rectangle "Embedding Service" as A3
+rectangle "Hệ thống ChatDesk" {
+  usecase "Xem danh sách sản phẩm" as U1
+  usecase "Thêm sản phẩm" as U2
+  usecase "Cập nhật sản phẩm" as U3
+  usecase "Xóa sản phẩm" as U4
+  usecase "Xóa toàn bộ sản phẩm" as U5
+  usecase "Import sản phẩm từ JSON" as U6
+  usecase "Chuẩn hóa text sản phẩm" as U7
+  usecase "Sinh embedding" as U8
+  usecase "Upsert embedding vào Milvus" as U9
+  usecase "Xóa embedding khỏi Milvus" as U10
+}
+A1 -- U1
+A1 -- U2
+A1 -- U3
+A1 -- U4
+A1 -- U5
+A1 -- U6
+A3 -- U8
+A2 -- U9
+A2 -- U10
+U2 ..> U7 : <<include>>
+U3 ..> U7 : <<include>>
+U6 ..> U7 : <<include>>
+U7 ..> U8 : <<include>>
+U8 ..> U9 : <<include>>
+U4 ..> U10 : <<include>>
+U5 ..> U10 : <<include>>
+@enduml

@@ -1,0 +1,61 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+title Biểu đồ Use Case tổng quát hệ thống ChatDesk
+actor "Admin hệ thống" as A1
+actor "Chủ doanh nghiệp" as A2
+actor "Nhân viên CSKH" as A3
+actor "Khách hàng" as A4
+rectangle "Nền tảng ngoài" as A5
+rectangle "Dịch vụ AI/Vector DB" as A6
+rectangle "ChatDesk CRM đa kênh" {
+  usecase "Đăng ký / đăng nhập" as U1
+  usecase "Quản lý hồ sơ doanh nghiệp" as U2
+  usecase "Quản lý kênh kết nối" as U3
+  usecase "Tạo và quản lý widget" as U4
+  usecase "Quản lý sản phẩm / tri thức AI" as U5
+  usecase "Quản lý hội thoại đa kênh" as U6
+  usecase "Gửi tin nhắn và file" as U7
+  usecase "AI tự động trả lời khách" as U8
+  usecase "Trợ lý AI nội bộ" as U9
+  usecase "Quản lý nhân viên" as U10
+  usecase "Cấu hình và xử lý phân công" as U11
+  usecase "Quản lý nhãn khách hàng" as U12
+  usecase "Quản lý mẫu trả lời nhanh" as U13
+  usecase "Xem thống kê doanh nghiệp" as U14
+  usecase "Quản trị toàn hệ thống" as U15
+}
+A1 -- U15
+A1 -- U1
+A2 -- U1
+A2 -- U2
+A2 -- U3
+A2 -- U4
+A2 -- U5
+A2 -- U6
+A2 -- U7
+A2 -- U8
+A2 -- U9
+A2 -- U10
+A2 -- U11
+A2 -- U12
+A2 -- U13
+A2 -- U14
+A3 -- U1
+A3 -- U6
+A3 -- U7
+A3 -- U9
+A3 -- U12
+A3 -- U13
+A4 -- U6
+A4 -- U7
+A5 -- U3
+A5 -- U6
+A5 -- U7
+A6 -- U8
+A6 -- U9
+A6 -- U5
+U8 ..> U5 : <<include>>
+U6 ..> U7 : <<include>>
+U11 ..> U12 : <<extend>>
+@enduml

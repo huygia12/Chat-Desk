@@ -1,0 +1,38 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+title Use Case phân rã: Widget khách hàng trên website
+actor "Khách truy cập website" as A1
+actor "Chủ doanh nghiệp" as A2
+actor "Nhân viên CSKH" as A3
+rectangle "Hệ thống ChatDesk" {
+  usecase "Mở widget chat" as U1
+  usecase "Nhập / lưu thông tin visitor" as U2
+  usecase "Khôi phục lịch sử hội thoại" as U3
+  usecase "Gửi tin nhắn" as U4
+  usecase "Gửi file" as U5
+  usecase "Xác thực widget_id và secret" as U6
+  usecase "Kiểm tra allowed origins" as U7
+  usecase "Tạo / cập nhật contact widget" as U8
+  usecase "Tạo / cập nhật conversation widget" as U9
+  usecase "Nhận phản hồi real-time" as U10
+  usecase "Doanh nghiệp / nhân viên phản hồi" as U11
+  usecase "Lấy favicon website làm avatar" as U12
+}
+A1 -- U1
+A1 -- U2
+A1 -- U3
+A1 -- U4
+A1 -- U5
+A1 -- U10
+A2 -- U11
+A3 -- U11
+U1 ..> U6 : <<include>>
+U6 ..> U7 : <<include>>
+U4 ..> U8 : <<include>>
+U4 ..> U9 : <<include>>
+U5 ..> U8 : <<include>>
+U5 ..> U9 : <<include>>
+U11 ..> U10 : <<include>>
+U4 ..> U12 : <<extend>>
+@enduml

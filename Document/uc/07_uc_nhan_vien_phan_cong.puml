@@ -1,0 +1,42 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+title Use Case phân rã: Nhân viên và phân công hội thoại
+actor "Chủ doanh nghiệp" as A1
+actor "Nhân viên CSKH" as A2
+rectangle "Hệ thống ChatDesk" {
+  usecase "Xem danh sách nhân viên" as U1
+  usecase "Tạo tài khoản nhân viên" as U2
+  usecase "Cập nhật hồ sơ nhân viên" as U3
+  usecase "Đổi mật khẩu nhân viên" as U4
+  usecase "Khóa / mở khóa nhân viên" as U5
+  usecase "Xóa nhân viên" as U6
+  usecase "Nhân viên cập nhật hồ sơ cá nhân" as U7
+  usecase "Nhân viên đổi mật khẩu" as U8
+  usecase "Cấu hình phân công" as U9
+  usecase "Chọn round-robin / least-active" as U10
+  usecase "Cấu hình rule theo kênh / nhãn" as U11
+  usecase "Xem tổng quan phân công" as U12
+  usecase "Gán hội thoại thủ công" as U13
+  usecase "Tự động phân công hội thoại mới" as U14
+  usecase "Khóa quyền nhân viên tự đổi assignee" as U15
+}
+A1 -- U1
+A1 -- U2
+A1 -- U3
+A1 -- U4
+A1 -- U5
+A1 -- U6
+A1 -- U9
+A1 -- U12
+A1 -- U13
+A2 -- U7
+A2 -- U8
+A2 -- U13
+U9 ..> U10 : <<include>>
+U9 ..> U11 : <<include>>
+U9 ..> U15 : <<include>>
+U14 ..> U10 : <<include>>
+U14 ..> U11 : <<extend>>
+U13 ..> U15 : <<extend>>
+@enduml

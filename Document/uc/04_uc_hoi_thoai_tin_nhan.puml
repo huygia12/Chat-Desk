@@ -1,0 +1,47 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+title Use Case phân rã: Hội thoại và tin nhắn đa kênh
+actor "Chủ doanh nghiệp" as A1
+actor "Nhân viên CSKH" as A2
+actor "Khách hàng" as A3
+rectangle "Facebook/Instagram/Telegram" as A4
+actor "Widget website" as A5
+rectangle "Hệ thống ChatDesk" {
+  usecase "Xem danh sách hội thoại" as U1
+  usecase "Xem chi tiết hội thoại" as U2
+  usecase "Xem lịch sử phân công / nhãn" as U3
+  usecase "Tải tin nhắn phân trang" as U4
+  usecase "Nhận tin nhắn real-time qua WebSocket" as U5
+  usecase "Gửi tin nhắn văn bản" as U6
+  usecase "Gửi file / ảnh / video" as U7
+  usecase "Tiếp nhận webhook tin nhắn" as U8
+  usecase "Tạo / cập nhật khách hàng" as U9
+  usecase "Tạo / cập nhật hội thoại" as U10
+  usecase "Lưu tin nhắn và metadata file" as U11
+  usecase "Xem thông tin khách hàng" as U12
+}
+A1 -- U1
+A1 -- U2
+A1 -- U6
+A1 -- U7
+A1 -- U12
+A2 -- U1
+A2 -- U2
+A2 -- U6
+A2 -- U7
+A2 -- U12
+A3 -- U8
+A4 -- U8
+A4 -- U6
+A4 -- U7
+A5 -- U8
+A5 -- U5
+U2 ..> U4 : <<include>>
+U2 ..> U3 : <<include>>
+U8 ..> U9 : <<include>>
+U8 ..> U10 : <<include>>
+U8 ..> U11 : <<include>>
+U7 ..> U11 : <<include>>
+U11 ..> U5 : <<include>>
+@enduml

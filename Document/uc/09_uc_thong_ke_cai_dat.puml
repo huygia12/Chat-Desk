@@ -1,0 +1,40 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+title Use Case phân rã: Thống kê và cài đặt doanh nghiệp
+actor "Chủ doanh nghiệp" as A1
+rectangle "Cơ sở dữ liệu" as A2
+rectangle "Hệ thống ChatDesk" {
+  usecase "Cập nhật hồ sơ doanh nghiệp" as U1
+  usecase "Cập nhật địa chỉ, giờ mở cửa và chính sách" as U2
+  usecase "Cung cấp ngữ cảnh cho AI" as U3
+  usecase "Xem thống kê doanh nghiệp" as U4
+  usecase "Chọn khoảng ngày 7-90 ngày" as U5
+  usecase "Xem chỉ số tổng quan" as U6
+  usecase "Xem biểu đồ hội thoại / tin nhắn" as U7
+  usecase "Xem phân bố theo nền tảng / kênh" as U8
+  usecase "Xem phân bố người gửi" as U9
+  usecase "Xem thống kê phân công" as U10
+  usecase "Xem top nhãn khách hàng" as U11
+  usecase "Xem thời gian phản hồi đầu tiên" as U12
+  usecase "Đổi ngôn ngữ giao diện" as U13
+}
+A1 -- U1
+A1 -- U2
+A1 -- U4
+A1 -- U5
+A1 -- U13
+A2 -- U4
+A2 -- U6
+A2 -- U7
+A2 -- U8
+U2 ..> U3 : <<include>>
+U4 ..> U5 : <<include>>
+U4 ..> U6 : <<include>>
+U4 ..> U7 : <<include>>
+U4 ..> U8 : <<include>>
+U4 ..> U9 : <<include>>
+U4 ..> U10 : <<include>>
+U4 ..> U11 : <<include>>
+U4 ..> U12 : <<include>>
+@enduml

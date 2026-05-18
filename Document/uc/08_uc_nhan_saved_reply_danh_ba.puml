@@ -1,0 +1,51 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+title Use Case phân rã: Nhãn, mẫu trả lời nhanh và danh bạ
+actor "Chủ doanh nghiệp" as A1
+actor "Nhân viên CSKH" as A2
+rectangle "Hệ thống ChatDesk" {
+  usecase "Xem danh sách khách hàng" as U1
+  usecase "Xem chi tiết khách hàng" as U2
+  usecase "Xem danh sách nhãn" as U3
+  usecase "Tạo nhãn" as U4
+  usecase "Cập nhật nhãn" as U5
+  usecase "Xóa nhãn" as U6
+  usecase "Gắn nhãn cho khách hàng" as U7
+  usecase "Gỡ nhãn khỏi khách hàng" as U8
+  usecase "Ghi lịch sử nhãn" as U9
+  usecase "Xem mẫu trả lời nhanh" as U10
+  usecase "Tạo mẫu trả lời" as U11
+  usecase "Sửa mẫu trả lời" as U12
+  usecase "Xóa mẫu trả lời" as U13
+  usecase "Chèn mẫu bằng /shortcut trong chat" as U14
+  usecase "Phân quyền mẫu chung / cá nhân" as U15
+}
+A1 -- U1
+A1 -- U2
+A1 -- U3
+A1 -- U4
+A1 -- U5
+A1 -- U6
+A1 -- U7
+A1 -- U8
+A1 -- U10
+A1 -- U11
+A1 -- U12
+A1 -- U13
+A2 -- U1
+A2 -- U2
+A2 -- U3
+A2 -- U7
+A2 -- U8
+A2 -- U10
+A2 -- U11
+A2 -- U12
+A2 -- U13
+A2 -- U14
+U7 ..> U9 : <<include>>
+U8 ..> U9 : <<include>>
+U11 ..> U15 : <<include>>
+U12 ..> U15 : <<include>>
+U14 ..> U10 : <<include>>
+@enduml

@@ -1,0 +1,46 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+title Use Case phân rã: Quản lý kênh kết nối và Widget
+actor "Chủ doanh nghiệp" as A1
+rectangle "Meta API" as A2
+rectangle "Telegram Bot API" as A3
+actor "Khách truy cập website" as A4
+rectangle "Hệ thống ChatDesk" {
+  usecase "Xem danh sách kênh" as U1
+  usecase "Kết nối Facebook / Instagram bằng OAuth" as U2
+  usecase "Xử lý OAuth callback" as U3
+  usecase "Lưu Facebook Page" as U4
+  usecase "Lưu Instagram account" as U5
+  usecase "Đăng ký Meta webhook" as U6
+  usecase "Kết nối Telegram bot" as U7
+  usecase "Đăng ký Telegram webhook" as U8
+  usecase "Ngắt kết nối kênh" as U9
+  usecase "Tạo widget chat website" as U10
+  usecase "Xem danh sách widget" as U11
+  usecase "Copy mã nhúng widget" as U12
+  usecase "Xóa widget" as U13
+  usecase "Xác thực widget_id / secret / origin" as U14
+}
+A1 -- U1
+A1 -- U2
+A1 -- U7
+A1 -- U9
+A1 -- U10
+A1 -- U11
+A1 -- U12
+A1 -- U13
+A2 -- U2
+A2 -- U3
+A2 -- U6
+A3 -- U7
+A3 -- U8
+A4 -- U14
+U2 ..> U3 : <<include>>
+U3 ..> U4 : <<include>>
+U3 ..> U5 : <<include>>
+U3 ..> U6 : <<include>>
+U7 ..> U8 : <<include>>
+U12 ..> U10 : <<include>>
+U14 ..> U10 : <<extend>>
+@enduml

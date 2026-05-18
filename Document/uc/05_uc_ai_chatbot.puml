@@ -1,0 +1,43 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+title Use Case phân rã: AI tự động và Trợ lý AI nội bộ
+actor "Khách hàng" as A1
+actor "Chủ doanh nghiệp" as A2
+actor "Nhân viên CSKH" as A3
+rectangle "LLM Provider" as A4
+rectangle "Milvus Vector DB" as A5
+rectangle "Hệ thống ChatDesk" {
+  usecase "Bật / tắt AI theo hội thoại" as U1
+  usecase "Nhận câu hỏi của khách" as U2
+  usecase "Tạo embedding câu hỏi" as U3
+  usecase "Truy xuất sản phẩm liên quan" as U4
+  usecase "Fallback khi vector search lỗi" as U5
+  usecase "Xây prompt với sản phẩm, chính sách và lịch sử" as U6
+  usecase "Sinh câu trả lời AI" as U7
+  usecase "Lưu message AI" as U8
+  usecase "Gửi phản hồi AI ra kênh gốc" as U9
+  usecase "Hỏi trợ lý AI nội bộ" as U10
+  usecase "Xem lịch sử trợ lý" as U11
+  usecase "Lấy ngữ cảnh hội thoại đang mở" as U12
+}
+A1 -- U2
+A2 -- U1
+A2 -- U10
+A3 -- U10
+A3 -- U11
+A4 -- U7
+A4 -- U10
+A5 -- U4
+A5 -- U3
+U2 ..> U3 : <<include>>
+U2 ..> U4 : <<include>>
+U4 ..> U5 : <<extend>>
+U2 ..> U6 : <<include>>
+U6 ..> U7 : <<include>>
+U7 ..> U8 : <<include>>
+U7 ..> U9 : <<include>>
+U10 ..> U11 : <<include>>
+U10 ..> U12 : <<include>>
+U10 ..> U4 : <<include>>
+@enduml

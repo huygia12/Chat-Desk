@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="988" viewBox="0 0 1680 988">
+<defs>
+  <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+    <path d="M0,0 L0,6 L9,3 z" fill="#64748b"/>
+  </marker>
+  <style>
+    .title { font: 700 26px "Times New Roman", serif; fill: #111827; }
+    .boundary { fill: #f8fafc; stroke: #334155; stroke-width: 2; }
+    .boundary-title { font: 700 18px "Times New Roman", serif; fill: #334155; }
+    .usecase { fill: #ffffff; stroke: #2563eb; stroke-width: 2; }
+    .usecase-label { font: 15px "Times New Roman", serif; fill: #111827; }
+    .actor { fill: none; stroke: #111827; stroke-width: 2.3; stroke-linecap: round; }
+    .actor-label { font: 15px "Times New Roman", serif; fill: #111827; }
+    .external-box { fill: #fff7ed; stroke: #c2410c; stroke-width: 2; }
+    .external-icon { font: 700 18px "Times New Roman", serif; fill: #9a3412; }
+    .assoc { stroke: #475569; stroke-width: 1.5; }
+    .include { stroke: #64748b; stroke-width: 1.3; stroke-dasharray: 8 5; }
+    .extend { stroke: #9333ea; stroke-width: 1.3; stroke-dasharray: 7 5; }
+    .rel-label { font: italic 13px "Times New Roman", serif; fill: #475569; paint-order: stroke; stroke: white; stroke-width: 4px; }
+    .note { font: 14px "Times New Roman", serif; fill: #475569; }
+  </style>
+</defs>
+<text x="840.0" y="44" text-anchor="middle" class="title">Use Case phân rã: Nhãn, mẫu trả lời nhanh và danh bạ</text>
+<rect x="310" y="88" width="1060" height="780" rx="12" class="boundary"/>
+<text x="330" y="122" class="boundary-title">Hệ thống ChatDesk</text>
+<line x1="120.0" y1="162.0" x2="509.0" y2="213.0" class="assoc"/><line x1="120.0" y1="162.0" x2="840.0" y2="213.0" class="assoc"/><line x1="120.0" y1="162.0" x2="1171.0" y2="213.0" class="assoc"/><line x1="120.0" y1="162.0" x2="509.0" y2="317.0" class="assoc"/><line x1="120.0" y1="162.0" x2="840.0" y2="317.0" class="assoc"/><line x1="120.0" y1="162.0" x2="1171.0" y2="317.0" class="assoc"/><line x1="120.0" y1="162.0" x2="509.0" y2="421.0" class="assoc"/><line x1="120.0" y1="162.0" x2="840.0" y2="421.0" class="assoc"/><line x1="120.0" y1="162.0" x2="509.0" y2="525.0" class="assoc"/><line x1="120.0" y1="162.0" x2="840.0" y2="525.0" class="assoc"/><line x1="120.0" y1="162.0" x2="1171.0" y2="525.0" class="assoc"/><line x1="120.0" y1="162.0" x2="509.0" y2="629.0" class="assoc"/><line x1="120.0" y1="557.0" x2="509.0" y2="213.0" class="assoc"/><line x1="120.0" y1="557.0" x2="840.0" y2="213.0" class="assoc"/><line x1="120.0" y1="557.0" x2="1171.0" y2="213.0" class="assoc"/><line x1="120.0" y1="557.0" x2="509.0" y2="421.0" class="assoc"/><line x1="120.0" y1="557.0" x2="840.0" y2="421.0" class="assoc"/><line x1="120.0" y1="557.0" x2="509.0" y2="525.0" class="assoc"/><line x1="120.0" y1="557.0" x2="840.0" y2="525.0" class="assoc"/><line x1="120.0" y1="557.0" x2="1171.0" y2="525.0" class="assoc"/><line x1="120.0" y1="557.0" x2="509.0" y2="629.0" class="assoc"/><line x1="120.0" y1="557.0" x2="840.0" y2="629.0" class="assoc"/><line x1="509.0" y1="421.0" x2="1171.0" y2="421.0" class="include" marker-end="url(#arrow)"/>
+<text x="840.0" y="415.0" text-anchor="middle" class="rel-label">&lt;&lt;include&gt;&gt;</text><line x1="840.0" y1="421.0" x2="1171.0" y2="421.0" class="include" marker-end="url(#arrow)"/>
+<text x="1005.5" y="415.0" text-anchor="middle" class="rel-label">&lt;&lt;include&gt;&gt;</text><line x1="840.0" y1="525.0" x2="1171.0" y2="629.0" class="include" marker-end="url(#arrow)"/>
+<text x="1005.5" y="571.0" text-anchor="middle" class="rel-label">&lt;&lt;include&gt;&gt;</text><line x1="1171.0" y1="525.0" x2="1171.0" y2="629.0" class="include" marker-end="url(#arrow)"/>
+<text x="1171.0" y="571.0" text-anchor="middle" class="rel-label">&lt;&lt;include&gt;&gt;</text><line x1="840.0" y1="629.0" x2="509.0" y2="525.0" class="include" marker-end="url(#arrow)"/>
+<text x="674.5" y="571.0" text-anchor="middle" class="rel-label">&lt;&lt;include&gt;&gt;</text>
+<circle cx="120" cy="126" r="16" class="actor"/>
+<line x1="120" y1="142" x2="120" y2="178" class="actor"/>
+<line x1="90" y1="156" x2="150" y2="156" class="actor"/>
+<line x1="120" y1="178" x2="94" y2="214" class="actor"/>
+<line x1="120" y1="178" x2="146" y2="214" class="actor"/>
+<text x="120" y="194" text-anchor="middle" class="actor-label">Chủ doanh nghiệp</text><circle cx="120" cy="521" r="16" class="actor"/>
+<line x1="120" y1="537" x2="120" y2="573" class="actor"/>
+<line x1="90" y1="551" x2="150" y2="551" class="actor"/>
+<line x1="120" y1="573" x2="94" y2="609" class="actor"/>
+<line x1="120" y1="573" x2="146" y2="609" class="actor"/>
+<text x="120" y="589" text-anchor="middle" class="actor-label">Nhân viên CSKH</text>
+<ellipse cx="509.0" cy="213.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="509.0" y="218.0" text-anchor="middle" class="usecase-label">Xem danh sách khách hàng</text><ellipse cx="840.0" cy="213.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="840.0" y="218.0" text-anchor="middle" class="usecase-label">Xem chi tiết khách hàng</text><ellipse cx="1171.0" cy="213.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="1171.0" y="218.0" text-anchor="middle" class="usecase-label">Xem danh sách nhãn</text><ellipse cx="509.0" cy="317.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="509.0" y="322.0" text-anchor="middle" class="usecase-label">Tạo nhãn</text><ellipse cx="840.0" cy="317.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="840.0" y="322.0" text-anchor="middle" class="usecase-label">Cập nhật nhãn</text><ellipse cx="1171.0" cy="317.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="1171.0" y="322.0" text-anchor="middle" class="usecase-label">Xóa nhãn</text><ellipse cx="509.0" cy="421.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="509.0" y="426.0" text-anchor="middle" class="usecase-label">Gắn nhãn cho khách hàng</text><ellipse cx="840.0" cy="421.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="840.0" y="426.0" text-anchor="middle" class="usecase-label">Gỡ nhãn khỏi khách hàng</text><ellipse cx="1171.0" cy="421.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="1171.0" y="426.0" text-anchor="middle" class="usecase-label">Ghi lịch sử nhãn</text><ellipse cx="509.0" cy="525.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="509.0" y="530.0" text-anchor="middle" class="usecase-label">Xem mẫu trả lời nhanh</text><ellipse cx="840.0" cy="525.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="840.0" y="530.0" text-anchor="middle" class="usecase-label">Tạo mẫu trả lời</text><ellipse cx="1171.0" cy="525.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="1171.0" y="530.0" text-anchor="middle" class="usecase-label">Sửa mẫu trả lời</text><ellipse cx="509.0" cy="629.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="509.0" y="634.0" text-anchor="middle" class="usecase-label">Xóa mẫu trả lời</text><ellipse cx="840.0" cy="629.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="840.0" y="625.0" text-anchor="middle" class="usecase-label">Chèn mẫu bằng /shortcut</text>
+<text x="840.0" y="643.0" text-anchor="middle" class="usecase-label">trong chat</text><ellipse cx="1171.0" cy="629.0" rx="135.0" ry="39.0" class="usecase"/>
+<text x="1171.0" y="625.0" text-anchor="middle" class="usecase-label">Phân quyền mẫu chung /</text>
+<text x="1171.0" y="643.0" text-anchor="middle" class="usecase-label">cá nhân</text>
+</svg>

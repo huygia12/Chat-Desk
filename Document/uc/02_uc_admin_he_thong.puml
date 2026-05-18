@@ -1,0 +1,33 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+title Use Case phân rã: Quản trị hệ thống
+actor "Admin hệ thống" as A1
+rectangle "Cơ sở dữ liệu" as A2
+rectangle "Hệ thống ChatDesk" {
+  usecase "Xem dashboard analytics toàn hệ thống" as U1
+  usecase "Xem thống kê hệ thống" as U2
+  usecase "Xem danh sách doanh nghiệp" as U3
+  usecase "Tìm kiếm / lọc / sắp xếp doanh nghiệp" as U4
+  usecase "Xem chi tiết doanh nghiệp" as U5
+  usecase "Theo dõi kênh kết nối của doanh nghiệp" as U6
+  usecase "Theo dõi nhân viên của doanh nghiệp" as U7
+  usecase "Theo dõi sản phẩm của doanh nghiệp" as U8
+  usecase "Xem hội thoại gần đây" as U9
+  usecase "Theo dõi mức sử dụng AI" as U10
+}
+A1 -- U1
+A1 -- U2
+A1 -- U3
+A1 -- U4
+A1 -- U5
+A1 -- U10
+A2 -- U1
+A2 -- U5
+A2 -- U2
+U4 ..> U3 : <<extend>>
+U5 ..> U6 : <<include>>
+U5 ..> U7 : <<include>>
+U5 ..> U8 : <<include>>
+U5 ..> U9 : <<include>>
+@enduml

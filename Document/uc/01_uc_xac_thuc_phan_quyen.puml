@@ -1,0 +1,37 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+title Use Case phân rã: Xác thực và phân quyền
+actor "Khách truy cập" as A1
+actor "Chủ doanh nghiệp" as A2
+actor "Nhân viên CSKH" as A3
+actor "Admin hệ thống" as A4
+rectangle "Hệ thống ChatDesk" {
+  usecase "Đăng ký tài khoản doanh nghiệp" as U1
+  usecase "Đăng nhập" as U2
+  usecase "Lấy thông tin người dùng hiện tại" as U3
+  usecase "Phát hành và kiểm tra JWT" as U4
+  usecase "Điều hướng theo vai trò" as U5
+  usecase "Chặn truy cập trang Business-only" as U6
+  usecase "Chặn truy cập trang Admin-only" as U7
+  usecase "Cập nhật hồ sơ" as U8
+  usecase "Đổi mật khẩu nhân viên" as U9
+  usecase "Đăng xuất" as U10
+}
+A1 -- U1
+A1 -- U2
+A2 -- U2
+A2 -- U8
+A2 -- U10
+A3 -- U2
+A3 -- U8
+A3 -- U9
+A3 -- U10
+A4 -- U2
+A4 -- U10
+U2 ..> U4 : <<include>>
+U3 ..> U4 : <<include>>
+U5 ..> U3 : <<include>>
+U6 ..> U5 : <<include>>
+U7 ..> U5 : <<include>>
+@enduml

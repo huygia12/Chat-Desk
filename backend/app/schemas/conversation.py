@@ -50,3 +50,22 @@ class ConversationAIToggle(BaseModel):
 class ConversationAssignUpdate(BaseModel):
     assigned_to_id: uuid.UUID | None = None
     assigned_to_business: bool | None = None
+
+
+class ConversationHistoryEventOut(BaseModel):
+    id: str
+    type: str
+    action: str
+    created_at: datetime
+    actor_id: uuid.UUID | None = None
+    actor_name: str | None = None
+    actor_email: str | None = None
+    from_assignee_id: uuid.UUID | None = None
+    from_assignee_name: str | None = None
+    from_assignee_email: str | None = None
+    to_assignee_id: uuid.UUID | None = None
+    to_assignee_name: str | None = None
+    to_assignee_email: str | None = None
+    label_id: uuid.UUID | None = None
+    label_name: str | None = None
+    label_color: str | None = None

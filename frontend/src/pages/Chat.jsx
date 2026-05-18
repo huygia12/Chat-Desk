@@ -105,6 +105,8 @@ export default function Chat() {
   const [detailCollapsed, setDetailCollapsed] = useState(getStoredDetailCollapsed)
   const [assigningConversation, setAssigningConversation] = useState(false)
   const [conversationQueue, setConversationQueue] = useState('all')
+  const [conversationHistory, setConversationHistory] = useState([])
+  const [historyLoading, setHistoryLoading] = useState(false)
   const { t } = useI18n()
   const { token } = theme.useToken()
   const chatContainerRef = useRef(null)
@@ -117,6 +119,7 @@ export default function Chat() {
   const previousFirstMessageIdRef = useRef(null)
   const previousLastMessageIdRef = useRef(null)
   const restoreScrollHeightRef = useRef(null)
+  const conversationHistoryRequestRef = useRef(0)
 
   const scrollToLatestMessage = (behavior = 'auto') => {
     const container = messagesContainerRef.current
@@ -128,6 +131,34 @@ export default function Chat() {
     })
   }
 
+  const fetchConversationHistory = async (conversationId = activeConversationId, options = {}) => {
+    conversationHistoryRequestRef.current += 1
+    const requestId = conversationHistoryRequestRef.current
+
+    if (!conversationId) {
+      setConversationHistory([])
+      setHistoryLoading(false)
+      return
+    }
+
+    if (!options.silent) setHistoryLoading(true)
+    try {
+      const res = await client.get(`/api/conversations/${conversationId}/history`)
+      if (conversationHistoryRequestRef.current === requestId) {
+        setConversationHistory(res.data)
+      }
+    } catch (err) {
+      if (conversationHistoryRequestRef.current === requestId) {
+        setConversationHistory([])
+      }
+      console.error('Failed to fetch conversation history:', err)
+    } finally {
+      if (conversationHistoryRequestRef.current === requestId) {
+        setHistoryLoading(false)
+      }
+    }
+  }
+
   useEffect(() => {
     fetchConversations()
     fetchLabels()
@@ -135,6 +166,10 @@ export default function Chat() {
     fetchAssignmentSettings()
     fetchSavedReplies()
   }, [])
+
+  useEffect(() => {
+    fetchConversationHistory(activeConversationId)
+  }, [activeConversationId])
 
   const handleMessagesScroll = () => {
     const container = messagesContainerRef.current
@@ -378,6 +413,7 @@ export default function Chat() {
     setAssigningLabel(true)
     try {
       await assignLabel(activeConv.contact_id, labelId, activeConversationId)
+      await fetchConversationHistory(activeConversationId, { silent: true })
     } catch (err) {
       message.error(err.response?.data?.detail || t('chat.assignLabelFailed'))
     } finally {
@@ -391,6 +427,7 @@ export default function Chat() {
     if (!activeConv?.contact_id || !label?.id) return
     try {
       await removeLabel(activeConv.contact_id, label.id, activeConversationId)
+      await fetchConversationHistory(activeConversationId, { silent: true })
       setLabelSelectValue(undefined)
       setLabelSearchText('')
     } catch (err) {
@@ -410,6 +447,9 @@ export default function Chat() {
         assigned_to_id: assignedToId,
         assigned_to_business: assignmentValue === '__business__',
       })
+      if (user?.role !== 'employee' || assignedToId === user.id) {
+        await fetchConversationHistory(activeConversationId, { silent: true })
+      }
       await fetchConversations()
       if (user?.role === 'employee' && assignedToId !== user.id) {
         setActiveConversation(null)
@@ -738,7 +778,7 @@ export default function Chat() {
     const idLabel = activeConv?.platform === 'widget' ? t('chat.visitorId') : t('chat.platformId')
 
     return (
-      <div style={{ marginTop: 18, paddingBottom: 18 }}>
+      <div style={{ marginTop: 18, paddingBottom: 18, borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
         <Typography.Text strong>{t('chat.visitorInfo')}</Typography.Text>
         <div style={{ marginTop: 8 }}>
           {renderDetailRow(t('chat.name'), contact.display_name)}
@@ -750,6 +790,135 @@ export default function Chat() {
       </div>
     )
   }
+
+  const getHistoryActorText = (event) =>
+    event.actor_name || event.actor_email || t('chat.system')
+
+  const getAssigneeText = (event, direction) => {
+    if (direction === 'from') {
+      return event.from_assignee_name || event.from_assignee_email || t('chat.unassigned')
+    }
+    if (event.action === 'assigned_business') return t('chat.business')
+    return event.to_assignee_name || event.to_assignee_email || t('chat.unassigned')
+  }
+
+  const getHistoryTitle = (event) => {
+    if (event.type === 'conversation') return t('chat.historyConversationCreated')
+
+    if (event.type === 'label') {
+      return event.action === 'removed'
+        ? t('chat.historyLabelRemoved', { label: event.label_name || t('chat.unknown') })
+        : t('chat.historyLabelAdded', { label: event.label_name || t('chat.unknown') })
+    }
+
+    if (event.action === 'auto_assigned') {
+      return t('chat.historyAutoAssigned', { assignee: getAssigneeText(event, 'to') })
+    }
+    if (event.action === 'assigned_business') {
+      return t('chat.historyAssignedBusiness')
+    }
+    if (event.action === 'unassigned') {
+      return t('chat.historyUnassigned')
+    }
+    if (event.action === 'reassigned') {
+      return t('chat.historyReassigned', {
+        from: getAssigneeText(event, 'from'),
+        to: getAssigneeText(event, 'to'),
+      })
+    }
+    return t('chat.historyAssigned', { assignee: getAssigneeText(event, 'to') })
+  }
+
+  const getHistoryDotColor = (event) => {
+    if (event.type === 'label') return event.label_color || '#faad14'
+    if (event.type === 'assignment') return '#1677ff'
+    return token.colorSuccess
+  }
+
+  const renderConversationHistory = () => (
+    <div style={{ marginTop: 18, paddingBottom: 8 }}>
+      <Typography.Text strong>{t('chat.history')}</Typography.Text>
+      <div style={{ marginTop: 12 }}>
+        {historyLoading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '16px 0' }}>
+            <Spin size="small" />
+          </div>
+        ) : conversationHistory.length === 0 ? (
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            {t('chat.noHistory')}
+          </Typography.Text>
+        ) : (
+          <div>
+            {conversationHistory.map((event, index) => {
+              const isFirst = index === 0
+              const isLast = index === conversationHistory.length - 1
+              const dotColor = getHistoryDotColor(event)
+
+              return (
+                <div
+                  key={event.id}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '24px 1fr',
+                    gap: 10,
+                    minHeight: 58,
+                  }}
+                >
+                  <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
+                    {!isFirst && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          bottom: '50%',
+                          width: 2,
+                          background: token.colorBorder,
+                        }}
+                      />
+                    )}
+                    {!isLast && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          bottom: 0,
+                          width: 2,
+                          background: token.colorBorder,
+                        }}
+                      />
+                    )}
+                    <span
+                      style={{
+                        position: 'relative',
+                        marginTop: 6,
+                        width: 12,
+                        height: 12,
+                        borderRadius: '50%',
+                        background: dotColor,
+                        border: `2px solid ${token.colorBgContainer}`,
+                        boxShadow: `0 0 0 2px ${dotColor}33`,
+                      }}
+                    />
+                  </div>
+                  <div style={{ paddingBottom: 14, minWidth: 0 }}>
+                    <Typography.Text style={{ display: 'block', fontSize: 12, fontWeight: 600 }}>
+                      {getHistoryTitle(event)}
+                    </Typography.Text>
+                    <Typography.Text type="secondary" style={{ display: 'block', fontSize: 11, marginTop: 2 }}>
+                      {dayjs(event.created_at).format('HH:mm DD/MM/YYYY')}
+                    </Typography.Text>
+                    <Typography.Text type="secondary" style={{ display: 'block', fontSize: 11, marginTop: 2 }}>
+                      {t('chat.historyBy', { actor: getHistoryActorText(event) })}
+                    </Typography.Text>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  )
 
   return (
     <div
@@ -1223,6 +1392,7 @@ export default function Chat() {
               />
             </div>
             {renderVisitorInfo()}
+            {renderConversationHistory()}
           </aside>
       )}
     </div>

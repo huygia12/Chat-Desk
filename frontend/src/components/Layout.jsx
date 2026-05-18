@@ -13,6 +13,7 @@ import {
   MoonOutlined,
   PartitionOutlined,
   SettingOutlined,
+  ShopOutlined,
   ShoppingOutlined,
   SunOutlined,
   TagsOutlined,
@@ -64,12 +65,16 @@ export default function Layout() {
   ];
 
   const adminMenuItems = [
-    { key: "/admin", icon: <DashboardOutlined />, label: t("nav.dashboard") },
+    { key: "/admin", icon: <DashboardOutlined />, label: t("nav.adminAnalytics") },
+    { key: "/admin/businesses", icon: <ShopOutlined />, label: t("nav.businessDirectory") },
   ];
 
   let menuItems = adminMenuItems;
   if (isBusiness) menuItems = businessMenuItems;
   else if (isEmployee) menuItems = employeeMenuItems;
+  const selectedMenuKey = isAdmin && location.pathname.startsWith("/admin/businesses")
+    ? "/admin/businesses"
+    : location.pathname;
 
   const wsBusinessId = isEmployee ? user?.business_id : user?.id;
 
@@ -152,7 +157,7 @@ export default function Layout() {
         </div>
         <Menu
           mode="inline"
-          selectedKeys={[location.pathname]}
+          selectedKeys={[selectedMenuKey]}
           items={menuItems}
           onClick={({ key }) => navigate(key)}
           inlineCollapsed={collapsed}

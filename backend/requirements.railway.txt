@@ -16,7 +16,7 @@ httpx==0.28.*
 groq==0.15.*
 openai==1.*
 python-dotenv==1.0.*
-bcrypt==4.2.*
+bcrypt==4.0.1
 
 # PyTorch CPU-only (reduces from 2.5GB to 700MB)
 --extra-index-url https://download.pytorch.org/whl/cpu

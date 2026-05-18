@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { Spin } from "antd";
 import { useAuthStore } from "./store/authStore";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
@@ -7,7 +9,9 @@ import Chat from "./pages/Chat";
 import Channels from "./pages/Channels";
 import Products from "./pages/Products";
 import Settings from "./pages/Settings";
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminAnalytics from "./pages/AdminAnalytics";
+import AdminBusinessDetail from "./pages/AdminBusinessDetail";
+import AdminBusinessDirectory from "./pages/AdminBusinessDirectory";
 import WidgetPage from "./pages/WidgetPage";
 import Employees from "./pages/Employees";
 import Labels from "./pages/Labels";
@@ -24,8 +28,34 @@ function PrivateRoute({ children }) {
 function AdminRoute({ children }) {
   const token = useAuthStore((state) => state.token);
   const user = useAuthStore((state) => state.user);
+  const fetchUser = useAuthStore((state) => state.fetchUser);
+  const [checking, setChecking] = useState(Boolean(token && !user));
+
+  useEffect(() => {
+    let alive = true;
+    const ensureUser = async () => {
+      if (!token || user) {
+        setChecking(false);
+        return;
+      }
+      setChecking(true);
+      await fetchUser();
+      if (alive) setChecking(false);
+    };
+    ensureUser();
+    return () => {
+      alive = false;
+    };
+  }, [fetchUser, token, user]);
 
   if (!token) return <Navigate to="/login" />;
+  if (checking || !user) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Spin />
+      </div>
+    );
+  }
   if (user?.role !== "admin") return <Navigate to="/chat" />;
 
   return children;
@@ -83,7 +113,9 @@ export default function App() {
           </AdminRoute>
         }
       >
-        <Route index element={<AdminDashboard />} />
+        <Route index element={<AdminAnalytics />} />
+        <Route path="businesses" element={<AdminBusinessDirectory />} />
+        <Route path="businesses/:businessId" element={<AdminBusinessDetail />} />
       </Route>
 
       {/* Business + Employee Routes (shared layout, role-restricted pages inside) */}

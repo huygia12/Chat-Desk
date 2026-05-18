@@ -6,6 +6,7 @@ import { ConfigProvider, theme } from 'antd'
 import enUS from 'antd/locale/en_US'
 import viVN from 'antd/locale/vi_VN'
 import App from './App'
+import ErrorBoundary from './components/ErrorBoundary'
 import { useLanguageStore } from './store/languageStore'
 import { useThemeStore } from './store/themeStore'
 import './styles/global.css'
@@ -33,7 +34,9 @@ function RootProviders() {
       }}
     >
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <App />
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
       </BrowserRouter>
     </ConfigProvider>
   )

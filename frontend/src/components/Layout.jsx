@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Layout as AntLayout, Button, Menu, Modal, Tag, Tooltip, Typography, theme } from "antd";
 import {
   ApiOutlined,
+  BarChartOutlined,
   DashboardOutlined,
   FileTextOutlined,
   LogoutOutlined,
@@ -51,6 +52,7 @@ export default function Layout() {
     { key: "/labels", icon: <TagsOutlined />, label: t("nav.labels") },
     { key: "/saved-replies", icon: <FileTextOutlined />, label: t("nav.savedReplies") },
     { key: "/assignment-settings", icon: <PartitionOutlined />, label: t("nav.assignmentSettings") },
+    { key: "/statistics", icon: <BarChartOutlined />, label: t("nav.statistics") },
     { key: "/employees", icon: <TeamOutlined />, label: t("nav.employees") },
     { key: "/settings", icon: <SettingOutlined />, label: t("nav.settings") },
   ];

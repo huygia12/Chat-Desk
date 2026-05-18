@@ -7,7 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from app.api import auth, users, channels, contacts, conversations, messages, products, webhooks, admin, widgets, employees, labels, saved_replies, assignments, files, ai_assistant
+from app.api import auth, users, channels, contacts, conversations, messages, products, webhooks, admin, widgets, employees, labels, saved_replies, assignments, files, ai_assistant, statistics
 from app.websocket.manager import manager
 from app.config import get_settings
 from app.i18n import (
@@ -133,6 +133,7 @@ app.include_router(saved_replies.router)
 app.include_router(assignments.router)
 app.include_router(files.router)
 app.include_router(ai_assistant.router)
+app.include_router(statistics.router)
 app.include_router(webhooks.router)
 app.include_router(widgets.router)
 app.include_router(employees.router)

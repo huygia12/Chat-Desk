@@ -9,6 +9,7 @@ from app.models.channel import Channel
 from app.models.contact import Contact
 from app.models.conversation import Conversation
 from app.models.message import Message
+from app.services.assignment_service import auto_assign_conversation
 from app.services.ai_service import generate_ai_response
 from app.services.file_storage import save_remote_file
 from app.services.telegram_service import get_telegram_file_url
@@ -250,6 +251,13 @@ async def _process_incoming_message(
                 db.add(conversation)
                 await db.flush()
                 await db.refresh(conversation)
+                await auto_assign_conversation(
+                    db=db,
+                    conversation=conversation,
+                    business_id=channel.business_id,
+                    platform=platform,
+                    contact_id=contact.id,
+                )
 
             # 4. Save incoming message
             message = Message(

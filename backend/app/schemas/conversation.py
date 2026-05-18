@@ -32,6 +32,7 @@ class ConversationOut(BaseModel):
     platform: str
     status: str = "open"
     assigned_to_id: uuid.UUID | None = None
+    assigned_to_business: bool = False
     last_message_at: datetime | None = None
     is_ai_enabled: bool
     created_at: datetime
@@ -48,3 +49,4 @@ class ConversationAIToggle(BaseModel):
 
 class ConversationAssignUpdate(BaseModel):
     assigned_to_id: uuid.UUID | None = None
+    assigned_to_business: bool | None = None

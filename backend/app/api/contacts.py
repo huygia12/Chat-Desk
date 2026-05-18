@@ -12,6 +12,7 @@ from app.models.label import Label
 from app.schemas.contact import ContactOut
 from app.schemas.label import ContactLabelAssign
 from app.api.deps import get_current_business_or_employee, get_effective_business_id
+from app.services.assignment_service import auto_assign_conversation
 
 router = APIRouter(prefix="/api/contacts", tags=["contacts"])
 
@@ -122,6 +123,23 @@ async def assign_label_to_contact(
             )
         )
         await db.flush()
+        if verified_conversation_id is not None:
+            conversation_result = await db.execute(
+                select(Conversation).where(
+                    Conversation.id == verified_conversation_id,
+                    Conversation.business_id == business_id,
+                )
+            )
+            conversation = conversation_result.scalar_one_or_none()
+            if conversation:
+                await auto_assign_conversation(
+                    db=db,
+                    conversation=conversation,
+                    business_id=business_id,
+                    platform=conversation.platform,
+                    contact_id=contact.id,
+                    label_id=label.id,
+                )
 
     return contact
 

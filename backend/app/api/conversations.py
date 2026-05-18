@@ -25,7 +25,14 @@ async def _get_assignment_setting(
     if setting:
         return setting
 
-    setting = AssignmentSetting(business_id=business_id, employee_assignment_locked=False)
+    setting = AssignmentSetting(
+        business_id=business_id,
+        employee_assignment_locked=False,
+        auto_assign_enabled=False,
+        auto_assign_strategy="round_robin",
+        channel_assignment_rules={},
+        label_assignment_rules={},
+    )
     db.add(setting)
     await db.flush()
     return setting
@@ -39,7 +46,13 @@ def _conversation_query():
     )
 
 
-def _assignment_action(from_assignee_id: uuid.UUID | None, to_assignee_id: uuid.UUID | None) -> str:
+def _assignment_action(
+    from_assignee_id: uuid.UUID | None,
+    to_assignee_id: uuid.UUID | None,
+    to_business: bool = False,
+) -> str:
+    if to_business:
+        return "assigned_business"
     if to_assignee_id is None:
         return "unassigned"
     if from_assignee_id is None:
@@ -138,6 +151,7 @@ async def update_assignee(
         raise HTTPException(status_code=403, detail="Employee assignment changes are locked")
 
     assignee_id = data.assigned_to_id
+    assigned_to_business = bool(data.assigned_to_business)
     if assignee_id is not None:
         employee_result = await db.execute(
             select(User).where(
@@ -149,12 +163,14 @@ async def update_assignee(
         )
         if not employee_result.scalar_one_or_none():
             raise HTTPException(status_code=404, detail="Assignee not found")
+        assigned_to_business = False
 
     from_assignee_id = conversation.assigned_to_id
-    if from_assignee_id == assignee_id:
+    if from_assignee_id == assignee_id and conversation.assigned_to_business == assigned_to_business:
         return conversation
 
     conversation.assigned_to_id = assignee_id
+    conversation.assigned_to_business = assigned_to_business
     db.add(
         ConversationAssignmentHistory(
             conversation_id=conversation.id,
@@ -162,7 +178,7 @@ async def update_assignee(
             actor_id=current_user.id,
             from_assignee_id=from_assignee_id,
             to_assignee_id=assignee_id,
-            action=_assignment_action(from_assignee_id, assignee_id),
+            action=_assignment_action(from_assignee_id, assignee_id, assigned_to_business),
         )
     )
     await db.flush()

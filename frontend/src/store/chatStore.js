@@ -224,10 +224,11 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  assignConversation: async (conversationId, assignedToId) => {
-    const res = await client.patch(`/api/conversations/${conversationId}/assignee`, {
-      assigned_to_id: assignedToId,
-    })
+  assignConversation: async (conversationId, assignment) => {
+    const payload = typeof assignment === 'object'
+      ? assignment
+      : { assigned_to_id: assignment, assigned_to_business: false }
+    const res = await client.patch(`/api/conversations/${conversationId}/assignee`, payload)
     set((state) => ({
       conversations: state.conversations
         .map((conversation) => (conversation.id === conversationId ? res.data : conversation)),

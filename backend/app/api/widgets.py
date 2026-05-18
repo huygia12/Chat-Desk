@@ -22,6 +22,7 @@ from app.models.message import Message
 from app.api.deps import get_current_business
 from app.services.widget_service import generate_widget_id, generate_widget_secret, validate_widget_request
 from app.services.file_storage import save_upload_file
+from app.services.assignment_service import auto_assign_conversation
 from app.services.ai_service import generate_ai_response
 from app.websocket.manager import manager
 from app.config import get_settings
@@ -364,6 +365,13 @@ async def send_widget_message(
         )
         db.add(conversation)
         await db.flush()
+        await auto_assign_conversation(
+            db=db,
+            conversation=conversation,
+            business_id=business_id,
+            platform="widget",
+            contact_id=contact.id,
+        )
 
     # Save incoming message
     message = Message(
@@ -520,6 +528,13 @@ async def send_widget_file(
         )
         db.add(conversation)
         await db.flush()
+        await auto_assign_conversation(
+            db=db,
+            conversation=conversation,
+            business_id=business_id,
+            platform="widget",
+            contact_id=contact.id,
+        )
 
     message = Message(
         conversation_id=conversation.id,

@@ -218,10 +218,14 @@ export default function Chat() {
   const visibleConversations = useMemo(() => {
     if (user?.role !== 'business') return conversations
     if (conversationQueue === 'unassigned') {
-      return conversations.filter((conversation) => !conversation.assigned_to_id)
+      return conversations.filter(
+        (conversation) => !conversation.assigned_to_id && !conversation.assigned_to_business,
+      )
     }
     if (conversationQueue === 'assigned') {
-      return conversations.filter((conversation) => conversation.assigned_to_id)
+      return conversations.filter(
+        (conversation) => conversation.assigned_to_id || conversation.assigned_to_business,
+      )
     }
     return conversations
   }, [conversationQueue, conversations, user?.role])
@@ -394,11 +398,18 @@ export default function Chat() {
     }
   }
 
-  const handleAssignConversation = async (assignedToId) => {
+  const handleAssignConversation = async (assignmentValue) => {
     if (!activeConversationId) return
     setAssigningConversation(true)
     try {
-      await assignConversation(activeConversationId, assignedToId || null)
+      const assignedToId =
+        assignmentValue === '__business__' || assignmentValue === '__unassigned__'
+          ? null
+          : assignmentValue
+      await assignConversation(activeConversationId, {
+        assigned_to_id: assignedToId,
+        assigned_to_business: assignmentValue === '__business__',
+      })
       await fetchConversations()
       if (user?.role === 'employee' && assignedToId !== user.id) {
         setActiveConversation(null)
@@ -413,7 +424,18 @@ export default function Chat() {
   const activeAssigneeName =
     activeConv?.assigned_to?.full_name ||
     activeConv?.assigned_to?.email ||
-    t('chat.business')
+    (activeConv?.assigned_to_business ? t('chat.business') : t('chat.unassigned'))
+
+  const activeAssignmentValue = activeConv?.assigned_to_id
+    || (activeConv?.assigned_to_business ? '__business__' : '__unassigned__')
+
+  const assigneeOptions = [
+    { value: '__unassigned__', label: t('chat.unassigned') },
+    ...assignees.map((assignee) => ({
+      value: assignee.type === 'business' ? '__business__' : assignee.id,
+      label: assignee.name,
+    })),
+  ]
 
   const getPlatformIcon = (platform) =>
     platform === 'facebook' ? (
@@ -1135,20 +1157,23 @@ export default function Chat() {
                 showSearch
                 disabled={employeeAssignmentLocked}
                 loading={assigneesLoading || assigningConversation}
-                value={activeConv?.assigned_to_id || '__business__'}
-                onChange={(value) => handleAssignConversation(value === '__business__' ? null : value)}
+                value={activeAssignmentValue}
+                onChange={handleAssignConversation}
                 optionFilterProp="label"
                 style={{ width: '100%' }}
-                options={assignees.map((assignee) => ({
-                  value: assignee.id || '__business__',
-                  label: assignee.name,
-                }))}
+                options={assigneeOptions}
               />
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
                 <Avatar
                   size={24}
                   icon={activeConv?.assigned_to_id ? <UserOutlined /> : <ShopOutlined />}
-                  style={{ background: activeConv?.assigned_to_id ? '#52c41a' : '#1677ff' }}
+                  style={{
+                    background: activeConv?.assigned_to_id
+                      ? '#52c41a'
+                      : activeConv?.assigned_to_business
+                        ? '#1677ff'
+                        : token.colorTextQuaternary,
+                  }}
                 />
                 <Typography.Text>{activeAssigneeName}</Typography.Text>
               </div>

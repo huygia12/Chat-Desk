@@ -11,6 +11,9 @@ import {
   PaperClipOutlined,
   FileOutlined,
   SmileOutlined,
+  SearchOutlined,
+  FilterOutlined,
+  CloseCircleOutlined,
 } from '@ant-design/icons'
 import { useChatStore } from '../store/chatStore'
 import { useAuthStore } from '../store/authStore'
@@ -24,6 +27,7 @@ const CONVERSATION_MIN_WIDTH = 240
 const CONVERSATION_MAX_WIDTH = 420
 const CONVERSATION_WIDTH_STORAGE_KEY = 'chatdesk_conversation_list_width'
 const CONVERSATION_DETAIL_STORAGE_KEY = 'chatdesk_conversation_detail_open'
+const CONVERSATION_FILTERS_STORAGE_KEY = 'chatdesk_conversation_filters'
 const MESSAGE_GROUP_WINDOW_MINUTES = 3
 const EMOJI_OPTIONS = [
   '😀',
@@ -49,6 +53,19 @@ const WIDGET_AVATAR_STYLE = {
   border: '1px solid #b7d8ff',
 }
 
+const PLATFORM_LABELS = {
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  telegram: 'Telegram',
+  widget: 'Widget',
+}
+
+const normalizeSearchText = (value = '') =>
+  String(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+
 const clampConversationWidth = (value) =>
   Math.min(CONVERSATION_MAX_WIDTH, Math.max(CONVERSATION_MIN_WIDTH, value))
 
@@ -64,6 +81,30 @@ const getStoredConversationWidth = () => {
 const getStoredDetailCollapsed = () => {
   if (typeof window === 'undefined') return true
   return window.localStorage.getItem(CONVERSATION_DETAIL_STORAGE_KEY) !== 'true'
+}
+
+const getStoredConversationFilters = () => {
+  const fallback = {
+    open: false,
+    queue: 'all',
+    search: '',
+    labelIds: [],
+    platforms: [],
+  }
+  if (typeof window === 'undefined') return fallback
+
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(CONVERSATION_FILTERS_STORAGE_KEY))
+    return {
+      open: Boolean(parsed?.open),
+      queue: ['all', 'unassigned', 'assigned'].includes(parsed?.queue) ? parsed.queue : fallback.queue,
+      search: typeof parsed?.search === 'string' ? parsed.search : fallback.search,
+      labelIds: Array.isArray(parsed?.labelIds) ? parsed.labelIds.map(String) : fallback.labelIds,
+      platforms: Array.isArray(parsed?.platforms) ? parsed.platforms.filter(Boolean) : fallback.platforms,
+    }
+  } catch {
+    return fallback
+  }
 }
 
 export default function Chat() {
@@ -104,7 +145,12 @@ export default function Chat() {
   const [conversationWidth, setConversationWidth] = useState(getStoredConversationWidth)
   const [detailCollapsed, setDetailCollapsed] = useState(getStoredDetailCollapsed)
   const [assigningConversation, setAssigningConversation] = useState(false)
-  const [conversationQueue, setConversationQueue] = useState('all')
+  const [storedConversationFilters] = useState(getStoredConversationFilters)
+  const [conversationQueue, setConversationQueue] = useState(storedConversationFilters.queue)
+  const [conversationFiltersOpen, setConversationFiltersOpen] = useState(storedConversationFilters.open)
+  const [conversationSearch, setConversationSearch] = useState(storedConversationFilters.search)
+  const [selectedLabelIds, setSelectedLabelIds] = useState(storedConversationFilters.labelIds)
+  const [selectedPlatforms, setSelectedPlatforms] = useState(storedConversationFilters.platforms)
   const [conversationHistory, setConversationHistory] = useState([])
   const [historyLoading, setHistoryLoading] = useState(false)
   const { t } = useI18n()
@@ -170,6 +216,25 @@ export default function Chat() {
   useEffect(() => {
     fetchConversationHistory(activeConversationId)
   }, [activeConversationId])
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      CONVERSATION_FILTERS_STORAGE_KEY,
+      JSON.stringify({
+        open: conversationFiltersOpen,
+        queue: conversationQueue,
+        search: conversationSearch,
+        labelIds: selectedLabelIds,
+        platforms: selectedPlatforms,
+      }),
+    )
+  }, [
+    conversationFiltersOpen,
+    conversationQueue,
+    conversationSearch,
+    selectedLabelIds,
+    selectedPlatforms,
+  ])
 
   const handleMessagesScroll = () => {
     const container = messagesContainerRef.current
@@ -250,7 +315,7 @@ export default function Chat() {
   }, [])
 
   const activeConv = conversations.find((c) => c.id === activeConversationId)
-  const visibleConversations = useMemo(() => {
+  const queuedConversations = useMemo(() => {
     if (user?.role !== 'business') return conversations
     if (conversationQueue === 'unassigned') {
       return conversations.filter(
@@ -264,6 +329,37 @@ export default function Chat() {
     }
     return conversations
   }, [conversationQueue, conversations, user?.role])
+  const platformOptions = useMemo(() => {
+    const platforms = Array.from(new Set(conversations.map((conversation) => conversation.platform).filter(Boolean)))
+    return platforms.map((platform) => ({
+      value: platform,
+      label: PLATFORM_LABELS[platform] || platform,
+    }))
+  }, [conversations])
+  const visibleConversations = useMemo(() => {
+    const normalizedSearch = normalizeSearchText(conversationSearch.trim())
+    const normalizedLabelIds = selectedLabelIds.map(String)
+
+    return queuedConversations.filter((conversation) => {
+      const customerName = normalizeSearchText(conversation.contact?.display_name || '')
+      const matchesSearch =
+        normalizedSearch.length === 0 || customerName.includes(normalizedSearch)
+      const matchesLabels =
+        normalizedLabelIds.length === 0 ||
+        normalizedLabelIds.every((labelId) =>
+          (conversation.contact?.labels || []).some((label) => String(label.id) === labelId),
+        )
+      const matchesPlatform =
+        selectedPlatforms.length === 0 || selectedPlatforms.includes(conversation.platform)
+
+      return matchesSearch && matchesLabels && matchesPlatform
+    })
+  }, [conversationSearch, queuedConversations, selectedLabelIds, selectedPlatforms])
+  const hasConversationFilters =
+    conversationSearch.trim().length > 0 ||
+    selectedLabelIds.length > 0 ||
+    selectedPlatforms.length > 0 ||
+    (user?.role === 'business' && conversationQueue !== 'all')
   const activeContactLabels = activeConv?.contact?.labels || []
   const assignedLabelIds = new Set(activeContactLabels.map((label) => label.id))
   const labelSelectorKey = `${activeConv?.contact_id || 'no-contact'}:${activeContactLabels
@@ -931,31 +1027,131 @@ export default function Chat() {
           minWidth: CONVERSATION_MIN_WIDTH,
           maxWidth: CONVERSATION_MAX_WIDTH,
           flex: '0 0 auto',
-          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          background: token.colorBgContainer,
         }}
       >
         <div style={{ padding: '12px 16px', borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
-          <Typography.Text strong>{t('chat.conversations')} ({conversations.length})</Typography.Text>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <div style={{ minWidth: 0, display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <Typography.Text strong>{t('chat.conversations')}</Typography.Text>
+              <Typography.Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>
+                {visibleConversations.length}/{conversations.length}
+              </Typography.Text>
+            </div>
+            <Tooltip title={t('chat.filters')}>
+              <Badge dot={hasConversationFilters} offset={[-2, 3]}>
+                <Button
+                  type={conversationFiltersOpen ? 'primary' : 'text'}
+                  size="small"
+                  icon={<FilterOutlined />}
+                  onClick={() => setConversationFiltersOpen((open) => !open)}
+                  aria-label={t('chat.filters')}
+                />
+              </Badge>
+            </Tooltip>
+          </div>
         </div>
-        {user?.role === 'business' && (
-          <div style={{ padding: '10px 16px', borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
-            <Segmented
-              size="small"
-              value={conversationQueue}
-              onChange={setConversationQueue}
-              options={[
-                { label: t('chat.all'), value: 'all' },
-                { label: t('chat.unassigned'), value: 'unassigned' },
-                { label: t('chat.assigned'), value: 'assigned' },
-              ]}
-              block
-            />
+        {conversationFiltersOpen && (
+          <div
+            style={{
+              padding: '12px 16px',
+              borderBottom: `1px solid ${token.colorBorderSecondary}`,
+              background: token.colorFillQuaternary,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <Typography.Text style={{ fontSize: 12, fontWeight: 600 }}>
+                {t('chat.filters')}
+              </Typography.Text>
+              {hasConversationFilters && (
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<CloseCircleOutlined />}
+                  onClick={() => {
+                    setConversationSearch('')
+                    setSelectedLabelIds([])
+                    setSelectedPlatforms([])
+                    setConversationQueue('all')
+                  }}
+                  style={{ marginLeft: 'auto', paddingInline: 4, fontSize: 12 }}
+                >
+                  {t('chat.clearFilters')}
+                </Button>
+              )}
+            </div>
+            <Space direction="vertical" size={8} style={{ width: '100%' }}>
+              <Input
+                allowClear
+                prefix={<SearchOutlined style={{ color: token.colorTextTertiary }} />}
+                placeholder={t('chat.searchCustomerPlaceholder')}
+                value={conversationSearch}
+                onChange={(event) => setConversationSearch(event.target.value)}
+                style={{
+                  borderRadius: 8,
+                  background: token.colorBgContainer,
+                }}
+              />
+              {user?.role === 'business' && (
+                <Segmented
+                  size="small"
+                  value={conversationQueue}
+                  onChange={setConversationQueue}
+                  options={[
+                    { label: t('chat.all'), value: 'all' },
+                    { label: t('chat.unassigned'), value: 'unassigned' },
+                    { label: t('chat.assigned'), value: 'assigned' },
+                  ]}
+                  block
+                />
+              )}
+              <Select
+                mode="multiple"
+                allowClear
+                maxTagCount="responsive"
+                size="small"
+                placeholder={t('chat.labelFilterPlaceholder')}
+                value={selectedLabelIds}
+                onChange={setSelectedLabelIds}
+                loading={labelsLoading}
+                optionFilterProp="searchText"
+                style={{ width: '100%' }}
+                options={labels.map((label) => ({
+                  value: String(label.id),
+                  searchText: label.name,
+                  label: <CustomerLabel label={label} size="small" />,
+                }))}
+              />
+              <Select
+                mode="multiple"
+                allowClear
+                maxTagCount="responsive"
+                size="small"
+                placeholder={t('chat.platformFilterPlaceholder')}
+                value={selectedPlatforms}
+                onChange={setSelectedPlatforms}
+                optionFilterProp="label"
+                style={{ width: '100%' }}
+                options={platformOptions}
+              />
+            </Space>
           </div>
         )}
         {visibleConversations.length === 0 ? (
-          <Empty description={t('chat.emptyConversations')} style={{ marginTop: 40 }} />
+          <Empty
+            description={
+              conversations.length === 0
+                ? t('chat.emptyConversations')
+                : t('chat.noFilteredConversations')
+            }
+            style={{ marginTop: 40 }}
+          />
         ) : (
           <List
+            style={{ flex: 1, overflowY: 'auto' }}
             dataSource={visibleConversations}
             renderItem={(conv) => (
               <List.Item

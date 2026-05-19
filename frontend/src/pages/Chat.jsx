@@ -66,6 +66,15 @@ const normalizeSearchText = (value = '') =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
 
+const getLabelTextColor = (hexColor) => {
+  const hex = hexColor?.replace('#', '') || 'd6e400'
+  const r = parseInt(hex.slice(0, 2), 16)
+  const g = parseInt(hex.slice(2, 4), 16)
+  const b = parseInt(hex.slice(4, 6), 16)
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  return luminance > 0.58 ? '#111' : '#fff'
+}
+
 const clampConversationWidth = (value) =>
   Math.min(CONVERSATION_MAX_WIDTH, Math.max(CONVERSATION_MIN_WIDTH, value))
 
@@ -685,6 +694,73 @@ export default function Chat() {
     )
   }
 
+  const renderLabelFilterTag = ({ value, closable, onClose }) => {
+    const label = labels.find((item) => String(item.id) === String(value))
+    if (!label) return null
+
+    const background = label.color || '#d6e400'
+    const color = getLabelTextColor(background)
+
+    return (
+      <span
+        onMouseDown={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+        }}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 4,
+          maxWidth: 116,
+          height: 20,
+          marginInlineEnd: 4,
+          padding: '0 6px',
+          borderRadius: 999,
+          background,
+          color,
+          fontSize: 11,
+          fontWeight: 600,
+          lineHeight: '20px',
+          verticalAlign: 'middle',
+        }}
+        title={label.name}
+      >
+        <span
+          style={{
+            minWidth: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {label.name}
+        </span>
+        {closable && (
+          <button
+            type="button"
+            aria-label={t('labelsPage.removeLabel', { name: label.name })}
+            onClick={onClose}
+            style={{
+              width: 14,
+              height: 14,
+              flex: '0 0 14px',
+              border: 0,
+              borderRadius: '50%',
+              padding: 0,
+              background: 'rgba(0, 0, 0, 0.28)',
+              color: '#fff',
+              cursor: 'pointer',
+              fontSize: 11,
+              lineHeight: '14px',
+            }}
+          >
+            x
+          </button>
+        )}
+      </span>
+    )
+  }
+
   const renderDetailRow = (label, value, options = {}) => (
     <div
       style={{
@@ -1118,6 +1194,7 @@ export default function Chat() {
                 onChange={setSelectedLabelIds}
                 loading={labelsLoading}
                 optionFilterProp="searchText"
+                tagRender={renderLabelFilterTag}
                 style={{ width: '100%' }}
                 options={labels.map((label) => ({
                   value: String(label.id),
@@ -1129,12 +1206,12 @@ export default function Chat() {
                 mode="multiple"
                 allowClear
                 maxTagCount="responsive"
-                size="small"
+                size="middle"
                 placeholder={t('chat.platformFilterPlaceholder')}
                 value={selectedPlatforms}
                 onChange={setSelectedPlatforms}
                 optionFilterProp="label"
-                style={{ width: '100%' }}
+                style={{ width: '100%', minHeight: 32 }}
                 options={platformOptions}
               />
             </Space>

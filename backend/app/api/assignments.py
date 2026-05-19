@@ -6,6 +6,7 @@ from app.database import get_db
 from app.models.conversation import Conversation
 from app.models.conversation_assignment import AssignmentSetting
 from app.models.user import User
+from app.services.assignment_service import get_auto_assignable_employee_ids, get_auto_assignable_employees
 from app.schemas.assignment import (
     AssigneeOptionOut,
     AssignmentOverviewBucket,
@@ -39,29 +40,27 @@ async def _get_or_create_setting(business_id, db: AsyncSession) -> AssignmentSet
     return setting
 
 
-async def _active_employee_ids(business_id, db: AsyncSession) -> set:
-    result = await db.execute(
-        select(User.id).where(
-            User.business_id == business_id,
-            User.role == "employee",
-            User.is_active == True,
-        )
-    )
-    return set(result.scalars().all())
+async def _auto_assignable_employee_ids(business_id, db: AsyncSession) -> set:
+    return await get_auto_assignable_employee_ids(db, business_id)
 
 
-def _clean_rule_map(rules: dict | None, active_employee_ids: set) -> dict:
+def _clean_rule_map(rules: dict | None, auto_assignable_employee_ids: set) -> dict:
     if not rules:
         return {}
 
     cleaned = {}
-    active_ids = {str(item) for item in active_employee_ids}
+    auto_assignable_ids = {str(item) for item in auto_assignable_employee_ids}
     for key, value in rules.items():
         if value is None:
             continue
-        value_text = str(value)
-        if value_text in active_ids:
-            cleaned[str(key)] = value_text
+        values = value if isinstance(value, list) else [value]
+        cleaned_values = []
+        for item in values:
+            value_text = str(item)
+            if value_text in auto_assignable_ids and value_text not in cleaned_values:
+                cleaned_values.append(value_text)
+        if cleaned_values:
+            cleaned[str(key)] = cleaned_values
     return cleaned
 
 
@@ -90,13 +89,13 @@ async def update_assignment_settings(
             raise HTTPException(status_code=422, detail="Unsupported assignment strategy")
         setting.auto_assign_strategy = data.auto_assign_strategy
 
-    active_ids = None
+    auto_assignable_ids = None
     if data.channel_assignment_rules is not None:
-        active_ids = active_ids or await _active_employee_ids(current_user.id, db)
-        setting.channel_assignment_rules = _clean_rule_map(data.channel_assignment_rules, active_ids)
+        auto_assignable_ids = auto_assignable_ids or await _auto_assignable_employee_ids(current_user.id, db)
+        setting.channel_assignment_rules = _clean_rule_map(data.channel_assignment_rules, auto_assignable_ids)
     if data.label_assignment_rules is not None:
-        active_ids = active_ids or await _active_employee_ids(current_user.id, db)
-        setting.label_assignment_rules = _clean_rule_map(data.label_assignment_rules, active_ids)
+        auto_assignable_ids = auto_assignable_ids or await _auto_assignable_employee_ids(current_user.id, db)
+        setting.label_assignment_rules = _clean_rule_map(data.label_assignment_rules, auto_assignable_ids)
 
     await db.flush()
     await db.refresh(setting)
@@ -179,12 +178,7 @@ async def list_assignees(
         )
     ]
 
-    employee_result = await db.execute(
-        select(User)
-        .where(User.business_id == business_id, User.role == "employee", User.is_active == True)
-        .order_by(User.full_name.asc().nullslast(), User.email.asc())
-    )
-    for employee in employee_result.scalars().all():
+    for employee in await get_auto_assignable_employees(db, business_id):
         options.append(
             AssigneeOptionOut(
                 id=employee.id,

@@ -37,6 +37,11 @@ const PLATFORM_RULES = [
 ];
 const EMPLOYEE_TABLE_SCROLL_Y = 240;
 
+const normalizeRuleAssignees = (value) => {
+  if (!value) return [];
+  return Array.isArray(value) ? value.filter(Boolean) : [value];
+};
+
 export default function AssignmentSettings() {
   const [settings, setSettings] = useState(null);
   const [overview, setOverview] = useState(null);
@@ -115,20 +120,20 @@ export default function AssignmentSettings() {
     }
   };
 
-  const setChannelRule = (platform, assigneeId) => {
+  const setChannelRule = (platform, assigneeIds) => {
     patchSettings({
       channel_assignment_rules: {
         ...(settings?.channel_assignment_rules || {}),
-        [platform]: assigneeId || null,
+        [platform]: assigneeIds?.length ? assigneeIds : null,
       },
     });
   };
 
-  const setLabelRule = (labelId, assigneeId) => {
+  const setLabelRule = (labelId, assigneeIds) => {
     patchSettings({
       label_assignment_rules: {
         ...(settings?.label_assignment_rules || {}),
-        [labelId]: assigneeId || null,
+        [labelId]: assigneeIds?.length ? assigneeIds : null,
       },
     });
   };
@@ -240,7 +245,7 @@ export default function AssignmentSettings() {
 
         <Col xs={24} lg={10} style={{ display: "flex" }}>
           <Card
-            title={t("assignment.generalSettings")}
+            title={t("assignment.autoAssignmentSection")}
             loading={loading}
             style={{ width: "100%" }}
           >
@@ -263,7 +268,7 @@ export default function AssignmentSettings() {
 
               <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
                 <div>
-                  <Text strong>{t("assignment.autoAssignTitle")}</Text>
+                  <Text strong>{t("assignment.enableAutoAssign")}</Text>
                   <Text type="secondary" style={{ display: "block", marginTop: 4 }}>
                     {t("assignment.autoAssignDescription")}
                   </Text>
@@ -276,7 +281,7 @@ export default function AssignmentSettings() {
               </div>
 
               <div>
-                <Text strong>{t("assignment.defaultRule")}</Text>
+                <Text strong>{t("assignment.strategy")}</Text>
                 <Select
                   value={settings?.auto_assign_strategy || "round_robin"}
                   disabled={!autoAssignEnabled || saving}
@@ -292,7 +297,29 @@ export default function AssignmentSettings() {
           </Card>
         </Col>
 
-        <Col xs={24} lg={12}>
+        <Col xs={24}>
+          <div style={{ marginTop: 4 }}>
+            <Title level={4} style={{ margin: 0 }}>
+              {t("assignment.routingRules")}
+            </Title>
+            <Text type="secondary">
+              {autoAssignEnabled
+                ? t("assignment.routingRulesDescription")
+                : t("assignment.routingRulesDisabledDescription")}
+            </Text>
+          </div>
+        </Col>
+
+        <Col xs={24}>
+          <Alert
+            type="info"
+            showIcon
+            message={t("assignment.conflictResolution")}
+            description={t("assignment.conflictResolutionDescription")}
+          />
+        </Col>
+
+        <Col xs={24} lg={12} style={{ order: 2 }}>
           <Card
             title={
               <Space>
@@ -301,6 +328,10 @@ export default function AssignmentSettings() {
               </Space>
             }
             loading={loading}
+            style={{
+              opacity: autoAssignEnabled ? 1 : 0.58,
+              pointerEvents: autoAssignEnabled ? "auto" : "none",
+            }}
           >
             <Space direction="vertical" size={12} style={{ width: "100%" }}>
               {PLATFORM_RULES.map((platform) => (
@@ -315,12 +346,14 @@ export default function AssignmentSettings() {
                 >
                   <Text strong>{platform.label}</Text>
                   <Select
+                    mode="multiple"
                     allowClear
                     showSearch
+                    maxTagCount="responsive"
                     disabled={!autoAssignEnabled || saving}
-                    placeholder={t("assignment.selectEmployee")}
+                    placeholder={t("assignment.selectEmployees")}
                     optionFilterProp="label"
-                    value={settings?.channel_assignment_rules?.[platform.key] || undefined}
+                    value={normalizeRuleAssignees(settings?.channel_assignment_rules?.[platform.key])}
                     onChange={(value) => setChannelRule(platform.key, value)}
                     options={employeeOptions}
                   />
@@ -330,7 +363,7 @@ export default function AssignmentSettings() {
           </Card>
         </Col>
 
-        <Col xs={24} lg={12}>
+        <Col xs={24} lg={12} style={{ order: 1 }}>
           <Card
             title={
               <Space>
@@ -339,6 +372,10 @@ export default function AssignmentSettings() {
               </Space>
             }
             loading={loading}
+            style={{
+              opacity: autoAssignEnabled ? 1 : 0.58,
+              pointerEvents: autoAssignEnabled ? "auto" : "none",
+            }}
           >
             {labels.length === 0 ? (
               <Empty description={t("assignment.noLabels")} />
@@ -364,12 +401,14 @@ export default function AssignmentSettings() {
                   >
                     <Tag color={selectedLabel.color}>{selectedLabel.name}</Tag>
                     <Select
+                      mode="multiple"
                       allowClear
                       showSearch
+                      maxTagCount="responsive"
                       disabled={!autoAssignEnabled || saving}
-                      placeholder={t("assignment.selectEmployee")}
+                      placeholder={t("assignment.selectEmployees")}
                       optionFilterProp="label"
-                      value={settings?.label_assignment_rules?.[selectedLabel.id] || undefined}
+                      value={normalizeRuleAssignees(settings?.label_assignment_rules?.[selectedLabel.id])}
                       onChange={(value) => setLabelRule(selectedLabel.id, value)}
                       options={employeeOptions}
                     />

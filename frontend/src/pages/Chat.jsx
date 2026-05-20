@@ -215,12 +215,16 @@ export default function Chat() {
   }
 
   useEffect(() => {
+    if (!user?.id) return
+    setActiveConversation(null)
+    setConversationHistory([])
+    setInputValue('')
     fetchConversations()
     fetchLabels()
     fetchAssignees()
     fetchAssignmentSettings()
     fetchSavedReplies()
-  }, [])
+  }, [user?.id])
 
   useEffect(() => {
     fetchConversationHistory(activeConversationId)
@@ -1285,7 +1289,7 @@ export default function Chat() {
       />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        {activeConversationId ? (
+        {activeConversationId && activeConv ? (
           <>
             <div
               style={{

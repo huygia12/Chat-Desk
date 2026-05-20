@@ -35,6 +35,7 @@ export default function Layout() {
   const { user, logout } = useAuthStore();
   const addMessage = useChatStore((s) => s.addMessage);
   const fetchConversations = useChatStore((s) => s.fetchConversations);
+  const resetChatState = useChatStore((s) => s.resetChatState);
   const { language, t } = useI18n();
   const toggleLanguage = useLanguageStore((s) => s.toggleLanguage);
   const themeMode = useThemeStore((s) => s.mode);
@@ -94,6 +95,7 @@ export default function Layout() {
   }, [addMessage, fetchConversations, isAdmin, wsBusinessId]);
 
   const handleLogout = () => {
+    resetChatState();
     logout();
     navigate("/login");
   };

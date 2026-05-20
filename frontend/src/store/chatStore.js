@@ -3,6 +3,21 @@ import client from '../api/client'
 
 const MESSAGE_PAGE_SIZE = 50
 
+const initialState = {
+  conversations: [],
+  labels: [],
+  assignees: [],
+  assignmentSettings: null,
+  activeConversationId: null,
+  messages: [],
+  messagesHasMore: false,
+  messagesNextCursor: null,
+  loading: false,
+  loadingOlderMessages: false,
+  labelsLoading: false,
+  assigneesLoading: false,
+}
+
 const normalizeMessagePage = (payload) => {
   if (Array.isArray(payload)) {
     return {
@@ -20,24 +35,32 @@ const normalizeMessagePage = (payload) => {
 }
 
 export const useChatStore = create((set, get) => ({
-  conversations: [],
-  labels: [],
-  assignees: [],
-  assignmentSettings: null,
-  activeConversationId: null,
-  messages: [],
-  messagesHasMore: false,
-  messagesNextCursor: null,
-  loading: false,
-  loadingOlderMessages: false,
-  labelsLoading: false,
-  assigneesLoading: false,
+  ...initialState,
+
+  resetChatState: () => set(initialState),
 
   fetchConversations: async () => {
     set({ loading: true })
     try {
       const res = await client.get('/api/conversations')
-      set({ conversations: res.data })
+      const conversations = res.data || []
+      const activeConversationId = get().activeConversationId
+      const activeConversationStillVisible = conversations.some(
+        (conversation) => String(conversation.id) === String(activeConversationId),
+      )
+
+      set({
+        conversations,
+        ...(!activeConversationStillVisible
+          ? {
+              activeConversationId: null,
+              messages: [],
+              messagesHasMore: false,
+              messagesNextCursor: null,
+              loadingOlderMessages: false,
+            }
+          : {}),
+      })
     } catch (err) {
       console.error('Failed to fetch conversations:', err)
     } finally {

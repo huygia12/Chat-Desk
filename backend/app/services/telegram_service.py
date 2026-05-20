@@ -72,6 +72,28 @@ async def get_telegram_file_url(bot_token: str, file_id: str) -> str | None:
         return None
 
 
+async def get_telegram_user_profile_photo_url(bot_token: str, user_id: str) -> str | None:
+    """Return a temporary Telegram URL for the user's largest current profile photo."""
+    url = f"{TELEGRAM_API}/bot{bot_token}/getUserProfilePhotos"
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(url, params={"user_id": user_id, "limit": 1})
+            data = response.json()
+            if not data.get("ok"):
+                logger.warning("Telegram getUserProfilePhotos failed: %s", data)
+                return None
+
+            photos = data.get("result", {}).get("photos") or []
+            if not photos or not photos[0]:
+                return None
+
+            largest_photo = photos[0][-1]
+            return await get_telegram_file_url(bot_token, largest_photo.get("file_id"))
+    except Exception as e:
+        logger.warning("Failed to get Telegram user profile photo: %s", e)
+        return None
+
+
 async def set_telegram_webhook(bot_token: str, webhook_url: str) -> bool:
     """Register webhook URL with Telegram Bot API."""
     url = f"{TELEGRAM_API}/bot{bot_token}/setWebhook"

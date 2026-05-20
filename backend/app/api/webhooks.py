@@ -12,7 +12,7 @@ from app.models.message import Message
 from app.services.assignment_service import auto_assign_conversation
 from app.services.ai_service import generate_ai_response
 from app.services.file_storage import save_remote_file
-from app.services.telegram_service import get_telegram_file_url
+from app.services.telegram_service import get_telegram_file_url, get_telegram_user_profile_photo_url
 from app.websocket.manager import manager
 
 logger = logging.getLogger(__name__)
@@ -163,6 +163,7 @@ async def telegram_webhook(bot_id: str, request: Request):
         message_text=text or attachment.get("attachment_filename") or "Attachment",
         platform_message_id=str(message_data.get("message_id", "")),
         sender_name=sender_name,
+        sender_profile_id=sender_id,
         attachment=attachment,
     )
 
@@ -178,6 +179,7 @@ async def _process_incoming_message(
     message_text: str,
     platform_message_id: str | None,
     sender_name: str | None = None,
+    sender_profile_id: str | None = None,
     attachment: dict | None = None,
 ):
     """Process incoming message from FB or IG: save to DB, trigger AI, notify via WS."""
@@ -207,7 +209,11 @@ async def _process_incoming_message(
             )
             contact = contact_result.scalar_one_or_none()
             if not contact:
-                sender_profile = await _get_sender_profile(platform, channel.access_token, sender_id)
+                sender_profile = await _get_sender_profile(
+                    platform,
+                    channel.access_token,
+                    sender_profile_id or sender_id,
+                )
                 contact = Contact(
                     business_id=channel.business_id,
                     platform=platform,
@@ -223,7 +229,11 @@ async def _process_incoming_message(
                 await db.flush()
                 await db.refresh(contact)
             elif not contact.profile_pic_url or not contact.display_name or contact.display_name.startswith("User "):
-                sender_profile = await _get_sender_profile(platform, channel.access_token, sender_id)
+                sender_profile = await _get_sender_profile(
+                    platform,
+                    channel.access_token,
+                    sender_profile_id or sender_id,
+                )
                 if sender_profile:
                     contact.display_name = (
                         sender_name
@@ -377,6 +387,20 @@ async def _get_sender_profile(
             from app.services.instagram_service import get_instagram_user_profile
 
             return await get_instagram_user_profile(page_access_token, sender_id)
+        if platform == "telegram":
+            profile_pic_url = await get_telegram_user_profile_photo_url(page_access_token, sender_id)
+            if not profile_pic_url:
+                return None
+
+            saved_photo = await save_remote_file(
+                profile_pic_url,
+                filename=f"telegram-profile-{sender_id}.jpg",
+                mime_type="image/jpeg",
+            )
+            if not saved_photo:
+                return None
+
+            return {"profile_pic_url": saved_photo["attachment_url"]}
     except Exception as e:
         logger.warning("Failed to fetch %s sender profile for %s: %s", platform, sender_id, e)
     return None

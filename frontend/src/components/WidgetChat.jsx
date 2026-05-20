@@ -184,7 +184,12 @@ export default function WidgetChat({
       `${apiUrl}/api/widgets/${widgetId}/history` +
         `?widget_secret=${encodeURIComponent(widgetSecret)}` +
         `&visitor_id=${encodeURIComponent(visitorInfo.id)}` +
-        `&visitor_email=${encodeURIComponent(visitorInfo.email || "")}`
+        `&visitor_email=${encodeURIComponent(visitorInfo.email || "")}`,
+      {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
+      }
     )
       .then((r) => r.json())
       .then((data) => {
@@ -233,6 +238,7 @@ export default function WidgetChat({
           "X-Language": language,
           "Accept-Language":
             language === "vi" ? "vi-VN,vi;q=0.9,en;q=0.8" : "en-US,en;q=0.9,vi;q=0.8",
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify({
           visitor_id: visitorInfo.id,
@@ -314,6 +320,7 @@ export default function WidgetChat({
           "X-Language": language,
           "Accept-Language":
             language === "vi" ? "vi-VN,vi;q=0.9,en;q=0.8" : "en-US,en;q=0.9,vi;q=0.8",
+          "ngrok-skip-browser-warning": "true",
         },
         body: formData,
       });

@@ -66,6 +66,10 @@ frontend/dist/
 frontend/.vite/
 frontend/.turbo/
 
+# Mobile
+mobile/node_modules/
+mobile/.expo/
+
 # Backend
 backend/.env.railway
 backend/uploads/

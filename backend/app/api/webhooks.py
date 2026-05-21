@@ -12,6 +12,7 @@ from app.models.message import Message
 from app.services.assignment_service import auto_assign_conversation
 from app.services.ai_service import generate_ai_response
 from app.services.file_storage import save_remote_file
+from app.services.push_service import send_conversation_push
 from app.services.telegram_service import get_telegram_file_url, get_telegram_user_profile_photo_url
 from app.websocket.manager import manager
 
@@ -303,6 +304,7 @@ async def _process_incoming_message(
                     },
                 },
             )
+            await send_conversation_push(db, conversation, message, contact)
 
             # 6. If AI enabled, generate and send AI response
             if conversation.is_ai_enabled and not attachment:

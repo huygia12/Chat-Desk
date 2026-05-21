@@ -32,7 +32,7 @@ const { Header, Sider, Content } = AntLayout;
 export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuthStore();
+  const { user, token: authToken, logout } = useAuthStore();
   const addMessage = useChatStore((s) => s.addMessage);
   const fetchConversations = useChatStore((s) => s.fetchConversations);
   const { language, t } = useI18n();
@@ -76,11 +76,9 @@ export default function Layout() {
     ? "/admin/businesses"
     : location.pathname;
 
-  const wsBusinessId = isEmployee ? user?.business_id : user?.id;
-
   useEffect(() => {
-    if (wsBusinessId && !isAdmin) {
-      connectWebSocket(wsBusinessId, (data) => {
+    if (authToken && !isAdmin) {
+      connectWebSocket(authToken, (data) => {
         if (data.type === "new_message") {
           addMessage({
             ...data.message,
@@ -91,7 +89,7 @@ export default function Layout() {
       });
       return () => disconnectWebSocket();
     }
-  }, [addMessage, fetchConversations, isAdmin, wsBusinessId]);
+  }, [addMessage, authToken, fetchConversations, isAdmin]);
 
   const handleLogout = () => {
     logout();

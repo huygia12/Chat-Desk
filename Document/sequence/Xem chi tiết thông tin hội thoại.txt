@@ -3,7 +3,7 @@ participant "Màn hình Chat" as ManHinhChat
 participant "Backend ChatDesk" as Backend
 participant "CSDL PostgreSQL" as CSDL
 
-NguoiDung->ManHinhChat: 1. Bấm nút Chi tiết của hội thoại đang mở
+NguoiDung->ManHinhChat: 1. Bấm nút Chi tiết \ncủa hội thoại đang mở
 activate ManHinhChat
 ManHinhChat->ManHinhChat: 2. Mở panel chi tiết \nvà lưu trạng thái hiển thị vào localStorage
 ManHinhChat->ManHinhChat: 3. Đọc thông tin hội thoại đang chọn đã có \ntrên màn hình: người phụ trách, label,\nthông tin khách hàng và kênh
@@ -29,7 +29,7 @@ deactivate CSDL
   Backend-->ManHinhChat: 12. Trả về danh sách lịch sử hội thoại
   deactivate Backend
   ManHinhChat->ManHinhChat: 13. Lưu lịch sử hội thoại \nvà dựng dữ liệu panel chi tiết
-  ManHinhChat-->NguoiDung: 14. Hiển thị thông tin mở rộng của hội thoại
+  ManHinhChat-->NguoiDung: 14. Hiển thị thông tin \nmở rộng của hội thoại
   deactivate ManHinhChat
 
 

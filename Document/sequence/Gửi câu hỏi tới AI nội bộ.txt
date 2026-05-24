@@ -1,86 +1,83 @@
-actor "Chủ doanh nghiệp\nNhân viên" as NguoiDung
+actor "Chủ doanh nghiệp\nNhân viên CSKH" as NguoiDung
 participant "Màn hình Trợ lý AI nội bộ" as ManHinhTroLy
 participant "Backend ChatDesk" as Backend
 participant "CSDL PostgreSQL" as PostgreSQL
 participant "Vector DB" as VectorDB
 participant "Groq/OpenAI API" as LLM
 
-NguoiDung->ManHinhTroLy: 1. Nhập câu hỏi và bấm Hỏi
+NguoiDung->ManHinhTroLy: 1. Nhập câu hỏi \nvà bấm Hỏi
 activate ManHinhTroLy
-ManHinhTroLy->ManHinhTroLy: 2. Chuẩn hóa câu hỏi và kiểm tra nội dung không rỗng
 
-alt [Câu hỏi trống hoặc đang xử lý]
-  ManHinhTroLy-->NguoiDung: 3. Không gửi yêu cầu
-else [Câu hỏi hợp lệ]
-  ManHinhTroLy->ManHinhTroLy: 3. Xóa ô nhập và hiển thị trạng thái AI đang suy nghĩ
-  ManHinhTroLy->Backend: 4. Gửi câu hỏi cho AI nội bộ \nPOST /api/ai-assistant/ask {question, conversation_id?}
-  activate Backend
+ManHinhTroLy->Backend: 2. Gửi câu hỏi cho AI nội bộ \nPOST /api/ai-assistant\n/ask {question, conversation_id?}
+activate Backend
 
-  Backend->Backend: 5. Chuẩn hóa câu hỏi và kiểm tra không rỗng
+Backend->Backend: 3. Chuẩn hóa câu hỏi và \nkiểm tra không rỗng
 
-  alt [Câu hỏi rỗng]
-    Backend-->ManHinhTroLy: 6. Trả lỗi Question is required
-  else [Câu hỏi có nội dung]
+
     alt [Có hội thoại đang mở]
-      Backend->PostgreSQL: 6. Tìm hội thoại được chọn theo conversation_id
-      activate PostgreSQL
-      PostgreSQL-->Backend: 7. Trả thông tin hội thoại
-      deactivate PostgreSQL
+        Backend->PostgreSQL: 4. Tìm hội thoại được \nchọn theo conversation_id
+        activate PostgreSQL
+
+        PostgreSQL-->Backend: 5. Trả thông tin hội thoại
+        deactivate PostgreSQL
+
     else [Không có hội thoại đang mở]
-      Backend->Backend: 6. Tiếp tục không dùng hội thoại làm ngữ cảnh
+        Backend->Backend: 4. Tiếp tục không dùng hội \nthoại làm ngữ cảnh
     end
 
-    Backend->PostgreSQL: 8. Lấy thông tin doanh nghiệp và lịch sử trợ lý gần nhất
+    Backend->PostgreSQL: 6. Lấy thông tin doanh nghiệp \nvà lịch sử trợ lý gần nhất
     activate PostgreSQL
-    PostgreSQL-->Backend: 9. Trả thông tin doanh nghiệp và lịch sử trợ lý
+
+    PostgreSQL-->Backend: 7. Trả thông tin doanh nghiệp\n và lịch sử trợ lý
     deactivate PostgreSQL
 
-    Backend->Backend: 10. Sinh embedding từ câu hỏi
-    Backend->VectorDB: 11. Tìm sản phẩm liên quan trong product_embeddings
+    Backend->Backend: 8. Sinh embedding từ câu hỏi
+
+    Backend->VectorDB: 9. Tìm sản phẩm liên quan trong product_embeddings
     activate VectorDB
 
     alt [Vector DB có kết quả]
-      VectorDB-->Backend: 12. Trả danh sách product_id liên quan
+        VectorDB-->Backend: 10. Trả danh sách product_id liên quan
+
     else [Vector DB lỗi hoặc không có kết quả]
-      VectorDB-->Backend: 12. Không trả được sản phẩm liên quan
-      deactivate VectorDB
+        VectorDB-->Backend: 10. Không trả được sản phẩm liên quan
     end
-    
+
+    deactivate VectorDB
+
     alt [Có product_id liên quan]
-      Backend->PostgreSQL: 13. Lấy chi tiết sản phẩm theo product_id
-      activate PostgreSQL
-      PostgreSQL-->Backend: 14. Trả thông tin sản phẩm liên quan
-      deactivate PostgreSQL
+        Backend->PostgreSQL: 11. Lấy chi tiết sản phẩm theo product_id
+        activate PostgreSQL
+
+        PostgreSQL-->Backend: 12. Trả thông tin sản phẩm liên quan
+        deactivate PostgreSQL
+
     else [Không có product_id liên quan]
-      Backend->PostgreSQL: 13. Lấy danh sách sản phẩm mới nhất làm dữ liệu dự phòng
-      activate PostgreSQL
-      PostgreSQL-->Backend: 14. Trả danh sách sản phẩm dự phòng
-      deactivate PostgreSQL
+        Backend->PostgreSQL: 11. Lấy danh sách sản phẩm \nmới nhất làm dữ liệu dự phòng
+        activate PostgreSQL
+
+        PostgreSQL-->Backend: 12. Trả danh sách \nsản phẩm dự phòng
+        deactivate PostgreSQL
     end
 
+    Backend->Backend: 13. Tạo prompt từ thông tin doanh nghiệp, \ntri thức ChatDesk, sản phẩm, \nlịch sử và ngữ cảnh
 
-    Backend->Backend: 18. Tạo prompt từ thông tin doanh nghiệp, tri thức ChatDesk, sản phẩm, lịch sử và ngữ cảnh
-    Backend->LLM: 19. Gửi prompt để tạo câu trả lời
+    Backend->LLM: 14. Gửi prompt để tạo câu trả lời
     activate LLM
 
-    alt [AI tạo được câu trả lời]
-      LLM-->Backend: 20. Trả nội dung câu trả lời
-      Backend->PostgreSQL: 21. Lưu câu hỏi và câu trả lời vào ai_assistant_messages
-      activate PostgreSQL
-      PostgreSQL-->Backend: 22. Xác nhận đã lưu bản ghi
-      deactivate PostgreSQL
-      Backend-->ManHinhTroLy: 23. Trả answer, user_message, assistant_message
-      
-      ManHinhTroLy->ManHinhTroLy: 24. Thêm câu hỏi và câu trả lời vào lịch sử hiển thị
-      ManHinhTroLy-->NguoiDung: 25. Hiển thị câu trả lời của AI nội bộ
-    else [AI không tạo được câu trả lời]
-      LLM-->Backend: 20. Trả lỗi hoặc không có nội dung phù hợp
-      deactivate LLM
-      Backend-->ManHinhTroLy: 21. Trả lỗi AI assistant failed to answer
-      deactivate Backend
-      ManHinhTroLy->ManHinhTroLy: 22. Khôi phục câu hỏi vào ô nhập
-      ManHinhTroLy-->NguoiDung: 23. Hiển thị thông báo thất bại
-      deactivate ManHinhTroLy
-    end
-  end
-  end
+    LLM-->Backend: 15. Trả nội dung câu trả lời
+    deactivate LLM
+
+    Backend->PostgreSQL: 16. Lưu câu hỏi và câu trả lời vào \nai_assistant_messages
+    activate PostgreSQL
+
+    PostgreSQL-->Backend: 17. Xác nhận đã lưu bản ghi
+    deactivate PostgreSQL
+
+    Backend-->ManHinhTroLy: 18. Trả answer, user_message, \nassistant_message
+    deactivate Backend
+
+    ManHinhTroLy->ManHinhTroLy: 19. Thêm câu hỏi và câu \ntrả lời vào lịch sử hiển thị
+
+    ManHinhTroLy-->NguoiDung: 20. Hiển thị câu trả \nlời của AI nội bộ
+    deactivate ManHinhTroLy

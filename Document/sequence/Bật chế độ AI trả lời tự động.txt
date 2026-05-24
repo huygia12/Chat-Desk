@@ -27,6 +27,6 @@ else [Không tìm thấy hội thoại]
 BackendChatDesk-->ManHinhHoiThoai: 5. Trả về lỗi không tìm thấy hội thoại
 deactivate BackendChatDesk
 ManHinhHoiThoai->ManHinhHoiThoai: 6. Ghi nhận lỗi và không cập nhật trạng thái hội thoại
-ManHinhHoiThoai-->NguoiQuanLy: 7. Giữ nguyên trạng thái công tắc AI trên giao diện
+ManHinhHoiThoai-->NguoiQuanLy: 7. Giữ nguyên trạng thái \ncông tắc AI trên giao diện
 deactivate ManHinhHoiThoai
 end

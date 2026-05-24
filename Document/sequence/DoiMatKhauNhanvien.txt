@@ -10,16 +10,12 @@ ManHinh->ManHinh: 2. Kiểm tra người dùng đã đăng nhập\nvà có vai t
 
 ManHinh->ManHinh: 3. Kiểm tra dữ liệu nhập\nMật khẩu hiện tại bắt buộc\nMật khẩu mới tối thiểu 6 ký tự\nNhập lại mật khẩu phải khớp
 
-alt [Dữ liệu nhập không hợp lệ]
-  ManHinh-->NhanVien: 4. Hiển thị thông báo lỗi nhập liệu
-
-else [Dữ liệu nhập hợp lệ]
   ManHinh->Backend: 4. Gửi yêu cầu cập nhật mật khẩu\nPATCH /api/employees/me/password\nBearer JWT, current_password, password
   activate Backend
 
   Backend->Backend: 5. Kiểm tra JWT, trạng thái tài khoản\nvà vai trò employee
 
-  Backend->Backend: 6. Kiểm tra mật khẩu mới tối thiểu 6 ký tự
+  Backend->Backend: 6. Kiểm tra mật khẩu mới \ntối thiểu 6 ký tự
 
   alt [Mật khẩu mới không hợp lệ]
     Backend-->ManHinh: 7. Trả về lỗi 422
@@ -48,5 +44,3 @@ else [Dữ liệu nhập hợp lệ]
       deactivate ManHinh
     end
   end
-end
-

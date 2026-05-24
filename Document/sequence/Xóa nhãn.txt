@@ -7,7 +7,7 @@ Chủ doanh nghiệp->Frontend: 1. Bấm nút Xóa trên nhãn cần xóa
 activate Frontend
 Frontend->Frontend: 2. Hiển thị hộp xác nhận xóa nhãn
 Chủ doanh nghiệp->Frontend: 3. Xác nhận xóa
-Frontend->Backend: 4. Gửi yêu cầu xóa nhãn: DELETE /api/labels/{label_id}
+Frontend->Backend: 4. Gửi yêu cầu xóa nhãn: \nDELETE /api/labels/{label_id}
 activate Backend
 
 Backend->DB: 5. Tìm nhãn theo label_id và doanh nghiệp sở hữu
@@ -15,11 +15,11 @@ activate DB
 DB-->Backend: 6. Trả về kết quả tìm kiếm nhãn
 
 alt [Tìm thấy nhãn]
-  Backend->DB: 7. Xóa nhãn khỏi bảng labels và tự động gỡ liên kết trong contact_labels
+  Backend->DB: 7. Xóa nhãn khỏi bảng labels\n và tự động gỡ liên kết trong contact_labels
   DB-->Backend: 8. Xác nhận xóa dữ liệu
   deactivate DB
   Backend-->Frontend: 9. Trả về kết quả xóa thành công
-  Frontend-->Chủ doanh nghiệp: 10. Hiển thị thông báo thành công và cập nhật danh sách nhãn
+  Frontend-->Chủ doanh nghiệp: 10. Hiển thị thông báo thành công\n và cập nhật danh sách nhãn
 else [Không tìm thấy nhãn]
   Backend-->Frontend: 7. Trả về lỗi không tìm thấy nhãn
   deactivate Backend

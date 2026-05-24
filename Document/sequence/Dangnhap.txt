@@ -3,17 +3,16 @@ participant "Màn hình đăng nhập" as ManHinhDangNhap
 participant "Backend ChatDesk" as Backend
 participant "CSDL PostgreSQL" as CSDL
 
-NguoiDung->ManHinhDangNhap: 1. Nhập email, mật khẩu và bấm Đăng nhập
+NguoiDung->ManHinhDangNhap: 1. Nhập email, mật \nkhẩu và bấm Đăng nhập
 activate ManHinhDangNhap
 ManHinhDangNhap->ManHinhDangNhap: 2. Kiểm tra dữ liệu nhập
 
-alt [Dữ liệu hợp lệ]
   ManHinhDangNhap->Backend: 3. Gửi thông tin đăng nhập\nPOST /api/auth/login
   activate Backend
-  Backend->Backend: 4. Kiểm tra định dạng dữ liệu đăng nhập
+  Backend->Backend: 4. Kiểm tra định dạng dữ \nliệu đăng nhập
   Backend->CSDL: 5. Tìm người dùng theo email
   activate CSDL
-  CSDL-->Backend: 6. Trả về thông tin người dùng và password_hash
+  CSDL-->Backend: 6. Trả về thông tin người\n dùng và password_hash
   deactivate CSDL
   Backend->Backend: 7. So sánh mật khẩu bằng bcrypt
 
@@ -22,41 +21,18 @@ alt [Dữ liệu hợp lệ]
     Backend-->ManHinhDangNhap: 9. Trả về access_token
     deactivate Backend
 
-    ManHinhDangNhap->ManHinhDangNhap: 10. Lưu token và chuẩn bị lấy thông tin người dùng
-    ManHinhDangNhap->Backend: 11. Lấy thông tin người dùng\nGET /api/auth/me
-    activate Backend
-    Backend->Backend: 12. Giải mã và kiểm tra JWT
-    Backend->CSDL: 13. Tìm người dùng theo id trong token
-    activate CSDL
-    CSDL-->Backend: 14. Trả về thông tin người dùng
-    deactivate CSDL
-    Backend->Backend: 15. Kiểm tra trạng thái tài khoản is_active
-
-    alt [Tài khoản đang hoạt động]
-      Backend-->ManHinhDangNhap: 16. Trả về thông tin người dùng
-      deactivate Backend
-      ManHinhDangNhap->ManHinhDangNhap: 17. Lưu thông tin người dùng
+    ManHinhDangNhap->ManHinhDangNhap: 10. Lưu token và chuẩn \nbị lấy thông tin người dùng
 
       alt [Vai trò là admin]
-        ManHinhDangNhap-->NguoiDung: 18. Hiển thị thông báo đăng nhập thành công
-        ManHinhDangNhap-->NguoiDung: 19. Điều hướng đến trang Admin
+        ManHinhDangNhap-->NguoiDung: 11. Hiển thị thông \nbáo đăng nhập thành công
+        ManHinhDangNhap-->NguoiDung: 12. Điều hướng đến trang Admin
       else [Vai trò là business hoặc employee]
-        ManHinhDangNhap-->NguoiDung: 18. Hiển thị thông báo đăng nhập thành công
-        ManHinhDangNhap-->NguoiDung: 19. Điều hướng đến màn hình trò chuyện
+        ManHinhDangNhap-->NguoiDung: 11. Hiển thị thông báo\n đăng nhập thành công
+        ManHinhDangNhap-->NguoiDung: 12. Điều hướng đến\n màn hình trò chuyện
       end
-    else [Token không hợp lệ hoặc tài khoản bị vô hiệu hóa]
-      Backend-->ManHinhDangNhap: 16. Trả về lỗi xác thực
-      ManHinhDangNhap->ManHinhDangNhap: 17. Xóa token và thông tin người dùng
-      ManHinhDangNhap-->NguoiDung: 18. Hiển thị thông báo thất bại
-    end
+
 
   else [Email không tồn tại hoặc mật khẩu sai]
-    Backend-->ManHinhDangNhap: 8. Trả về lỗi Invalid email or password
+    Backend-->ManHinhDangNhap: 8. Trả về lỗi \nInvalid email or password
     ManHinhDangNhap-->NguoiDung: 9. Hiển thị thông báo thất bại
   end
-
-else [Dữ liệu không hợp lệ]
-  ManHinhDangNhap-->NguoiDung: 3. Hiển thị lỗi nhập liệu
-  deactivate ManHinhDangNhap
-end
-

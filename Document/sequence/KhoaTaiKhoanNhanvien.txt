@@ -11,9 +11,9 @@ ManHinhNV->ManHinhNV: 2. Xác định trạng thái mới is_active = false
 ManHinhNV->Backend: 3. Gửi yêu cầu khóa tài khoản\nPATCH /api/employees/{employee_id}\n{ "is_active": false }
 activate Backend
 
-Backend->Backend: 4. Kiểm tra nhân viên thuộc doanh nghiệp
+Backend->Backend: 4. Kiểm tra nhân viên \nthuộc doanh nghiệp
 
-Backend->CSDL: 5. Tìm nhân viên theo id, business_id và role = employee
+Backend->CSDL: 5. Tìm nhân viên theo id, \nbusiness_id và role = employee
 activate CSDL
 
 CSDL-->Backend: 6. Trả về thông tin nhân viên
@@ -28,7 +28,7 @@ else [Tìm thấy nhân viên]
     Backend->CSDL: 7. Cập nhật users.is_active = false
     activate CSDL
 
-    CSDL-->Backend: 8. Lưu và trả về thông tin nhân viên đã cập nhật
+    CSDL-->Backend: 8. Lưu và trả về thông tin \nnhân viên đã cập nhật
     deactivate CSDL
 
     Backend-->ManHinhNV: 9. Trả về thông tin nhân viên đã khóa
@@ -36,5 +36,3 @@ deactivate Backend
     ManHinhNV-->ChuDN: 10. Hiển thị thông báo thành công
 deactivate ManHinhNV
 end
-
-

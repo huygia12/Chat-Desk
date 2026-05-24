@@ -8,34 +8,34 @@ ChuDoanhNghiep->ManHinhSanPham: 1. Bấm Thêm sản phẩm
 activate ManHinhSanPham
 ManHinhSanPham-->ChuDoanhNghiep: 2. Hiển thị form thêm sản phẩm mới
 
-ChuDoanhNghiep->ManHinhSanPham: 3. Nhập tên, SKU, danh mục, mô tả, giá, tồn kho, trạng thái và bấm Thêm
+ChuDoanhNghiep->ManHinhSanPham: 3. Nhập tên, SKU, danh mục, \nmô tả, giá, tồn kho, trạng thái \nvà bấm Thêm
 ManHinhSanPham->ManHinhSanPham: 4. Kiểm tra dữ liệu form
 
 alt [Dữ liệu form không hợp lệ]
-  ManHinhSanPham-->ChuDoanhNghiep: 5. Hiển thị lỗi nhập liệu và thông báo thất bại
+  ManHinhSanPham-->ChuDoanhNghiep: 5. Hiển thị lỗi nhập liệu \nvà thông báo thất bại
 else [Dữ liệu form hợp lệ]
-  ManHinhSanPham->Backend: 5. Gửi yêu cầu thêm sản phẩm thủ công - POST /api/products
+  ManHinhSanPham->Backend: 5. Gửi yêu cầu thêm \nsản phẩm thủ công\nPOST /api/products
   activate Backend
-  Backend->Backend: 6. Kiểm tra dữ liệu theo ProductCreate
+  Backend->Backend: 6. Kiểm tra dữ liệu theo \nProductCreate
 
   alt [Tạo sản phẩm thành công]
     Backend->PostgreSQL: 7. Lưu sản phẩm mới vào bảng products
     activate PostgreSQL
-    PostgreSQL-->Backend: 8. Trả về bản ghi sản phẩm đã có id, created_at, updated_at
+    PostgreSQL-->Backend: 8. Trả về bản ghi sản phẩm đã có \nid, created_at, updated_at
     deactivate PostgreSQL
 
-    Backend->Backend: 9. Tạo nội dung sản phẩm và sinh embedding
-    Backend->VectorDB: 10. Upsert embedding vào product_embeddings
+    Backend->Backend: 9. Tạo nội dung sản phẩm \nvà sinh embedding
+    Backend->VectorDB: 10. Upsert embedding \nvào product_embeddings
     activate VectorDB
-    VectorDB-->Backend: 11. Xác nhận đã lưu vector sản phẩm
+    VectorDB-->Backend: 11. Xác nhận đã lưu \nvector sản phẩm
     deactivate VectorDB
 
-    Backend-->ManHinhSanPham: 12. Trả về thông tin sản phẩm mới
-    ManHinhSanPham-->ChuDoanhNghiep: 13. Hiển thị thông báo Thêm sản phẩm thành công, đóng
+    Backend-->ManHinhSanPham: 12. Trả về thông \ntin sản phẩm mới
+    ManHinhSanPham-->ChuDoanhNghiep: 13. Hiển thị thông báo \nThêm sản phẩm thành công, đóng
   else [Dữ liệu backend không hợp lệ hoặc xử lý thất bại]
-    Backend-->ManHinhSanPham: 12. Trả về lỗi tạo sản phẩm
+    Backend-->ManHinhSanPham: 7. Trả về lỗi tạo sản phẩm
     deactivate Backend
-    ManHinhSanPham-->ChuDoanhNghiep: 13. Hiển thị thông báo thất bại
+    ManHinhSanPham-->ChuDoanhNghiep: 8. Hiển thị thông báo thất bại
     deactivate ManHinhSanPham
   end
 end

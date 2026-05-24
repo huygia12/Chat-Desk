@@ -54,7 +54,7 @@ else [Dữ liệu gửi hợp lệ]
     alt [Cuộc hội thoại thuộc kênh Widget]
       Backend->WidgetKhachHang: 12. Phát sự kiện WebSocket new_message cho khách hàng
       activate WidgetKhachHang
-      WidgetKhachHang-->WidgetKhachHang: 13. Hiển thị \ntin nhắn \nmới trong \nwidget
+      WidgetKhachHang->WidgetKhachHang: 13. Hiển thị \ntin nhắn \nmới trong \nwidget
       
       deactivate WidgetKhachHang
     else [Cuộc hội thoại thuộc Facebook, Instagram hoặc Telegram]

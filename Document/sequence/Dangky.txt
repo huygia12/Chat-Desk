@@ -3,15 +3,14 @@ participant "Màn hình đăng ký" as ManHinhDangKy
 participant "Backend ChatDesk" as Backend
 participant "CSDL PostgreSQL" as CSDL
 
-ChuDN->ManHinhDangKy: 1. Nhập tên doanh nghiệp, email, mật khẩu, số điện thoại
+ChuDN->ManHinhDangKy: 1. Nhập tên doanh nghiệp, \nemail, mật khẩu, số điện thoại
 activate ManHinhDangKy
-ManHinhDangKy->ManHinhDangKy: 2. Kiểm tra dữ liệu nhập\n(tên doanh nghiệp, email, mật khẩu tối thiểu 6 ký tự)
+ManHinhDangKy->ManHinhDangKy: 2. Kiểm tra dữ liệu nhập\n(tên doanh nghiệp, email, \nmật khẩu tối thiểu 6 ký tự)
 
-alt [Dữ liệu hợp lệ]
   ManHinhDangKy->Backend: 3. Gửi thông tin đăng ký\nPOST /api/auth/register
   activate Backend
-  Backend->Backend: 4. Kiểm tra định dạng dữ liệu đăng ký
-  Backend->CSDL: 5. Kiểm tra email đã tồn tại trong bảng users
+  Backend->Backend: 4. Kiểm tra định dạng \ndữ liệu đăng ký
+  Backend->CSDL: 5. Kiểm tra email đã \ntồn tại trong bảng users
   activate CSDL
   CSDL-->Backend: 6. Trả về kết quả kiểm tra email
   deactivate CSDL
@@ -24,29 +23,16 @@ alt [Dữ liệu hợp lệ]
     deactivate CSDL
     Backend->Backend: 10. Tạo JWT access_token
     Backend-->ManHinhDangKy: 11. Trả về access_token
-    deactivate Backend
 
     ManHinhDangKy->ManHinhDangKy: 12. Lưu token
-    ManHinhDangKy->Backend: 13. Lấy thông tin người dùng\nGET /api/auth/me
-    activate Backend
-    Backend->Backend: 14. Kiểm tra JWT và trạng thái tài khoản
-    Backend->CSDL: 15. Truy vấn người dùng theo id trong token
-    activate CSDL
-    CSDL-->Backend: 16. Trả về thông tin người dùng
-    deactivate CSDL
-
-      Backend-->ManHinhDangKy: 17. Trả về thông tin người dùng
-      deactivate Backend
-      ManHinhDangKy-->ChuDN: 18. Hiển thị thông báo đăng ký thành công
-      ManHinhDangKy-->ChuDN: 19. Điều hướng đến trang trò chuyện
+ 
+      ManHinhDangKy-->ChuDN: 13. Hiển thị thông báo \nđăng ký thành công
+      ManHinhDangKy-->ChuDN: 14. Điều hướng đến \ntrang trò chuyện
 
 
   else [Email đã được đăng ký]
-    Backend-->ManHinhDangKy: 7. Trả về lỗi Email already registered
+    Backend-->ManHinhDangKy: 7. Trả về lỗi Email \nalready registered
+    deactivate Backend
     ManHinhDangKy-->ChuDN: 8. Hiển thị thông báo thất bại
+    deactivate ManHinhDangKy
   end
-
-else [Dữ liệu không hợp lệ]
-  ManHinhDangKy-->ChuDN: 3. Hiển thị thông báo dữ liệu không hợp lệ
-  deactivate ManHinhDangKy
-end

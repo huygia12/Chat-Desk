@@ -3,10 +3,10 @@ participant "Màn hình quản lý nhãn" as ManHinhNhan
 participant "Backend ChatDesk" as Backend
 participant "CSDL PostgreSQL" as CSDL
 
-ChuDoanhNghiep->ManHinhNhan: 1. Bấm Thêm nhãn, nhập tên, màu, ghi chú và bấm Tạo nhãn
+ChuDoanhNghiep->ManHinhNhan: 1. Bấm Thêm nhãn, nhập tên, màu, \nghi chú và bấm Tạo nhãn
 activate ManHinhNhan
 
-ManHinhNhan->ManHinhNhan: 2. Kiểm tra tên nhãn bắt buộc, tối đa 80 ký tự và màu nhãn
+ManHinhNhan->ManHinhNhan: 2. Kiểm tra tên nhãn bắt buộc, \ntối đa 80 ký tự và màu nhãn
 
 alt [Dữ liệu nhập không hợp lệ]
   ManHinhNhan-->ChuDoanhNghiep: 3. Hiển thị thông báo thất bại
@@ -14,7 +14,7 @@ else [Dữ liệu nhập hợp lệ]
   ManHinhNhan->Backend: 3. Gửi yêu cầu tạo nhãn\nPOST /api/labels\n{name, color, internal_note}
   activate Backend
 
-  Backend->Backend: 4. Chuẩn hóa tên nhãn và kiểm tra dữ liệu đầu vào
+  Backend->Backend: 4. Chuẩn hóa tên nhãn \nvà kiểm tra dữ liệu đầu vào
 
   alt [Tên nhãn rỗng hoặc dữ liệu không hợp lệ]
     Backend-->ManHinhNhan: 5. Trả về lỗi tạo nhãn

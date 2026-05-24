@@ -1,18 +1,18 @@
-actor "Chủ doanh nghiệp\n hoặc Nhân viên" as NguoiDung
+actor "Chủ doanh nghiệp\n Nhân viên CSKH" as NguoiDung
 participant "Màn hình Mẫu trả lời" as ManHinh
 participant "Backend ChatDesk" as Backend
 participant "CSDL PostgreSQL" as CSDL
 
 NguoiDung->ManHinh: 1. Bấm Thêm template
 activate ManHinh
-ManHinh->ManHinh: 2. Mở form thêm mẫu trả lời và thiết lập phạm vi mặc định
-NguoiDung->ManHinh: 3. Nhập tiêu đề, shortcut, nội dung và bấm Tạo
-ManHinh->ManHinh: 4. Kiểm tra dữ liệu bắt buộc và định dạng shortcut
+ManHinh->ManHinh: 2. Mở form thêm mẫu trả lời \nvà thiết lập phạm vi mặc định
+NguoiDung->ManHinh: 3. Nhập tiêu đề, shortcut, \nnội dung và bấm Tạo
+ManHinh->ManHinh: 4. Kiểm tra dữ liệu bắt buộc \nvà định dạng shortcut
 
 alt [Dữ liệu form không hợp lệ]
   ManHinh-->NguoiDung: 5. Hiển thị lỗi nhập liệu trên form
 else [Dữ liệu form hợp lệ]
-  ManHinh->Backend: 5. Gửi yêu cầu thêm mẫu trả lời (POST /api/saved-replies)
+  ManHinh->Backend: 5. Gửi yêu cầu thêm mẫu trả lời \nPOST /api/saved-replies
   activate Backend
   Backend->Backend: 6. Chuẩn hóa shortcut, tiêu đề và nội dung
 
@@ -40,4 +40,3 @@ else [Dữ liệu form hợp lệ]
     end
   end
 end
-

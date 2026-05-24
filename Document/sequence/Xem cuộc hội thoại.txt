@@ -17,7 +17,6 @@ activate CSDL
 CSDL-->Backend: 5. Trả về thông tin cuộc hội thoại \nhoặc không tìm thấy
 deactivate CSDL
 
-alt [Tìm thấy cuộc hội thoại]
     Backend->CSDL: 6. Truy vấn tối đa 51 tin nhắn mới nhất \ncủa cuộc hội thoại, sắp xếp theo thời gian tạo
     activate CSDL
 
@@ -27,24 +26,17 @@ alt [Tìm thấy cuộc hội thoại]
     Backend->Backend: 8. Đảo lại thứ tự hiển thị, \nxác định has_more và next_cursor
 
     Backend-->ManHinh: 9. Trả về items, has_more, next_cursor
-
+    deactivate Backend
     ManHinh->ManHinh: 10. Cập nhật danh sách tin nhắn, \ntrạng thái còn tin nhắn cũ và con trỏ phân trang
 
     ManHinh-->NguoiDung: 11. Hiển thị nội dung tin nhắn \ntrong cuộc hội thoại
 
-else [Không tìm thấy cuộc hội thoại]
-    Backend-->ManHinh: 6. Trả về lỗi không tìm thấy cuộc hội thoại
 
-    ManHinh->ManHinh: 7. Ghi nhận lỗi và dừng trạng thái đang tải
 
-    ManHinh-->NguoiDung: 8. Không cập nhật được\n danh sách tin nhắn
-end
-
-deactivate Backend
 
 opt [Người dùng cuộn lên đầu danh sách và còn tin nhắn cũ]
 
-    NguoiDung->ManHinh: 12. Cuộn lên để xem thêm tin nhắn cũ
+    NguoiDung->ManHinh: 12. Cuộn lên để \nxem thêm tin nhắn cũ
 
     ManHinh->ManHinh: 13. Kiểm tra còn tin nhắn cũ \nvà chưa có yêu cầu tải thêm đang chạy
 
@@ -57,8 +49,6 @@ opt [Người dùng cuộn lên đầu danh sách và còn tin nhắn cũ]
     CSDL-->Backend: 16. Trả về tin nhắn mốc hoặc không hợp lệ
     deactivate CSDL
 
-    alt [Con trỏ hợp lệ]
-
         Backend->CSDL: 17. Truy vấn các tin nhắn cũ hơn mốc before
         activate CSDL
 
@@ -66,24 +56,13 @@ opt [Người dùng cuộn lên đầu danh sách và còn tin nhắn cũ]
         deactivate CSDL
 
         Backend->Backend: 19. Đảo lại thứ tự hiển thị, \nxác định has_more và next_cursor mới
+        
 
         Backend-->ManHinh: 20. Trả về items, has_more, next_cursor
-
+        deactivate Backend
         ManHinh->ManHinh: 21. Loại bỏ tin nhắn trùng \nvà thêm tin nhắn cũ vào đầu danh sách
 
-        ManHinh-->NguoiDung: 22. Hiển thị thêm tin nhắn\ cũ trong cuộc hội thoại
+        ManHinh-->NguoiDung: 22. Hiển thị thêm tin nhắn\n cũ trong cuộc hội thoại
+        deactivate ManHinh
 
-    else [Con trỏ không hợp lệ]
-
-        Backend-->ManHinh: 17. Trả về lỗi con trỏ tin nhắn không hợp lệ
-
-        ManHinh->ManHinh: 18. Ghi nhận lỗi và dừng trạng thái tải thêm
-
-        ManHinh-->NguoiDung: 19. Giữ nguyên danh sách tin nhắn hiện tại
-
-    end
-
-    deactivate Backend
 end
-
-deactivate ManHinh

@@ -20,10 +20,7 @@ else [Dữ liệu nhập hợp lệ]
   PostgreSQL-->Backend: 6. Trả về kênh Widget \nhoặc không tìm thấy
   deactivate PostgreSQL
 
-  alt [Widget không hợp lệ hoặc nội dung rỗng]
-    Backend-->Widget: 7. Trả lỗi gửi tin nhắn
-    Widget-->KhachHang: 8. Hiển thị thông báo \nthất bại trong Widget
-  else [Widget hợp lệ và nội dung hợp lệ]
+
     Backend->PostgreSQL: 7. Tìm contact theo \nvisitor_id hoặc visitor_email
     activate PostgreSQL
     PostgreSQL-->Backend: 8. Trả contact hoặc không tìm thấy
@@ -72,5 +69,4 @@ else [Dữ liệu nhập hợp lệ]
     Widget-->KhachHang: 21. Hiển thị tin nhắn \nđã gửi trong Widget
     deactivate Widget
   end
-end
 

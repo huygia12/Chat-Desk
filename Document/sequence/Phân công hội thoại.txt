@@ -15,11 +15,6 @@ activate CSDL
 CSDL-->Backend: 5. Trả về hội thoại hoặc không có dữ liệu
 deactivate CSDL
 
-alt [Không tìm thấy hội thoại]
-  Backend-->ManHinh: 6. Trả về lỗi 404 Conversation not found
-  
-  ManHinh-->NguoiDung: 7. Hiển thị thông báo thất bại
-else [Tìm thấy hội thoại]
   alt [Người nhận là nhân viên]
     Backend->CSDL: 6. Kiểm tra nhân viên nhận phân công\ntrong bảng users
     activate CSDL
@@ -29,11 +24,6 @@ else [Tìm thấy hội thoại]
     Backend->Backend: 6. Xác định không cần kiểm tra \nnhân viên nhận phân công
   end
 
-  alt [Người nhận là nhân viên nhưng không hợp lệ]
-    Backend-->ManHinh: 8. Trả về lỗi 404 Assignee not found
-    
-    ManHinh-->NguoiDung: 9. Hiển thị thông báo thất bại
-  else [Người nhận hợp lệ]
     Backend->Backend: 8. So sánh phân công mới \nvới phân công hiện tại
 
     alt [Phân công không thay đổi]
@@ -52,7 +42,6 @@ else [Tìm thấy hội thoại]
       ManHinh->ManHinh: 13. Cập nhật người nhận \ntrong danh sách và chi tiết hội thoại
       ManHinh-->NguoiDung: 14. Hiển thị kết quả \nphân công hội thoại
       deactivate ManHinh
-    end
-  end
+    
 end
 

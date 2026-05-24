@@ -9,7 +9,6 @@ activate ManHinh
 ManHinh->Backend: 2. Yêu cầu tạo URL OAuth Meta\nGET /api/channels/facebook/oauth
 activate Backend
 
-alt [Tạo được URL OAuth]
 Backend->Backend: 3. Tạo URL OAuth kèm state OAuth
 Backend-->ManHinh: 4. Trả về URL OAuth
 
@@ -43,17 +42,10 @@ activate CSDL
 CSDL-->Backend: 13. Trả về kênh hiện có hoặc rỗng
 deactivate CSDL
 
-alt [Kênh Facebook đã tồn tại]
-Backend->CSDL: 14. Cập nhật page_name, \npage access_token và is_active=true
-activate CSDL
-CSDL-->Backend: 15. Xác nhận cập nhật kênh Facebook
-deactivate CSDL
-else [Kênh Facebook chưa tồn tại]
 Backend->CSDL: 14. Tạo kênh Facebook mới với \nplatform_page_id, page_name \và page access_token
 activate CSDL
 CSDL-->Backend: 15. Xác nhận tạo kênh Facebook
 deactivate CSDL
-end
 
 Backend->Meta: 16. Đăng ký webhook cho Facebook Page
 activate Meta
@@ -72,17 +64,11 @@ activate CSDL
 CSDL-->Backend: 21. Trả về kênh hiện có hoặc rỗng
 deactivate CSDL
 
-alt [Kênh Instagram đã tồn tại]
-Backend->CSDL: 22. Cập nhật page_name, \npage access_token và is_active=true
-activate CSDL
-CSDL-->Backend: 23. Xác nhận cập nhật kênh Instagram
-deactivate CSDL
-else [Kênh Instagram chưa tồn tại]
+
 Backend->CSDL: 22. Tạo kênh Instagram mới với \nplatform_page_id, page_name và page access_token
 activate CSDL
 CSDL-->Backend: 23. Xác nhận tạo kênh Instagram
 deactivate CSDL
-end
 end
 else [Không có Instagram liên kết]
 Backend->Backend: 20. Bỏ qua bước lưu kênh Instagram
@@ -94,14 +80,7 @@ activate CSDL
 CSDL-->Backend: 25. Xác nhận lưu thành công
 deactivate CSDL
 Backend-->ManHinh: 26. Chuyển hướng về \n/channels\?success=meta&pages=...&instagram=...
-ManHinh-->ChuDoanhNghiep: 27. Hiển thị thông báo thành công \nvà cập nhật danh sách kênh
-
-
-end
-
-else [Không tạo được URL OAuth]
-Backend-->ManHinh: 3. Trả về lỗi khởi tạo OAuth
 deactivate Backend
-ManHinh-->ChuDoanhNghiep: 4. Hiển thị thông báo thất bại: \nKhông thể khởi tạo OAuth
+ManHinh-->ChuDoanhNghiep: 27. Hiển thị thông báo thành công \nvà cập nhật danh sách kênh
 deactivate ManHinh
 end

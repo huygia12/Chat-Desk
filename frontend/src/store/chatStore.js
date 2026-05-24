@@ -2,6 +2,14 @@ import { create } from 'zustand'
 import client from '../api/client'
 
 const MESSAGE_PAGE_SIZE = 50
+const DEFAULT_CONVERSATION_FILTERS = {
+  search: '',
+  assignment: 'all',
+  labelIds: [],
+  platforms: [],
+}
+
+let conversationRequestSeq = 0
 
 const normalizeMessagePage = (payload) => {
   if (Array.isArray(payload)) {
@@ -19,8 +27,30 @@ const normalizeMessagePage = (payload) => {
   }
 }
 
+const normalizeConversationFilters = (filters = {}) => ({
+  search: typeof filters.search === 'string' ? filters.search : '',
+  assignment: filters.assignment || filters.queue || 'all',
+  labelIds: Array.isArray(filters.labelIds) ? filters.labelIds.map(String).filter(Boolean) : [],
+  platforms: Array.isArray(filters.platforms) ? filters.platforms.filter(Boolean) : [],
+})
+
+const buildConversationParams = (filters) => {
+  const params = new URLSearchParams()
+  const search = filters.search.trim()
+
+  if (search) params.set('search', search)
+  if (filters.assignment && filters.assignment !== 'all') {
+    params.set('assignment', filters.assignment)
+  }
+  filters.labelIds.forEach((labelId) => params.append('label_ids', labelId))
+  filters.platforms.forEach((platform) => params.append('platforms', platform))
+
+  return params
+}
+
 export const useChatStore = create((set, get) => ({
   conversations: [],
+  conversationFilters: DEFAULT_CONVERSATION_FILTERS,
   labels: [],
   assignees: [],
   assignmentSettings: null,
@@ -33,15 +63,23 @@ export const useChatStore = create((set, get) => ({
   labelsLoading: false,
   assigneesLoading: false,
 
-  fetchConversations: async () => {
-    set({ loading: true })
+  fetchConversations: async (filters) => {
+    const activeFilters = normalizeConversationFilters(filters || get().conversationFilters)
+    const requestId = ++conversationRequestSeq
+    set({ loading: true, conversationFilters: activeFilters })
     try {
-      const res = await client.get('/api/conversations')
-      set({ conversations: res.data })
+      const res = await client.get('/api/conversations', {
+        params: buildConversationParams(activeFilters),
+      })
+      if (requestId === conversationRequestSeq) {
+        set({ conversations: res.data })
+      }
     } catch (err) {
       console.error('Failed to fetch conversations:', err)
     } finally {
-      set({ loading: false })
+      if (requestId === conversationRequestSeq) {
+        set({ loading: false })
+      }
     }
   },
 

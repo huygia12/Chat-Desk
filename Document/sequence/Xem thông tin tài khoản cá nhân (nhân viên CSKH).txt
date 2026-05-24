@@ -1,0 +1,22 @@
+actor "Nhân viên CSKH" as NhanVien
+participant "Màn hình Cài đặt tài khoản" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NhanVien->ManHinh: 1. Chọn xem thông tin \ntài khoản cá nhân
+activate ManHinh
+
+ManHinh->Backend: 2. Gửi yêu cầu lấy thông tin tài khoản\nGET /api/auth/me
+activate Backend
+
+Backend->CSDL: 3. Truy vấn bảng users để lấy\nthông tin tài khoản hiện tại
+activate CSDL
+CSDL-->Backend: 4. Trả về dữ liệu tài khoản\nid, email, role, full_name,\nbusiness_id, is_active, \ncreated_at, updated_at
+deactivate CSDL
+
+Backend-->ManHinh: 5. Trả về thông tin tài khoản cá nhân
+deactivate Backend
+
+ManHinh->ManHinh: 6. Gán full_name và email\nvào biểu mẫu thông tin cơ bản
+ManHinh-->NhanVien: 7. Hiển thị họ tên và email đăng nhập
+deactivate ManHinh

@@ -1,0 +1,33 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình Thống kê" as ManHinhThongKe
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDoanhNghiep->ManHinhThongKe: 1. Chọn khoảng thời gian \nthống kê phân công
+activate ManHinhThongKe
+ManHinhThongKe->ManHinhThongKe: 2. Cập nhật số ngày thống kê \nvà bật trạng thái tải dữ liệu
+ManHinhThongKe->Backend: 3. Gửi yêu cầu lấy thống kê doanh nghiệp\nGET /api/statistics/business?days={days}
+activate Backend
+
+Backend->Backend: 4. Xác định khoảng ngày thống kê từ days
+Backend->CSDL: 5. Đếm hội thoại chưa phân công\ntrong bảng conversations
+activate CSDL
+CSDL-->Backend: 6. Trả về số hội thoại chưa phân công
+
+Backend->CSDL: 7. Đếm hội thoại đang giao cho shop\ntrong bảng conversations
+CSDL-->Backend: 8. Trả về số hội thoại giao cho shop
+
+Backend->CSDL: 9. Đếm hội thoại theo từng nhân viên phụ trách\ntrong bảng conversations
+CSDL-->Backend: 10. Trả về số lượng hội thoại theo assigned_to_id
+
+Backend->CSDL: 11. Lấy danh sách nhân viên của doanh nghiệp\ntrong bảng users
+CSDL-->Backend: 12. Trả về danh sách nhân viên
+deactivate CSDL
+
+Backend->Backend: 13. Ghép dữ liệu chưa phân công, giao cho shop\nvà từng nhân viên; sắp xếp theo số lượng giảm dần
+
+  Backend-->ManHinhThongKe: 14. Trả về dữ liệu thống kê phân công\ntrong assignments và summary
+  deactivate Backend
+  ManHinhThongKe->ManHinhThongKe: 15. Cập nhật biểu đồ Workload phân công\nvà thẻ hội thoại chưa phân công
+  ManHinhThongKe-->ChuDoanhNghiep: 16. Hiển thị thống kê phân công
+deactivate ManHinhThongKe

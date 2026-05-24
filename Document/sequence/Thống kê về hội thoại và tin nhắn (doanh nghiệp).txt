@@ -1,0 +1,31 @@
+actor "Chủ doanh nghiệp" as ChuDN
+participant "Màn hình Thống kê" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDN->ManHinh: 1. Chọn khoảng thời gian \nthống kê hoặc bấm Làm mới
+activate ManHinh
+ManHinh->ManHinh: 2. Cập nhật trạng thái \nđang tải và chuẩn bị tham số days
+ManHinh->Backend: 3. Gửi yêu cầu thống kê \nGET /api/statistics/business?days={days}
+activate Backend
+Backend->Backend: 4. Kiểm tra days trong khoảng \n7-90 và xác định khoảng ngày thống kê
+
+  Backend->CSDL: 5. Truy vấn số liệu tổng quan về \nhội thoại, liên hệ và tin nhắn
+  activate CSDL
+  CSDL-->Backend: 6. Trả về tổng hội thoại, hội thoại mở/đóng, \ntổng liên hệ, tổng tin nhắn, tin nhắn AI, \nhội thoại chưa phân công
+  deactivate CSDL
+
+  Backend->CSDL: 7. Truy vấn số liệu biểu đồ và phân nhóm thống kê
+  activate CSDL
+  CSDL-->Backend: 8. Trả về hội thoại/tin nhắn theo ngày, \nnền tảng, kênh, phân công, loại người gửi, \nnhãn phổ biến và thời gian phản hồi đầu tiên
+  deactivate CSDL
+
+  Backend->Backend: 9. Tổng hợp dữ liệu theo BusinessStatisticsOut
+  Backend-->ManHinh: 10. Trả về dữ liệu thống kê tổng hợp
+
+deactivate Backend
+
+  ManHinh->ManHinh: 11. Lưu dữ liệu và tính tỷ lệ tin nhắn AI
+  ManHinh-->ChuDN: 12. Hiển thị thẻ chỉ số \nvà các biểu đồ thống kê
+
+deactivate ManHinh

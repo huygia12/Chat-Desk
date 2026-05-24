@@ -1,0 +1,35 @@
+actor "Admin hệ thống" as Admin
+participant "Màn hình quản lý doanh nghiệp" as Frontend
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as DB
+
+Admin->Frontend: 1. Chọn "Xem chi tiết" tại một doanh nghiệp
+activate Frontend
+Frontend->Frontend: 2. Điều hướng đến trang \nchi tiết với businessId
+Frontend->Backend: 3. Gửi yêu cầu lấy chi tiết doanh nghiệp\nGET /api/admin/businesses/{business_id}
+activate Backend
+
+Backend->DB: 4. Tìm doanh nghiệp \ntheo id trong bảng users
+activate DB
+DB-->Backend: 5. Trả về doanh nghiệp \nhoặc kết quả không tìm thấy
+deactivate DB
+
+  Backend->DB: 6. Tổng hợp chỉ số từ users, channels, \ncontacts, conversations, messages, products
+  activate DB
+  DB-->Backend: 7. Trả về số liệu tổng quan của doanh nghiệp
+  deactivate DB
+
+  Backend->DB: 8. Truy vấn nền tảng, phân công, kênh, \nnhân viên, sản phẩm và hội thoại gần đây
+  activate DB
+  DB-->Backend: 9. Trả về dữ liệu chi tiết liên quan
+  deactivate DB
+
+  Backend->Backend: 10. Ghép dữ liệu thành kết quả \nchi tiết doanh nghiệp
+  Backend-->Frontend: 11. Trả về chi tiết doanh nghiệp, \nthống kê, biểu đồ và bảng dữ liệu
+
+deactivate Backend
+
+  Frontend->Frontend: 12. Lưu dữ liệu chi tiết vào trạng thái màn hình
+  Frontend-->Admin: 13. Hiển thị thông tin doanh nghiệp, \nthống kê, biểu đồ, kênh, nhân viên \nvà hội thoại gần đây
+
+deactivate Frontend

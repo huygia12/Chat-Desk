@@ -1,0 +1,35 @@
+actor "Quản trị viên hệ thống" as QuanTriVien
+participant "Màn hình danh bạ doanh nghiệp" as ManHinhDanhBa
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+QuanTriVien->ManHinhDanhBa: 1. Nhập từ khóa \nvà bấm Tìm kiếm
+activate ManHinhDanhBa
+ManHinhDanhBa->Backend: 2. Gửi yêu cầu tìm kiếm doanh nghiệp\nGET /api/admin/businesses\n(search, status, sort)
+activate Backend
+
+Backend->Backend: 3. Chuẩn hóa từ khóa tìm kiếm\nvà tạo điều kiện lọc doanh nghiệp
+alt [Có từ khóa tìm kiếm]
+  Backend->CSDL: 4. Tìm tài khoản doanh nghiệp \ntrong bảng users role = business \nvà email hoặc business_name chứa từ khóa
+  activate CSDL
+  CSDL-->Backend: 5. Trả về danh sách doanh nghiệp phù hợp
+  deactivate CSDL
+else [Không có từ khóa tìm kiếm]
+  Backend->CSDL: 4. Lấy danh sách tài khoản doanh nghiệp \ntrong bảng users role = business
+  activate CSDL
+  CSDL-->Backend: 5. Trả về danh sách doanh nghiệp
+  deactivate CSDL
+end
+
+Backend->CSDL: 6. Truy vấn số liệu liên quan theo \ntừng doanh nghiệp kênh, nhân viên, \nkhách hàng, hội thoại, tin nhắn, \nAI message, sản phẩm
+activate CSDL
+CSDL-->Backend: 7. Trả về các số liệu tổng hợp
+deactivate CSDL
+
+Backend->Backend: 8. Lọc theo trạng thái \nkênh hoạt động nếu có \nvà sắp xếp kết quả theo lựa chọn hiện tại
+
+  Backend-->ManHinhDanhBa: 9. Trả về danh sách doanh nghiệp \nvà số liệu tổng hợp
+  deactivate Backend
+  ManHinhDanhBa->ManHinhDanhBa: 10. Cập nhật bảng danh bạ doanh nghiệp
+  ManHinhDanhBa-->QuanTriVien: 11. Hiển thị kết quả tìm kiếm
+deactivate ManHinhDanhBa

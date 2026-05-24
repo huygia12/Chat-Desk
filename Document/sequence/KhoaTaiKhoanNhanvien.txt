@@ -1,0 +1,40 @@
+actor "Chủ doanh nghiệp" as ChuDN
+participant "Màn hình cài đặt nhân viên" as ManHinhNV
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDN->ManHinhNV: 1. Chọn khóa tài khoản nhân viên
+activate ManHinhNV
+
+ManHinhNV->ManHinhNV: 2. Xác định trạng thái mới is_active = false
+
+ManHinhNV->Backend: 3. Gửi yêu cầu khóa tài khoản\nPATCH /api/employees/{employee_id}\n{ "is_active": false }
+activate Backend
+
+Backend->Backend: 4. Kiểm tra nhân viên thuộc doanh nghiệp
+
+Backend->CSDL: 5. Tìm nhân viên theo id, business_id và role = employee
+activate CSDL
+
+CSDL-->Backend: 6. Trả về thông tin nhân viên
+deactivate CSDL
+
+alt [Không tìm thấy nhân viên]
+    Backend-->ManHinhNV: 7. Trả về lỗi 404
+
+    ManHinhNV-->ChuDN: 8. Hiển thị thông báo thất bại
+
+else [Tìm thấy nhân viên]
+    Backend->CSDL: 7. Cập nhật users.is_active = false
+    activate CSDL
+
+    CSDL-->Backend: 8. Lưu và trả về thông tin nhân viên đã cập nhật
+    deactivate CSDL
+
+    Backend-->ManHinhNV: 9. Trả về thông tin nhân viên đã khóa
+deactivate Backend
+    ManHinhNV-->ChuDN: 10. Hiển thị thông báo thành công
+deactivate ManHinhNV
+end
+
+

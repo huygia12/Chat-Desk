@@ -60,12 +60,6 @@ const PLATFORM_LABELS = {
   widget: 'Widget',
 }
 
-const normalizeSearchText = (value = '') =>
-  String(value)
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-
 const getLabelTextColor = (hexColor) => {
   const hex = hexColor?.replace('#', '') || 'd6e400'
   const r = parseInt(hex.slice(0, 2), 16)
@@ -214,13 +208,27 @@ export default function Chat() {
     }
   }
 
+  const conversationFilterPayload = useMemo(() => ({
+    search: conversationSearch,
+    assignment: conversationQueue,
+    labelIds: selectedLabelIds,
+    platforms: selectedPlatforms,
+  }), [conversationQueue, conversationSearch, selectedLabelIds, selectedPlatforms])
+
   useEffect(() => {
-    fetchConversations()
     fetchLabels()
     fetchAssignees()
     fetchAssignmentSettings()
     fetchSavedReplies()
   }, [])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      fetchConversations(conversationFilterPayload)
+    }, 300)
+
+    return () => window.clearTimeout(timer)
+  }, [conversationFilterPayload, fetchConversations])
 
   useEffect(() => {
     fetchConversationHistory(activeConversationId)
@@ -324,46 +332,13 @@ export default function Chat() {
   }, [])
 
   const activeConv = conversations.find((c) => c.id === activeConversationId)
-  const queuedConversations = useMemo(() => {
-    if (user?.role !== 'business') return conversations
-    if (conversationQueue === 'unassigned') {
-      return conversations.filter(
-        (conversation) => !conversation.assigned_to_id && !conversation.assigned_to_business,
-      )
-    }
-    if (conversationQueue === 'assigned') {
-      return conversations.filter(
-        (conversation) => conversation.assigned_to_id || conversation.assigned_to_business,
-      )
-    }
-    return conversations
-  }, [conversationQueue, conversations, user?.role])
   const platformOptions = useMemo(() => {
-    const platforms = Array.from(new Set(conversations.map((conversation) => conversation.platform).filter(Boolean)))
-    return platforms.map((platform) => ({
+    return Object.keys(PLATFORM_LABELS).map((platform) => ({
       value: platform,
       label: PLATFORM_LABELS[platform] || platform,
     }))
-  }, [conversations])
-  const visibleConversations = useMemo(() => {
-    const normalizedSearch = normalizeSearchText(conversationSearch.trim())
-    const normalizedLabelIds = selectedLabelIds.map(String)
-
-    return queuedConversations.filter((conversation) => {
-      const customerName = normalizeSearchText(conversation.contact?.display_name || '')
-      const matchesSearch =
-        normalizedSearch.length === 0 || customerName.includes(normalizedSearch)
-      const matchesLabels =
-        normalizedLabelIds.length === 0 ||
-        normalizedLabelIds.every((labelId) =>
-          (conversation.contact?.labels || []).some((label) => String(label.id) === labelId),
-        )
-      const matchesPlatform =
-        selectedPlatforms.length === 0 || selectedPlatforms.includes(conversation.platform)
-
-      return matchesSearch && matchesLabels && matchesPlatform
-    })
-  }, [conversationSearch, queuedConversations, selectedLabelIds, selectedPlatforms])
+  }, [])
+  const visibleConversations = conversations
   const hasConversationFilters =
     conversationSearch.trim().length > 0 ||
     selectedLabelIds.length > 0 ||
@@ -1114,7 +1089,7 @@ export default function Chat() {
             <div style={{ minWidth: 0, display: 'flex', alignItems: 'baseline', gap: 8 }}>
               <Typography.Text strong>{t('chat.conversations')}</Typography.Text>
               <Typography.Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>
-                {visibleConversations.length}/{conversations.length}
+                {visibleConversations.length}
               </Typography.Text>
             </div>
             <Tooltip title={t('chat.filters')}>

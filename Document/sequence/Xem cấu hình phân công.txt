@@ -1,0 +1,36 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình Cấu hình phân công" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDoanhNghiep->ManHinh: 1. Yêu cầu xem cấu hình phân công
+activate ManHinh
+
+ManHinh->Backend: 2. Gửi đồng thời yêu cầu lấy dữ liệu phân công\nGET /api/assignments/settings\nGET /api/assignments/overview\nGET /api/assignments/assignees\nGET /api/labels
+activate Backend
+
+Backend->CSDL: 3. Tìm cấu hình trong bảng \nassignment_settings theo doanh nghiệp
+activate CSDL
+CSDL-->Backend: 4. Trả về cấu hình hiện có hoặc không có dữ liệu
+
+alt [Đã có cấu hình phân công]
+  Backend->Backend: 5. Sử dụng cấu hình hiện có
+else [Chưa có cấu hình phân công]
+  Backend->CSDL: 5. Tạo cấu hình mặc định trong assignment_settings
+  CSDL-->Backend: 6. Trả về cấu hình mặc định
+end
+
+Backend->CSDL: 7. Thống kê hội thoại trong bảng conversations \ntheo trạng thái phân công
+CSDL-->Backend: 8. Trả về tổng hội thoại, \nhội thoại chưa phân công, \ngiao cho shop và số lượng theo nhân viên
+
+Backend->CSDL: 9. Lấy thông tin shop và nhân viên \ncó thể nhận phân công từ bảng users
+CSDL-->Backend: 10. Trả về danh sách người nhận phân công
+
+Backend->CSDL: 11. Lấy danh sách nhãn từ bảng labels
+CSDL-->Backend: 12. Trả về danh sách nhãn
+deactivate CSDL
+  Backend-->ManHinh: 13. Trả về cấu hình phân công, \ntổng quan, người nhận phân công và nhãn
+  deactivate Backend
+  ManHinh->ManHinh: 14. Cập nhật dữ liệu hiển thị và chọn nhãn đầu tiên nếu có
+  ManHinh-->ChuDoanhNghiep: 15. Hiển thị cấu hình phân công, \ntổng quan và routing rules theo channel/label
+deactivate ManHinh

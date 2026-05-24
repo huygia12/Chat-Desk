@@ -1,0 +1,32 @@
+actor "Chủ doanh nghiệp \nhoặc Nhân viên" as NguoiDung
+participant "Màn hình Mẫu trả lời" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NguoiDung->ManHinh: 1. Chọn xem thông tin mẫu trả lời
+activate ManHinh
+
+ManHinh->Backend: 2. Gửi yêu cầu lấy thông tin mẫu trả lời\nGET /api/saved-replies
+activate Backend
+
+Backend->Backend: 3. Xác định phạm vi mẫu trả lời cần hiển thị
+Backend->CSDL: 4. Truy vấn bảng saved_replies theo business_id,\nvisibility, owner_id và sắp xếp theo visibility, shortcut
+activate CSDL
+CSDL-->Backend: 5. Trả về kết quả truy vấn
+deactivate CSDL
+
+alt [Truy xuất thành công]
+    Backend-->ManHinh: 6. Trả về danh sách mẫu trả lời gồm id, title,\nshortcut, visibility, content, created_at, updated_at
+    ManHinh->ManHinh: 7. Cập nhật dữ liệu bảng mẫu trả lời
+
+    alt [Có mẫu trả lời]
+        ManHinh-->NguoiDung: 8. Hiển thị thông tin mẫu trả lời
+    else [Không có mẫu trả lời]
+        ManHinh-->NguoiDung: 8. Hiển thị trạng thái chưa có template nào
+    end
+else [Truy xuất thất bại]
+    Backend-->ManHinh: 6. Trả về lỗi truy xuất mẫu trả lời
+    deactivate Backend
+    ManHinh-->NguoiDung: 7. Hiển thị thông báo tải mẫu trả lời thất bại
+    deactivate ManHinh
+end

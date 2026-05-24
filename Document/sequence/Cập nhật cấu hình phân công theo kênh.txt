@@ -1,0 +1,43 @@
+actor "Chủ doanh nghiệp" as ChuDN
+participant "Màn hình Cấu hình phân công" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDN->ManHinh: 1. Chọn nhân viên phụ \ntrách cho một kênh liên lạc
+activate ManHinh
+ManHinh->ManHinh: 2. Cập nhật tạm thời \nchannel_assignment_rules trên giao diện
+ManHinh->Backend: 3. Gửi yêu cầu cập nhật quy tắc theo kênh\nPATCH /api/assignments/settings\n{ channel_assignment_rules }
+activate Backend
+
+Backend->CSDL: 4. Tìm cấu hình phân công của \ndoanh nghiệp trong assignment_settings
+activate CSDL
+CSDL-->Backend: 5. Trả về cấu hình hiện có \nhoặc không có dữ liệu
+deactivate CSDL
+
+alt [Chưa có cấu hình phân công]
+  Backend->CSDL: 6. Tạo cấu hình phân công \nmặc định cho doanh nghiệp
+  activate CSDL
+  CSDL-->Backend: 7. Trả về cấu hình vừa tạo
+  deactivate CSDL
+else [Đã có cấu hình phân công]
+  Backend->Backend: 6. Sử dụng cấu hình hiện có
+end
+
+Backend->CSDL: 8. Lấy danh sách nhân viên đang \nhoạt động có thể được phân công
+activate CSDL
+CSDL-->Backend: 9. Trả về danh sách id nhân viên hợp lệ
+deactivate CSDL
+
+Backend->Backend: 10. Lọc quy tắc theo kênh: bỏ giá trị rỗng, \nid không hợp lệ và id trùng
+Backend->CSDL: 11. Cập nhật \nassignment_settings.channel_assignment_rules
+activate CSDL
+CSDL-->Backend: 12. Trả về cấu hình sau khi cập nhật
+deactivate CSDL
+
+  Backend-->ManHinh: 13. Trả về cấu hình phân công mới
+  deactivate Backend
+  ManHinh->ManHinh: 14. Cập nhật lại dữ liệu cấu hình trên giao diện
+  ManHinh-->ChuDN: 15. Hiển thị thông báo thành công
+
+deactivate Backend
+deactivate ManHinh

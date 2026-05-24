@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import joinedload
@@ -61,6 +61,69 @@ def _conversation_query():
         joinedload(Conversation.assigned_to),
         joinedload(Conversation.channel),
     )
+
+
+def _dedupe_values(values):
+    return list(dict.fromkeys(value for value in values if value))
+
+
+def _apply_conversation_filters(
+    query,
+    current_user: User,
+    search: str | None = None,
+    platform: str | None = None,
+    platforms: list[str] | None = None,
+    status: str | None = None,
+    label_id: uuid.UUID | None = None,
+    label_ids: list[uuid.UUID] | None = None,
+    assignment: str = "all",
+):
+    platform_values = _dedupe_values([*(platforms or []), platform])
+    if platform_values:
+        query = query.where(Conversation.platform.in_(platform_values))
+    if status:
+        query = query.where(Conversation.status == status)
+
+    if assignment == "unassigned":
+        query = query.where(
+            Conversation.assigned_to_id.is_(None),
+            Conversation.assigned_to_business.is_(False),
+        )
+    elif assignment == "assigned":
+        query = query.where(
+            or_(
+                Conversation.assigned_to_id.is_not(None),
+                Conversation.assigned_to_business.is_(True),
+            )
+        )
+    elif assignment == "me":
+        query = query.where(Conversation.assigned_to_id == current_user.id)
+    elif assignment == "business":
+        query = query.where(Conversation.assigned_to_business.is_(True))
+
+    if search:
+        like_value = f"%{search.strip()}%"
+        query = query.join(Contact, Conversation.contact_id == Contact.id).where(
+            or_(
+                Contact.display_name.ilike(like_value),
+                Contact.platform_user_id.ilike(like_value),
+                Contact.visitor_email.ilike(like_value),
+                Contact.visitor_phone.ilike(like_value),
+            )
+        )
+
+    selected_label_ids = _dedupe_values([*(label_ids or []), label_id])
+    for selected_label_id in selected_label_ids:
+        query = query.where(
+            select(contact_labels.c.contact_id)
+            .where(
+                contact_labels.c.contact_id == Conversation.contact_id,
+                contact_labels.c.label_id == selected_label_id,
+            )
+            .exists()
+        )
+
+    return query
 
 
 def _encode_conversation_cursor(conversation: Conversation) -> str:
@@ -153,11 +216,29 @@ async def _get_visible_conversation(
 async def list_conversations(
     current_user: User = Depends(get_current_business_or_employee),
     db: AsyncSession = Depends(get_db),
+    search: str | None = None,
+    platform: str | None = None,
+    platforms: list[str] = Query(default_factory=list),
+    status: str | None = None,
+    label_id: uuid.UUID | None = None,
+    label_ids: list[uuid.UUID] = Query(default_factory=list),
+    assignment: str = "all",
 ):
     business_id = get_effective_business_id(current_user)
     query = _conversation_query().where(Conversation.business_id == business_id)
     if current_user.role == "employee":
         query = query.where(Conversation.assigned_to_id == current_user.id)
+    query = _apply_conversation_filters(
+        query,
+        current_user=current_user,
+        search=search,
+        platform=platform,
+        platforms=platforms,
+        status=status,
+        label_id=label_id,
+        label_ids=label_ids,
+        assignment=assignment,
+    )
 
     result = await db.execute(
         query.order_by(Conversation.last_message_at.desc().nullslast())
@@ -175,8 +256,10 @@ async def list_conversations_page(
     cursor: str | None = None,
     search: str | None = None,
     platform: str | None = None,
+    platforms: list[str] = Query(default_factory=list),
     status: str | None = None,
     label_id: uuid.UUID | None = None,
+    label_ids: list[uuid.UUID] = Query(default_factory=list),
     assignment: str = "all",
 ):
     limit = min(max(limit, 1), CONVERSATION_PAGE_MAX_LIMIT)
@@ -185,35 +268,17 @@ async def list_conversations_page(
     query = _conversation_query().where(Conversation.business_id == business_id)
     if current_user.role == "employee":
         query = query.where(Conversation.assigned_to_id == current_user.id)
-
-    if platform:
-        query = query.where(Conversation.platform == platform)
-    if status:
-        query = query.where(Conversation.status == status)
-    if assignment == "unassigned":
-        query = query.where(Conversation.assigned_to_id.is_(None))
-    elif assignment == "assigned":
-        query = query.where(Conversation.assigned_to_id.is_not(None))
-    elif assignment == "me":
-        query = query.where(Conversation.assigned_to_id == current_user.id)
-    elif assignment == "business":
-        query = query.where(Conversation.assigned_to_business == True)
-
-    if search:
-        like_value = f"%{search.strip()}%"
-        query = query.join(Contact, Conversation.contact_id == Contact.id).where(
-            or_(
-                Contact.display_name.ilike(like_value),
-                Contact.platform_user_id.ilike(like_value),
-                Contact.visitor_email.ilike(like_value),
-                Contact.visitor_phone.ilike(like_value),
-            )
-        )
-
-    if label_id:
-        query = query.join(contact_labels, Conversation.contact_id == contact_labels.c.contact_id).where(
-            contact_labels.c.label_id == label_id
-        )
+    query = _apply_conversation_filters(
+        query,
+        current_user=current_user,
+        search=search,
+        platform=platform,
+        platforms=platforms,
+        status=status,
+        label_id=label_id,
+        label_ids=label_ids,
+        assignment=assignment,
+    )
 
     if cursor:
         cursor_time, cursor_id = _decode_conversation_cursor(cursor)

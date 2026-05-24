@@ -1,0 +1,18 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình sản phẩm" as ManHinhSanPham
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDoanhNghiep->ManHinhSanPham: 1. Yêu cầu xem danh sách sản phẩm
+activate ManHinhSanPham
+ManHinhSanPham->Backend: 2. Lấy danh sách sản phẩm\nGET /api/products
+activate Backend
+  Backend->CSDL: 3. Truy vấn sản phẩm theo business_id\nSắp xếp theo created_at giảm dần
+  activate CSDL
+  CSDL-->Backend: 4. Trả về danh sách sản phẩm
+  deactivate CSDL
+  Backend-->ManHinhSanPham: 5. Trả về danh sách sản phẩm
+  deactivate Backend
+  ManHinhSanPham->ManHinhSanPham: 6. Cập nhật dữ liệu bảng sản phẩm
+  ManHinhSanPham-->ChuDoanhNghiep: 7. Hiển thị danh sách sản phẩm
+deactivate ManHinhSanPham

@@ -1,0 +1,42 @@
+actor "Nhân viên CSKH" as NhanVien
+participant "Màn hình cài đặt nhân viên" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NhanVien->ManHinh: 1. Nhập mật khẩu hiện tại, \nmật khẩu mới, xác nhận mật \nkhẩu mới và bấm Đổi mật khẩu
+activate ManHinh
+
+ManHinh->ManHinh: 2. Kiểm tra dữ liệu nhập\nMật khẩu hiện tại bắt buộc\nMật khẩu mới tối thiểu 6 ký tự\nXác nhận mật khẩu phải khớp
+
+alt [Dữ liệu nhập không hợp lệ]
+  ManHinh-->NhanVien: 3. Hiển thị thông báo thất bại
+else [Dữ liệu nhập hợp lệ]
+  ManHinh->Backend: 3. Gửi yêu cầu đổi mật khẩu\nPATCH /api/employees/me/password\ncurrent_password, password
+  activate Backend
+
+  Backend->Backend: 4. Kiểm tra mật khẩu mới tối thiểu 6 ký tự
+
+  alt [Mật khẩu mới không hợp lệ]
+    Backend-->ManHinh: 5. Trả về lỗi Password \nmust be at least 6 characters
+    ManHinh-->NhanVien: 6. Hiển thị thông báo thất bại
+  else [Mật khẩu mới hợp lệ]
+    Backend->Backend: 5. Xác minh mật khẩu hiện tại bằng bcrypt
+
+    alt [Mật khẩu hiện tại không đúng]
+      Backend-->ManHinh: 6. Trả về lỗi Current \npassword is incorrect
+      ManHinh-->NhanVien: 7. Hiển thị thông báo thất bại
+    else [Mật khẩu hiện tại đúng]
+      Backend->Backend: 6. Mã hóa mật khẩu mới bằng bcrypt
+      Backend->CSDL: 7. Cập nhật password_hash \ncủa nhân viên trong bảng users
+      activate CSDL
+      CSDL-->Backend: 8. Xác nhận lưu thay đổi
+      deactivate CSDL
+
+      Backend-->ManHinh: 9. Trả về thông báo \nĐã cập nhật mật khẩu
+      deactivate Backend
+      ManHinh->ManHinh: 10. Xóa dữ liệu trong \nform mật khẩu
+      ManHinh-->NhanVien: 11. Hiển thị thông báo thành công
+      deactivate ManHinh
+    end
+  end
+end

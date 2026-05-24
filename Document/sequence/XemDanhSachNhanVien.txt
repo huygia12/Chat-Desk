@@ -1,0 +1,21 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình cài đặt nhân viên" as ManHinhNhanVien
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDoanhNghiep->ManHinhNhanVien: 1. Truy cập menu Nhân viên\n/employees
+activate ManHinhNhanVien
+
+  ManHinhNhanVien->Backend: 2. Lấy danh sách nhân viên\nGET /api/employees
+  activate Backend
+  
+    Backend->CSDL: 10. Truy vấn bảng users\nbusiness_id = id Chủ doanh nghiệp\nrole = employee\nORDER BY created_at ASC
+    activate CSDL
+    CSDL-->Backend: 11. Trả về danh sách nhân viên
+    deactivate CSDL
+    Backend-->ManHinhNhanVien: 12. Trả về danh sách nhân viên
+    deactivate Backend
+    ManHinhNhanVien->ManHinhNhanVien: 13. Cập nhật dữ liệu bảng nhân viên
+    ManHinhNhanVien-->ChuDoanhNghiep: 14. Hiển thị danh sách nhân viên
+
+deactivate ManHinhNhanVien

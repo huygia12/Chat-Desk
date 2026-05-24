@@ -1,0 +1,70 @@
+actor "Chủ doanh nghiệp\nNhân viên CSKH" as NguoiDung
+participant "Màn hình Chat" as ManHinhChat
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as PostgreSQL
+participant "Meta/Facebook API" as FacebookAPI
+participant "Meta/Instagram API" as InstagramAPI
+participant "Telegram API" as TelegramAPI
+participant "Màn hình Widget khách hàng" as WidgetKhachHang
+
+NguoiDung->ManHinhChat: 1. Nhập nội dung \nvà bấm Gửi
+activate ManHinhChat
+ManHinhChat->ManHinhChat: 2. Kiểm tra nội dung \nkhông rỗng và có cuộc \nhội thoại đang chọn
+
+alt [Nội dung trống hoặc chưa chọn cuộc hội thoại]
+  ManHinhChat-->NguoiDung: 3. Không gửi yêu cầu, \ngiữ nguyên giao diện
+else [Dữ liệu gửi hợp lệ]
+  ManHinhChat->Backend: 3. Gửi yêu cầu tạo tin nhắn: \nPOST /api/conversations\n/{conversation_id}/messages
+  activate Backend
+
+  Backend->PostgreSQL: 4. Truy xuất cuộc hội thoại \nkèm kênh và khách hàng
+  activate PostgreSQL
+  PostgreSQL-->Backend: 5. Trả về dữ liệu cuộc hội thoại
+  deactivate PostgreSQL
+
+  alt [Kênh Facebook]
+    Backend->FacebookAPI: 6. Gửi nội dung tin nhắn đến khách hàng
+    activate FacebookAPI
+    FacebookAPI-->Backend: 7. Trả về platform_message_id
+    deactivate FacebookAPI
+  else [Kênh Instagram]
+    Backend->InstagramAPI: 6. Gửi nội dung tin nhắn đến khách hàng
+    activate InstagramAPI
+    InstagramAPI-->Backend: 7. Trả về platform_message_id
+    deactivate InstagramAPI
+  else [Kênh Telegram]
+    Backend->TelegramAPI: 6. Gửi nội dung tin nhắn đến khách hàng
+    activate TelegramAPI
+    TelegramAPI-->Backend: 7. Trả về message_id hoặc null
+    deactivate TelegramAPI
+  end
+
+  alt [Gửi ra kênh ngoài phát sinh lỗi]
+    Backend-->ManHinhChat: 8. Trả về lỗi gửi tin nhắn
+    ManHinhChat-->NguoiDung: 9. Dừng trạng thái \nđang gửi, giữ nội dung \ntrong ô nhập
+  else [Không phát sinh lỗi]
+    Backend->PostgreSQL: 8. Lưu messages với \nsender_type = business \nvà cập nhật \nconversations.last_message_at
+    activate PostgreSQL
+    PostgreSQL-->Backend: 9. Trả về tin nhắn đã lưu
+    deactivate PostgreSQL
+
+    Backend->ManHinhChat: 10. Phát sự kiện WebSocket \nnew_message cho màn hình \nnội bộ
+    ManHinhChat->ManHinhChat: 11. Thêm tin nhắn nếu \nchưa tồn tại trong danh sách
+
+    alt [Cuộc hội thoại thuộc kênh Widget]
+      Backend->WidgetKhachHang: 12. Phát sự kiện WebSocket new_message cho khách hàng
+      activate WidgetKhachHang
+      WidgetKhachHang-->WidgetKhachHang: 13. Hiển thị \ntin nhắn \nmới trong \nwidget
+      
+      deactivate WidgetKhachHang
+    else [Cuộc hội thoại thuộc Facebook, Instagram hoặc Telegram]
+      Backend->Backend: 12. Không gửi WebSocket\n tới widget khách hàng
+    end
+
+    Backend-->ManHinhChat: 14. Trả về thông tin \ntin nhắn đã tạo
+    deactivate Backend
+    ManHinhChat->ManHinhChat: 15. Bổ sung tin nhắn từ \nresponse nếu chưa có \nvà xoá ô nhập
+    ManHinhChat-->NguoiDung: 16. Hiển thị tin nhắn \nvừa gửi trong cuộc \nhội thoại
+    deactivate ManHinhChat
+  end
+end

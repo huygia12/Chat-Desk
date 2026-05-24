@@ -1,0 +1,52 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình Quản lý kênh" as ManHinhKenh
+participant "Backend ChatDesk" as Backend
+participant "Telegram API" as TelegramAPI
+participant "CSDL PostgreSQL" as PostgreSQL
+
+ChuDoanhNghiep->ManHinhKenh: 1. Bấm "Kết nối Telegram"
+activate ManHinhKenh
+ManHinhKenh-->ChuDoanhNghiep: 2. Hiển thị hộp thoại nhập Bot Token
+ChuDoanhNghiep->ManHinhKenh: 3. Nhập Bot Token và bấm "Kết nối"
+ManHinhKenh->ManHinhKenh: 4. Kiểm tra Bot Token đã được nhập
+
+alt [Bot Token trống]
+  ManHinhKenh-->ChuDoanhNghiep: 5. Hiển thị thông báo \n"Vui lòng nhập Bot Token"
+else [Bot Token hợp lệ để gửi]
+  ManHinhKenh->Backend: 5. Gửi yêu cầu thêm kết nối Telegram: \nPOST /api/channels/telegram/connect
+  activate Backend
+  Backend->TelegramAPI: 6. Kiểm tra Bot Token bằng getMe
+  activate TelegramAPI
+  TelegramAPI-->Backend: 7. Trả về thông tin bot Telegram
+  deactivate TelegramAPI
+
+  alt [Bot Token không hợp lệ]
+    Backend-->ManHinhKenh: 8. Trả về lỗi Bot Token không hợp lệ
+    ManHinhKenh-->ChuDoanhNghiep: 9. Hiển thị thông báo thất bại
+  else [Bot Token hợp lệ]
+    Backend->PostgreSQL: 8. Kiểm tra bot Telegram đã được \nkết nối trong channels
+    activate PostgreSQL
+    PostgreSQL-->Backend: 9. Trả về kết quả kiểm tra
+    deactivate PostgreSQL
+
+    alt [Bot đã được kết nối]
+      Backend-->ManHinhKenh: 10. Trả về lỗi bot đã được kết nối
+      ManHinhKenh-->ChuDoanhNghiep: 11. Hiển thị thông báo thất bại
+    else [Bot chưa được kết nối]
+      Backend->TelegramAPI: 10. Đăng ký webhook nhận tin nhắn \nbằng setWebhook
+      activate TelegramAPI
+      TelegramAPI-->Backend: 11. Trả về kết quả đăng ký webhook
+      deactivate TelegramAPI
+        Backend->PostgreSQL: 12. Lưu kênh Telegram vào bảng channels
+        activate PostgreSQL
+        PostgreSQL-->Backend: 13. Trả về thông tin kênh Telegram đã lưu
+        deactivate PostgreSQL
+        Backend-->ManHinhKenh: 14. Trả về thông tin kết nối Telegram
+        ManHinhKenh->ManHinhKenh: 15. Thêm kênh Telegram vào \ndanh sách hiển thị, đóng hộp thoại \nvà xóa Bot Token đã nhập
+        ManHinhKenh-->ChuDoanhNghiep: 16. Hiển thị thông báo thành công
+    end
+  end
+  deactivate Backend
+end
+
+deactivate ManHinhKenh

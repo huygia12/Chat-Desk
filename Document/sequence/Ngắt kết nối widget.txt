@@ -1,0 +1,33 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình quản lý Widget" as ManHinhWidget
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as PostgreSQL
+
+ChuDoanhNghiep->ManHinhWidget: 1. Bấm nút ngắt kết nối Widget
+activate ManHinhWidget
+ManHinhWidget->ManHinhWidget: 2. Hiển thị hộp xác nhận ngắt kết nối
+
+ChuDoanhNghiep->ManHinhWidget: 3. Xác nhận ngắt kết nối Widget
+ManHinhWidget->Backend: 4. Gửi yêu cầu ngắt kết nối Widget\nDELETE /api/widgets/{widget_id}
+activate Backend
+
+Backend->PostgreSQL: 5. Tìm bản ghi kênh Widget theo widget_id
+activate PostgreSQL
+PostgreSQL-->Backend: 6. Trả về kết quả tìm kiếm Widget
+
+alt [Tìm thấy Widget]
+  Backend->PostgreSQL: 7. Xóa bản ghi Widget trong bảng channels
+  PostgreSQL-->Backend: 8. Xác nhận đã xóa dữ liệu Widget
+  deactivate PostgreSQL
+  Backend-->ManHinhWidget: 9. Trả kết quả ngắt kết nối thành công
+  ManHinhWidget->ManHinhWidget: 10. Xóa Widget khỏi danh sách đang hiển thị
+  ManHinhWidget-->ChuDoanhNghiep: 11. Hiển thị thông báo thành công
+else [Không tìm thấy Widget hoặc xóa thất bại]
+  Backend-->ManHinhWidget: 7. Trả lỗi ngắt kết nối Widget
+  deactivate Backend
+  ManHinhWidget-->ChuDoanhNghiep: 8. Hiển thị thông báo thất bại
+  deactivate ManHinhWidget
+end
+
+
+

@@ -1,0 +1,24 @@
+actor "Quản trị viên hệ thống" as QuanTriVien
+participant "Màn hình Danh sách doanh nghiệp" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+QuanTriVien->ManHinh: 1. Yêu cầu xem danh sách doanh nghiệp\n(kèm từ khóa, trạng thái, sắp xếp nếu có)
+activate ManHinh
+ManHinh->ManHinh: 2. Bật trạng thái đang tải danh sách
+ManHinh->Backend: 3. Gửi yêu cầu lấy danh sách doanh nghiệp\nGET /api/admin/businesses?search&status&sort
+activate Backend
+
+Backend->CSDL: 4. Truy vấn bảng users với role = business\nlọc theo email hoặc tên doanh nghiệp nếu có từ khóa
+activate CSDL
+
+  CSDL-->Backend: 5. Trả về danh sách tài khoản doanh nghiệp
+  Backend->CSDL: 6. Thống kê dữ liệu liên quan theo từng doanh nghiệp\nchannels, users nhân viên, contacts, products,\nconversations, messages
+  CSDL-->Backend: 7. Trả về số kênh, kênh hoạt động, nhân viên,\nliên hệ, sản phẩm, hội thoại, tin nhắn,\ntin nhắn AI và thời điểm hoạt động gần nhất
+  deactivate CSDL
+  Backend->Backend: 8. Tổng hợp chỉ số, lọc trạng thái active/inactive\nvà sắp xếp theo tham số sort
+  Backend-->ManHinh: 9. Trả về items danh sách doanh nghiệp
+  deactivate Backend
+  ManHinh->ManHinh: 10. Gán dữ liệu vào bảng và tắt trạng thái đang tải
+  ManHinh-->QuanTriVien: 11. Hiển thị bảng danh sách doanh nghiệp
+  deactivate ManHinh

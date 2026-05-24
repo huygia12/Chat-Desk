@@ -1,0 +1,58 @@
+actor "Chủ doanh nghiệp \nNhân viên CSKH" as NguoiDung
+participant "Màn hình Hội thoại" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NguoiDung->ManHinh: 1. Chọn người nhận \nphân công cho hội thoại
+activate ManHinh
+ManHinh->ManHinh: 2. Tạo dữ liệu phân công\nassigned_to_id, assigned_to_business
+
+ManHinh->Backend: 3. Gửi yêu cầu cập nhật phân công\nPATCH /api/conversations\n/{conversation_id}/assignee
+activate Backend
+
+Backend->CSDL: 4. Tìm hội thoại theo \nconversation_id và doanh nghiệp
+activate CSDL
+CSDL-->Backend: 5. Trả về hội thoại hoặc không có dữ liệu
+deactivate CSDL
+
+alt [Không tìm thấy hội thoại]
+  Backend-->ManHinh: 6. Trả về lỗi 404 Conversation not found
+  
+  ManHinh-->NguoiDung: 7. Hiển thị thông báo thất bại
+else [Tìm thấy hội thoại]
+  alt [Người nhận là nhân viên]
+    Backend->CSDL: 6. Kiểm tra nhân viên nhận phân công\ntrong bảng users
+    activate CSDL
+    CSDL-->Backend: 7. Trả về nhân viên hợp lệ \nhoặc không có dữ liệu
+    deactivate CSDL
+  else [Giao cho chủ doanh nghiệp hoặc bỏ phân công]
+    Backend->Backend: 6. Xác định không cần kiểm tra \nnhân viên nhận phân công
+  end
+
+  alt [Người nhận là nhân viên nhưng không hợp lệ]
+    Backend-->ManHinh: 8. Trả về lỗi 404 Assignee not found
+    
+    ManHinh-->NguoiDung: 9. Hiển thị thông báo thất bại
+  else [Người nhận hợp lệ]
+    Backend->Backend: 8. So sánh phân công mới \nvới phân công hiện tại
+
+    alt [Phân công không thay đổi]
+      Backend-->ManHinh: 9. Trả về thông tin hội thoại hiện tại
+      
+      ManHinh->ManHinh: 10. Giữ nguyên trạng thái \nphân công trên giao diện
+      ManHinh-->NguoiDung: 11. Hiển thị thông tin \nphân công hiện tại
+    else [Phân công có thay đổi]
+      Backend->CSDL: 9. Cập nhật conversations\nassigned_to_id, assigned_to_business
+      activate CSDL
+      Backend->CSDL: 10. Ghi lịch sử vào \nconversation_assignment_history
+      CSDL-->Backend: 11. Trả về hội thoại \nđã cập nhật kèm người nhận
+      deactivate CSDL
+      Backend-->ManHinh: 12. Trả về thông tin \nhội thoại sau phân công
+      deactivate Backend
+      ManHinh->ManHinh: 13. Cập nhật người nhận \ntrong danh sách và chi tiết hội thoại
+      ManHinh-->NguoiDung: 14. Hiển thị kết quả \nphân công hội thoại
+      deactivate ManHinh
+    end
+  end
+end
+

@@ -1,0 +1,38 @@
+actor "Admin hệ thống" as Admin
+participant "Màn hình Thống kê doanh nghiệp" as Frontend
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as DB
+
+Admin->Frontend: 1. Chọn khoảng thời gian \nthống kê hoặc bấm làm mới
+activate Frontend
+Frontend->Backend: 2. Gửi yêu cầu lấy thống kê doanh nghiệp\nGET /api/admin/analytics?days={số ngày}
+activate Backend
+
+Backend->Backend: 3. Xác định khoảng ngày cần thống kê
+Backend->DB: 4. Truy vấn số hội thoại theo ngày
+activate DB
+DB-->Backend: 5. Trả về số hội thoại theo từng ngày
+
+Backend->DB: 6. Truy vấn số tin nhắn và tin nhắn AI theo ngày
+DB-->Backend: 7. Trả về số tin nhắn theo từng ngày
+
+Backend->DB: 8. Truy vấn phân bố hội thoại theo nền tảng
+DB-->Backend: 9. Trả về thống kê nền tảng
+
+Backend->DB: 10. Truy vấn phân bố tin nhắn theo loại người gửi
+DB-->Backend: 11. Trả về thống kê loại người gửi
+
+Backend->DB: 12. Truy vấn danh sách doanh nghiệp và các chỉ số liên quan\nusers, channels, contacts, conversations, messages, products
+DB-->Backend: 13. Trả về dữ liệu tổng hợp theo từng doanh nghiệp
+
+Backend->DB: 14. Truy vấn số liệu tổng quan toàn hệ thống
+DB-->Backend: 15. Trả về tổng doanh nghiệp, doanh nghiệp hoạt động, \nmkênh, hội thoại, tin nhắn, sản phẩm, khách hàng, nhân viên
+deactivate DB
+
+Backend->Backend: 16. Tổng hợp dữ liệu biểu đồ, thống kê \ntổng quan và top doanh nghiệp
+
+Backend-->Frontend: 17. Trả về dữ liệu thống kê doanh nghiệp
+deactivate Backend
+Frontend->Frontend: 18. Cập nhật thẻ số liệu, biểu đồ lưu lượng, \nnền tảng, loại người gửi và top doanh nghiệp
+Frontend-->Admin: 19. Hiển thị thống kê \nvề các doanh nghiệp
+deactivate Frontend

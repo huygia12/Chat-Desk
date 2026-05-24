@@ -1,0 +1,31 @@
+actor "Người dùng nội bộ" as NguoiDung
+participant "Màn hình Mẫu trả lời" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NguoiDung->ManHinh: 1. Bấm nút xóa mẫu trả lời
+activate ManHinh
+ManHinh-->NguoiDung: 2. Hiển thị hộp xác nhận xóa
+NguoiDung->ManHinh: 3. Xác nhận xóa mẫu trả lời
+
+ManHinh->Backend: 4. Gửi yêu cầu xóa mẫu trả lời DELETE /api/saved-replies/{replyId}
+activate Backend
+
+Backend->CSDL: 5. Tìm mẫu trả lời theo id trong bảng saved_replies
+activate CSDL
+CSDL-->Backend: 6. Trả về thông tin mẫu trả lời hoặc không tìm thấy
+deactivate CSDL
+
+alt [Tìm thấy mẫu trả lời có thể xóa]
+    Backend->CSDL: 7. Xóa mẫu trả lời khỏi bảng saved_replies
+    activate CSDL
+    CSDL-->Backend: 8. Xác nhận thao tác xóa
+    deactivate CSDL
+    Backend-->ManHinh: 9. Trả về kết quả thành công {"detail": "Đã xóa mẫu trả lời"}
+    ManHinh-->NguoiDung: 10. Hiển thị thông báo thành công và cập nhật lại danh sách
+else [Không tìm thấy mẫu trả lời]
+    Backend-->ManHinh: 9. Trả về lỗi "Không tìm thấy mẫu trả lời"
+    deactivate Backend
+    ManHinh-->NguoiDung: 10. Hiển thị thông báo thất bại
+    deactivate ManHinh
+end

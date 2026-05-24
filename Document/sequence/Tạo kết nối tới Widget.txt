@@ -1,0 +1,36 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình Kênh kết nối - Widget" as ManHinhWidget
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as PostgreSQL
+
+ChuDoanhNghiep->ManHinhWidget: 1. Bấm Thêm Widget
+activate ManHinhWidget
+ManHinhWidget->ManHinhWidget: 2. Mở form tạo Widget mới
+
+ChuDoanhNghiep->ManHinhWidget: 3. Nhập tên Widget, \nAllowed Origins và bấm xác nhận
+ManHinhWidget->ManHinhWidget: 4. Chuẩn hóa danh sách domain \nđược phép sử dụng Widget
+
+alt [Danh sách domain trống]
+  ManHinhWidget-->ChuDoanhNghiep: 5. Hiển thị thông báo thất bại\n do thiếu Allowed Origins
+else [Danh sách domain hợp lệ]
+  ManHinhWidget->Backend: 5. Gửi yêu cầu thêm kết nối \nWidget - POST /api/widgets/create
+  activate Backend
+  Backend->Backend: 6. Sinh widget_id, widget_secret \nvà tạo dữ liệu kênh platform="widget"
+
+  Backend->PostgreSQL: 7. Lưu bản ghi Widget vào bảng channels
+  activate PostgreSQL
+  PostgreSQL-->Backend: 8. Trả về bản ghi Widget đã được tạo
+  deactivate PostgreSQL
+
+  alt [Tạo Widget thành công]
+    Backend-->ManHinhWidget: 9. Trả cấu hình Widget gồm widget_id, \nwidget_secret, allowed_origins và embed_script_url
+    ManHinhWidget->ManHinhWidget: 10. Thêm Widget mới vào danh sách \nhiện tại, đóng form và xóa dữ liệu form
+    ManHinhWidget-->ChuDoanhNghiep: 11. Hiển thị thông báo thành công
+  else [Tạo Widget thất bại]
+    Backend-->ManHinhWidget: 9. Trả lỗi tạo Widget
+    ManHinhWidget-->ChuDoanhNghiep: 11. Hiển thị thông báo thất bại
+  end
+  deactivate Backend
+end
+
+deactivate ManHinhWidget

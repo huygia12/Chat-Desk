@@ -1,0 +1,38 @@
+actor "Chủ doanh nghiệp\nNhân viên" as NguoiDung
+participant "Màn hình Chat" as ManHinhChat
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NguoiDung->ManHinhChat: 1. Nhập từ khóa hoặc \nchọn điều kiện lọc hội thoại
+activate ManHinhChat
+
+ManHinhChat->ManHinhChat: 2. Cập nhật tiêu chí lọc gồm từ khóa,\n hàng đợi, nhãn và nền tảng
+
+ManHinhChat->Backend: 3. Gửi yêu cầu lọc hội thoại: \nGET /api/conversations?search=...&\nassignment=...&label_ids=...&platforms=...
+activate Backend
+
+Backend->Backend: 4. Tạo truy vấn danh sách hội thoại \ntheo các điều kiện lọc
+
+Backend->CSDL: 5. Truy vấn conversations, contacts, \ncontact_labels, labels, channels theo điều kiện lọc
+activate CSDL
+
+CSDL-->Backend: 6. Trả về danh sách hội thoại phù hợp
+
+Backend->CSDL: 7. Truy vấn số tin nhắn chưa đọc \ncủa các hội thoại phù hợp
+
+CSDL-->Backend: 8. Trả về số lượng tin nhắn chưa đọc
+deactivate CSDL
+
+Backend-->ManHinhChat: 9. Trả về danh sách hội thoại đã lọc
+deactivate Backend
+
+ManHinhChat->ManHinhChat: 10. Cập nhật danh sách hội thoại trên màn hình
+
+alt [Có hội thoại phù hợp]
+    ManHinhChat-->NguoiDung: 11. Hiển thị danh sách \nhội thoại đã lọc
+
+else [Không có hội thoại phù hợp]
+    ManHinhChat-->NguoiDung: 11. Hiển thị thông báo \n"Không có hội thoại phù hợp"
+    deactivate ManHinhChat
+end
+

@@ -1,0 +1,39 @@
+actor "Nhân viên CSKH" as NhanVien
+participant "Màn hình cài đặt tài khoản nhân viên" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NhanVien->ManHinh: 1. Nhập họ tên, email \nvà bấm Lưu thông tin
+activate ManHinh
+
+ManHinh->ManHinh: 2. Kiểm tra họ tên bắt buộc,\nemail bắt buộc và đúng định dạng
+
+alt [Dữ liệu nhập không hợp lệ]
+  ManHinh-->NhanVien: 3. Hiển thị thông báo thất bại
+else [Dữ liệu nhập hợp lệ]
+  ManHinh->Backend: 3. Gửi yêu cầu sửa \nthông tin cơ bản tài khoản\nPATCH /api/employees/me/profile\n{full_name, email}
+  activate Backend
+
+  Backend->Backend: 4. Kiểm tra định dạng dữ liệu,\nchuẩn hóa họ tên
+  Backend->CSDL: 5. Kiểm tra email đã được \ntài khoản khác sử dụng chưa
+  activate CSDL
+  CSDL-->Backend: 6. Trả về kết quả kiểm tra email
+  deactivate CSDL
+
+  alt [Email đã tồn tại hoặc họ tên không hợp lệ]
+    Backend-->ManHinh: 7. Trả về lỗi 400 hoặc 422
+    ManHinh-->NhanVien: 8. Hiển thị thông báo thất bại
+  else [Thông tin hợp lệ]
+    Backend->CSDL: 7. Cập nhật email, full_name \nvà updated_at trong bảng users
+    activate CSDL
+    CSDL-->Backend: 8. Xác nhận cập nhật và \ntrả về tài khoản đã sửa
+    deactivate CSDL
+
+    Backend-->ManHinh: 9. Trả về thông tin tài \nkhoản nhân viên đã cập nhật
+    ManHinh-->NhanVien: 10. Hiển thị thông báo thành công\nvà cập nhật thông tin trên giao diện
+  end
+
+  deactivate Backend
+end
+
+deactivate ManHinh

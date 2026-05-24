@@ -1,0 +1,42 @@
+actor "Quản trị viên hệ thống" as QuanTriVien
+participant "Màn hình Admin Analytics" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+QuanTriVien->ManHinh: 1. Chọn khoảng thời gian \nxem traffic toàn hệ thống
+activate ManHinh
+ManHinh->ManHinh: 2. Bật trạng thái đang tải \nvà chuẩn bị tham số days
+ManHinh->Backend: 3. Gửi yêu cầu lấy traffic toàn hệ thống\nGET /api/admin/analytics?days={days}
+activate Backend
+
+Backend->Backend: 4. Kiểm tra days trong khoảng 7-90,\nxác định ngày bắt đầu \nvà danh sách ngày thống kê
+
+  Backend->CSDL: 5. Truy vấn tổng quan hệ thống\nusers, channels, conversations, \nmessages, products, contacts
+  activate CSDL
+  CSDL-->Backend: 6. Trả về tổng doanh nghiệp, \ndoanh nghiệp active,\nkênh, hội thoại, tin nhắn, tin nhắn AI,\nsản phẩm, khách hàng và nhân viên
+  deactivate CSDL
+
+  Backend->CSDL: 7. Truy vấn traffic theo ngày \ntrong khoảng đã chọn\nconversations.created_at \nvà messages.created_at
+  activate CSDL
+  CSDL-->Backend: 8. Trả về số hội thoại, tin nhắn \nvà tin nhắn AI theo ngày
+  deactivate CSDL
+
+  Backend->CSDL: 9. Truy vấn phân bố traffic theo \nnền tảng và loại người gửi
+  activate CSDL
+  CSDL-->Backend: 10. Trả về số hội thoại theo platform\nvà số tin nhắn theo sender_type
+  deactivate CSDL
+
+  Backend->CSDL: 11. Truy vấn chỉ số theo từng doanh nghiệp
+  activate CSDL
+  CSDL-->Backend: 12. Trả về số kênh, nhân viên, \nkhách hàng,hội thoại, tin nhắn, \ntin nhắn AI, sản phẩm và thời điểm \nhoạt động gần nhất theo doanh nghiệp
+  deactivate CSDL
+
+  Backend->Backend: 13. Tổng hợp dữ liệu AdminAnalyticsOut,\nsắp xếp top doanh nghiệp theo hội thoại và AI
+  Backend-->ManHinh: 14. Trả về dữ liệu traffic toàn hệ thống
+
+deactivate Backend
+
+  ManHinh->ManHinh: 15. Lưu dữ liệu, tính tỷ lệ tin nhắn AI\nvà chuẩn bị dữ liệu biểu đồ
+  ManHinh-->QuanTriVien: 16. Hiển thị thẻ chỉ số, \nbiểu đồ traffic, phân bố nền tảng, \nloại người gửi và top doanh nghiệp
+
+deactivate ManHinh

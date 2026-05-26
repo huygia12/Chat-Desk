@@ -7,6 +7,8 @@ import * as Notifications from 'expo-notifications'
 
 import { useAuthStore } from './src/store/authStore'
 import { useChatStore } from './src/store/chatStore'
+import { useLanguageStore } from './src/store/languageStore'
+import { translate } from './src/i18n/dictionaries'
 import { theme } from './src/theme/theme'
 import LoginScreen from './src/screens/LoginScreen'
 import RegisterScreen from './src/screens/RegisterScreen'
@@ -32,10 +34,18 @@ export default function App() {
   const user = useAuthStore((state) => state.user)
   const bootstrapped = useAuthStore((state) => state.bootstrapped)
   const loadSession = useAuthStore((state) => state.loadSession)
+  const language = useLanguageStore((state) => state.language)
+  const languageBootstrapped = useLanguageStore((state) => state.bootstrapped)
+  const loadLanguage = useLanguageStore((state) => state.loadLanguage)
 
   useEffect(() => {
-    loadSession()
-  }, [loadSession])
+    async function bootstrap() {
+      await loadLanguage()
+      await loadSession()
+    }
+
+    bootstrap()
+  }, [loadLanguage, loadSession])
 
   useEffect(() => {
     if (token && user && ['business', 'employee'].includes(user.role)) {
@@ -54,7 +64,7 @@ export default function App() {
 
       try {
         const conversation = await useChatStore.getState().openConversationById(conversationId)
-        navigate('Chat', { title: conversation.contact?.display_name || 'Hoi thoai' })
+        navigate('Chat', { title: conversation.contact?.display_name || translate(language, 'chat.title') })
       } catch (error) {
         console.warn('Failed to open notification conversation:', error)
       }
@@ -66,9 +76,9 @@ export default function App() {
       .catch((error) => console.warn('Failed to read last notification response:', error))
 
     return () => subscription.remove()
-  }, [token, user])
+  }, [language, token, user])
 
-  if (!bootstrapped) {
+  if (!bootstrapped || !languageBootstrapped) {
     return null
   }
 

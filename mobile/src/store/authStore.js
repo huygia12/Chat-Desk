@@ -2,6 +2,8 @@ import * as SecureStore from 'expo-secure-store'
 import { create } from 'zustand'
 
 import client, { setAccessToken } from '../api/client'
+import { translate } from '../i18n/dictionaries'
+import { useLanguageStore } from './languageStore'
 
 const TOKEN_KEY = 'chatdesk_mobile_token'
 
@@ -40,7 +42,7 @@ export const useAuthStore = create((set, get) => ({
     const user = get().user
     if (!['business', 'employee'].includes(user?.role)) {
       await get().logout()
-      throw new Error('Ung dung mobile chi danh cho tai khoan doanh nghiep hoac nhan vien CSKH.')
+      throw new Error(translate(useLanguageStore.getState().language, 'auth.mobileOnly'))
     }
   },
 

@@ -2,9 +2,11 @@ import { Linking, StyleSheet, View } from 'react-native'
 import { Button, Text } from 'react-native-paper'
 import dayjs from 'dayjs'
 
+import { useI18n } from '../i18n/useI18n'
 import { colors } from '../theme/theme'
 
 export default function MessageBubble({ message }) {
+  const { t } = useI18n()
   const isMine = message.sender_type === 'business'
   const isAi = message.sender_type === 'ai'
   const hasAttachment = Boolean(message.attachment_url)
@@ -25,7 +27,7 @@ export default function MessageBubble({ message }) {
             onPress={() => Linking.openURL(message.attachment_url)}
             style={styles.attachment}
           >
-            {message.attachment_filename || 'Mo tep'}
+            {message.attachment_filename || t('chat.openAttachment')}
           </Button>
         ) : null}
         <Text style={[styles.time, isMine ? styles.mineTime : styles.theirTime]}>

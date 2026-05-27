@@ -18,6 +18,8 @@ import {
   UnlockOutlined,
   DeleteOutlined,
   EditOutlined,
+  ReloadOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import client from "../api/client";
 import { useI18n } from "../i18n/useI18n";
@@ -33,15 +35,18 @@ export default function Employees() {
   const [submitting, setSubmitting] = useState(false);
   const [profileSubmitting, setProfileSubmitting] = useState(false);
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+  const [search, setSearch] = useState("");
   const [form] = Form.useForm();
   const [profileForm] = Form.useForm();
   const [passwordForm] = Form.useForm();
   const { t } = useI18n();
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = async (nextSearch = search) => {
     setLoading(true);
     try {
-      const res = await client.get("/api/employees");
+      const res = await client.get("/api/employees", {
+        params: { search: nextSearch.trim() || undefined },
+      });
       setEmployees(res.data);
     } catch {
       message.error(t("employees.loadError"));
@@ -53,6 +58,11 @@ export default function Employees() {
   useEffect(() => {
     fetchEmployees();
   }, []);
+
+  const handleResetSearch = () => {
+    setSearch("");
+    fetchEmployees("");
+  };
 
   const handleCreate = async (values) => {
     setSubmitting(true);
@@ -227,13 +237,31 @@ export default function Employees() {
         </Button>
       </div>
 
+      <Space wrap style={{ marginBottom: 16 }}>
+        <Input
+          allowClear
+          prefix={<SearchOutlined />}
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          onPressEnter={() => fetchEmployees()}
+          placeholder={t("employees.searchPlaceholder")}
+          style={{ width: 320 }}
+        />
+        <Button type="primary" icon={<SearchOutlined />} onClick={() => fetchEmployees()}>
+          {t("common.search")}
+        </Button>
+        <Button icon={<ReloadOutlined />} onClick={handleResetSearch} disabled={!search.trim()}>
+          {t("employees.resetSearch")}
+        </Button>
+      </Space>
+
       <Table
         dataSource={employees}
         columns={columns}
         rowKey="id"
         loading={loading}
         pagination={{ pageSize: 20 }}
-        locale={{ emptyText: t("employees.empty") }}
+        locale={{ emptyText: search.trim() ? t("employees.noFilteredEmployees") : t("employees.empty") }}
       />
 
       <Modal

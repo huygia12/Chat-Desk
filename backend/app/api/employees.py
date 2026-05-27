@@ -1,8 +1,8 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from app.database import get_db
 from app.i18n import t
 from app.models.user import User
@@ -44,15 +44,19 @@ def _normalize_full_name(full_name: str) -> str:
 
 @router.get("", response_model=list[EmployeeOut])
 async def list_employees(
+    search: str | None = Query(default=None, max_length=255),
     current_user: User = Depends(get_current_business),
     db: AsyncSession = Depends(get_db),
 ):
     """List all employees belonging to this business."""
-    result = await db.execute(
-        select(User)
-        .where(User.business_id == current_user.id, User.role == "employee")
-        .order_by(User.created_at.asc())
-    )
+    conditions = [User.business_id == current_user.id, User.role == "employee"]
+
+    search_text = search.strip() if search else ""
+    if search_text:
+        search_pattern = f"%{search_text}%"
+        conditions.append(or_(User.full_name.ilike(search_pattern), User.email.ilike(search_pattern)))
+
+    result = await db.execute(select(User).where(*conditions).order_by(User.created_at.asc()))
     return result.scalars().all()
 
 

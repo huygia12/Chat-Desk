@@ -1,9 +1,9 @@
 import json
 import uuid
 import logging
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from app.database import get_db
 from app.i18n import t
 from app.models.user import User
@@ -54,12 +54,37 @@ def _build_product_text(
 
 @router.get("", response_model=list[ProductOut])
 async def list_products(
+    search: str | None = Query(default=None, max_length=255),
+    status: str | None = Query(default=None),
+    category: str | None = Query(default=None, max_length=120),
+    min_price: float | None = Query(default=None, ge=0),
+    max_price: float | None = Query(default=None, ge=0),
     current_user: User = Depends(get_current_business),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(
-        select(Product).where(Product.business_id == current_user.id).order_by(Product.created_at.desc())
-    )
+    conditions = [Product.business_id == current_user.id]
+
+    search_text = search.strip() if search else ""
+    if search_text:
+        search_pattern = f"%{search_text}%"
+        conditions.append(or_(Product.name.ilike(search_pattern), Product.sku.ilike(search_pattern)))
+
+    if status:
+        if status not in {"available", "out_of_stock"}:
+            raise HTTPException(status_code=400, detail="Invalid product status")
+        conditions.append(Product.status == status)
+
+    category_text = category.strip() if category else ""
+    if category_text:
+        conditions.append(Product.category.ilike(category_text))
+
+    if min_price is not None:
+        conditions.append(Product.price >= min_price)
+
+    if max_price is not None:
+        conditions.append(Product.price <= max_price)
+
+    result = await db.execute(select(Product).where(*conditions).order_by(Product.created_at.desc()))
     return result.scalars().all()
 
 

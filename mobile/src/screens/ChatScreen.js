@@ -4,12 +4,10 @@ import { ActivityIndicator, Appbar, Text } from 'react-native-paper'
 
 import MessageBubble from '../components/MessageBubble'
 import MessageComposer from '../components/MessageComposer'
-import { useI18n } from '../i18n/useI18n'
 import { useChatStore } from '../store/chatStore'
 import { colors } from '../theme/theme'
 
 export default function ChatScreen({ navigation, route }) {
-  const { t } = useI18n()
   const listRef = useRef(null)
   const {
     activeConversation,
@@ -36,7 +34,7 @@ export default function ChatScreen({ navigation, route }) {
     }
   }, [activeConversation?.id, markConversationRead])
 
-  const title = route.params?.title || activeConversation?.contact?.display_name || t('chat.title')
+  const title = route.params?.title || activeConversation?.contact?.display_name || 'Hoi thoai'
 
   return (
     <KeyboardAvoidingView
@@ -69,7 +67,7 @@ export default function ChatScreen({ navigation, route }) {
           ListHeaderComponent={olderMessagesLoading ? <ActivityIndicator style={styles.older} /> : null}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Text style={styles.emptyText}>{t('chat.empty')}</Text>
+              <Text style={styles.emptyText}>Chua co tin nhan trong hoi thoai nay.</Text>
             </View>
           }
         />

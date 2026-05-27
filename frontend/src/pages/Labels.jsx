@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Button, Card, Form, Input, Modal, Popconfirm, Table, Typography, message } from 'antd'
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
+import { Button, Card, Form, Input, Modal, Popconfirm, Space, Table, Typography, message } from 'antd'
+import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import client from '../api/client'
 import CustomerLabel from '../components/CustomerLabel'
@@ -14,13 +14,16 @@ export default function Labels() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingLabel, setEditingLabel] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+  const [search, setSearch] = useState('')
   const [form] = Form.useForm()
   const { t } = useI18n()
 
-  const fetchLabels = async () => {
+  const fetchLabels = async (nextSearch = search) => {
     setLoading(true)
     try {
-      const res = await client.get('/api/labels')
+      const res = await client.get('/api/labels', {
+        params: { search: nextSearch.trim() || undefined },
+      })
       setLabels(res.data)
     } catch {
       message.error(t('labelsPage.loadError'))
@@ -32,6 +35,11 @@ export default function Labels() {
   useEffect(() => {
     fetchLabels()
   }, [])
+
+  const handleResetSearch = () => {
+    setSearch('')
+    fetchLabels('')
+  }
 
   const openCreateModal = () => {
     setEditingLabel(null)
@@ -189,13 +197,30 @@ export default function Labels() {
         <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
           {t('labelsPage.helper')}
         </Typography.Text>
+        <Space wrap style={{ marginBottom: 16 }}>
+          <Input
+            allowClear
+            prefix={<SearchOutlined />}
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            onPressEnter={() => fetchLabels()}
+            placeholder={t('labelsPage.searchPlaceholder')}
+            style={{ width: 280 }}
+          />
+          <Button type="primary" icon={<SearchOutlined />} onClick={() => fetchLabels()}>
+            {t('common.search')}
+          </Button>
+          <Button icon={<ReloadOutlined />} onClick={handleResetSearch} disabled={!search.trim()}>
+            {t('labelsPage.resetSearch')}
+          </Button>
+        </Space>
         <Table
           dataSource={labels}
           columns={columns}
           rowKey="id"
           loading={loading}
           pagination={{ pageSize: 10 }}
-          locale={{ emptyText: t('labelsPage.empty') }}
+          locale={{ emptyText: search.trim() ? t('labelsPage.noFilteredLabels') : t('labelsPage.empty') }}
         />
       </Card>
 

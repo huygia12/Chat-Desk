@@ -12,7 +12,7 @@ import {
   Typography,
   message,
 } from "antd";
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import client from "../api/client";
 import { useI18n } from "../i18n/useI18n";
 import { useAuthStore } from "../store/authStore";
@@ -26,6 +26,7 @@ export default function SavedReplies() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingReply, setEditingReply] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [search, setSearch] = useState("");
   const [form] = Form.useForm();
   const { t } = useI18n();
 
@@ -35,10 +36,12 @@ export default function SavedReplies() {
     personal: t("savedReplies.personal"),
   };
 
-  const fetchReplies = async () => {
+  const fetchReplies = async (nextSearch = search) => {
     setLoading(true);
     try {
-      const res = await client.get("/api/saved-replies");
+      const res = await client.get("/api/saved-replies", {
+        params: { search: nextSearch.trim() || undefined },
+      });
       setReplies(res.data);
     } catch {
       message.error(t("savedReplies.loadError"));
@@ -50,6 +53,11 @@ export default function SavedReplies() {
   useEffect(() => {
     fetchReplies();
   }, []);
+
+  const handleResetSearch = () => {
+    setSearch("");
+    fetchReplies("");
+  };
 
   const openCreateModal = () => {
     setEditingReply(null);
@@ -193,13 +201,31 @@ export default function SavedReplies() {
         </Button>
       </div>
 
+      <Space wrap style={{ marginBottom: 16 }}>
+        <Input
+          allowClear
+          prefix={<SearchOutlined />}
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          onPressEnter={() => fetchReplies()}
+          placeholder={t("savedReplies.searchPlaceholder")}
+          style={{ width: 320 }}
+        />
+        <Button type="primary" icon={<SearchOutlined />} onClick={() => fetchReplies()}>
+          {t("common.search")}
+        </Button>
+        <Button icon={<ReloadOutlined />} onClick={handleResetSearch} disabled={!search.trim()}>
+          {t("savedReplies.resetSearch")}
+        </Button>
+      </Space>
+
       <Table
         dataSource={replies}
         columns={columns}
         rowKey="id"
         loading={loading}
         pagination={{ pageSize: 10 }}
-        locale={{ emptyText: t("savedReplies.empty") }}
+        locale={{ emptyText: search.trim() ? t("savedReplies.noFilteredReplies") : t("savedReplies.empty") }}
       />
 
       <Modal

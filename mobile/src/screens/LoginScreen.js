@@ -2,13 +2,10 @@ import { useState } from 'react'
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native'
 import { Button, HelperText, Text, TextInput } from 'react-native-paper'
 
-import LanguageToggle from '../components/LanguageToggle'
-import { useI18n } from '../i18n/useI18n'
 import { useAuthStore } from '../store/authStore'
 import { colors } from '../theme/theme'
 
 export default function LoginScreen({ navigation }) {
-  const { t } = useI18n()
   const login = useAuthStore((state) => state.login)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -21,7 +18,7 @@ export default function LoginScreen({ navigation }) {
     try {
       await login(email.trim(), password)
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || t('auth.loginFailed'))
+      setError(err.response?.data?.detail || err.message || 'Dang nhap that bai')
     } finally {
       setLoading(false)
     }
@@ -33,14 +30,11 @@ export default function LoginScreen({ navigation }) {
       style={styles.container}
     >
       <View style={styles.card}>
-        <View style={styles.headerRow}>
-          <Text variant="headlineMedium" style={styles.title}>ChatDesk</Text>
-          <LanguageToggle compact />
-        </View>
-        <Text variant="bodyMedium" style={styles.subtitle}>{t('auth.loginSubtitle')}</Text>
+        <Text variant="headlineMedium" style={styles.title}>ChatDesk</Text>
+        <Text variant="bodyMedium" style={styles.subtitle}>Dang nhap danh cho doanh nghiep va nhan vien CSKH</Text>
 
         <TextInput
-          label={t('auth.email')}
+          label="Email"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -49,7 +43,7 @@ export default function LoginScreen({ navigation }) {
           style={styles.input}
         />
         <TextInput
-          label={t('auth.password')}
+          label="Mat khau"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -58,10 +52,10 @@ export default function LoginScreen({ navigation }) {
         />
         <HelperText type="error" visible={Boolean(error)}>{error}</HelperText>
         <Button mode="contained" loading={loading} disabled={loading} onPress={handleLogin}>
-          {t('auth.loginButton')}
+          Dang nhap
         </Button>
         <Button mode="text" onPress={() => navigation.navigate('Register')}>
-          {t('auth.registerBusiness')}
+          Tao tai khoan doanh nghiep
         </Button>
       </View>
     </KeyboardAvoidingView>
@@ -81,14 +75,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: colors.surface,
   },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
   title: {
-    flex: 1,
     fontWeight: '700',
     color: colors.primary,
   },

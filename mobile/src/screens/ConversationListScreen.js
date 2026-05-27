@@ -3,15 +3,12 @@ import { FlatList, StyleSheet, View } from 'react-native'
 import { Appbar, ActivityIndicator, Button, Searchbar, SegmentedButtons, Text } from 'react-native-paper'
 
 import ConversationItem from '../components/ConversationItem'
-import LanguageToggle from '../components/LanguageToggle'
-import { useI18n } from '../i18n/useI18n'
 import { connectChatSocket, disconnectChatSocket } from '../realtime/websocket'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
 import { colors } from '../theme/theme'
 
 export default function ConversationListScreen({ navigation }) {
-  const { t } = useI18n()
   const token = useAuthStore((state) => state.token)
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
@@ -54,20 +51,19 @@ export default function ConversationListScreen({ navigation }) {
 
   const handleOpen = useCallback(async (conversation) => {
     await openConversation(conversation)
-    navigation.navigate('Chat', { title: conversation.contact?.display_name || t('chat.title') })
-  }, [navigation, openConversation, t])
+    navigation.navigate('Chat', { title: conversation.contact?.display_name || 'Hoi thoai' })
+  }, [navigation, openConversation])
 
   return (
     <View style={styles.container}>
       <Appbar.Header mode="small" elevated>
-        <Appbar.Content title={t('conversations.title')} subtitle={user?.full_name || user?.business_name || user?.email} />
-        <LanguageToggle compact />
+        <Appbar.Content title="Hoi thoai" subtitle={user?.full_name || user?.business_name || user?.email} />
         <Appbar.Action icon="logout" onPress={logout} />
       </Appbar.Header>
 
       <View style={styles.filters}>
         <Searchbar
-          placeholder={t('conversations.searchPlaceholder')}
+          placeholder="Tim theo ten, email, SDT"
           value={filters.search}
           onChangeText={(search) => setFilters({ search })}
           style={styles.search}
@@ -77,7 +73,7 @@ export default function ConversationListScreen({ navigation }) {
           value={filters.platform}
           onValueChange={(platform) => setFilters({ platform })}
           buttons={[
-            { value: '', label: t('conversations.allPlatforms') },
+            { value: '', label: 'Tat ca' },
             { value: 'facebook', label: 'FB' },
             { value: 'instagram', label: 'IG' },
             { value: 'telegram', label: 'TG' },
@@ -101,9 +97,9 @@ export default function ConversationListScreen({ navigation }) {
         }}
         ListEmptyComponent={!conversationsLoading ? (
           <View style={styles.empty}>
-            <Text variant="titleMedium">{t('conversations.emptyTitle')}</Text>
-            <Text variant="bodySmall" style={styles.emptyText}>{t('conversations.emptySubtitle')}</Text>
-            <Button mode="outlined" onPress={refreshConversations}>{t('conversations.reload')}</Button>
+            <Text variant="titleMedium">Chua co hoi thoai</Text>
+            <Text variant="bodySmall" style={styles.emptyText}>Tin nhan moi se xuat hien tai day.</Text>
+            <Button mode="outlined" onPress={refreshConversations}>Tai lai</Button>
           </View>
         ) : null}
         ListFooterComponent={conversationsLoading ? <ActivityIndicator style={styles.loading} /> : null}

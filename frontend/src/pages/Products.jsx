@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Card,
   Table,
@@ -8,12 +8,20 @@ import {
   Input,
   InputNumber,
   Select,
+  Space,
   Typography,
   Tag,
   message,
   Popconfirm,
 } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons'
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  UploadOutlined,
+  SearchOutlined,
+  ReloadOutlined,
+} from '@ant-design/icons'
 import client from '../api/client'
 import { useI18n } from '../i18n/useI18n'
 import dayjs from 'dayjs'
@@ -26,14 +34,49 @@ export default function Products() {
   const [editingProduct, setEditingProduct] = useState(null)
   const [importing, setImporting] = useState(false)
   const [deletingAll, setDeletingAll] = useState(false)
+  const [deleteAllCount, setDeleteAllCount] = useState(null)
+  const [categoryOptions, setCategoryOptions] = useState([])
+  const [filters, setFilters] = useState({
+    search: '',
+    status: 'all',
+    category: undefined,
+    minPrice: null,
+    maxPrice: null,
+  })
   const [form] = Form.useForm()
   const { t } = useI18n()
 
-  const fetchProducts = async () => {
+  const hasActiveFilters = useMemo(
+    () =>
+      Boolean(
+        filters.search.trim() ||
+          filters.status !== 'all' ||
+          filters.category ||
+          filters.minPrice != null ||
+          filters.maxPrice != null,
+      ),
+    [filters],
+  )
+
+  const buildProductParams = (nextFilters = filters) => ({
+    search: nextFilters.search.trim() || undefined,
+    status: nextFilters.status !== 'all' ? nextFilters.status : undefined,
+    category: nextFilters.category || undefined,
+    min_price: nextFilters.minPrice ?? undefined,
+    max_price: nextFilters.maxPrice ?? undefined,
+  })
+
+  const fetchProducts = async (nextFilters = filters) => {
     setLoading(true)
     try {
-      const res = await client.get('/api/products')
+      const res = await client.get('/api/products', {
+        params: buildProductParams(nextFilters),
+      })
       setProducts(res.data)
+      setCategoryOptions((current) => {
+        const categories = res.data.map((product) => product.category).filter(Boolean)
+        return [...new Set([...current, ...categories])].sort((a, b) => a.localeCompare(b))
+      })
     } catch (err) {
       message.error(t('products.loadError'))
     } finally {
@@ -44,6 +87,22 @@ export default function Products() {
   useEffect(() => {
     fetchProducts()
   }, [])
+
+  const updateFilter = (key, value) => {
+    setFilters((current) => ({ ...current, [key]: value }))
+  }
+
+  const handleResetFilters = () => {
+    const resetFilters = {
+      search: '',
+      status: 'all',
+      category: undefined,
+      minPrice: null,
+      maxPrice: null,
+    }
+    setFilters(resetFilters)
+    fetchProducts(resetFilters)
+  }
 
   const handleSubmit = async () => {
     try {
@@ -91,6 +150,17 @@ export default function Products() {
       message.error(err.response?.data?.detail || t('products.deleteAllError'))
     } finally {
       setDeletingAll(false)
+    }
+  }
+
+  const handleOpenDeleteAllModal = async () => {
+    setDeleteAllModalOpen(true)
+    setDeleteAllCount(products.length)
+    try {
+      const res = await client.get('/api/products')
+      setDeleteAllCount(res.data.length)
+    } catch {
+      setDeleteAllCount(products.length)
     }
   }
 
@@ -220,8 +290,8 @@ export default function Products() {
             <Button
               danger
               icon={<DeleteOutlined />}
-              onClick={() => setDeleteAllModalOpen(true)}
-              disabled={products.length === 0}
+              onClick={handleOpenDeleteAllModal}
+              disabled={products.length === 0 && !hasActiveFilters}
             >
               {t('products.deleteAllButton')}
             </Button>
@@ -231,6 +301,64 @@ export default function Products() {
         <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
           {t('products.helper')}
         </Typography.Text>
+        <Space wrap style={{ marginBottom: 16 }}>
+          <Input
+            allowClear
+            prefix={<SearchOutlined />}
+            value={filters.search}
+            onChange={(event) => updateFilter('search', event.target.value)}
+            onPressEnter={() => fetchProducts()}
+            placeholder={t('products.searchPlaceholder')}
+            style={{ width: 280 }}
+          />
+          <Select
+            value={filters.status}
+            onChange={(value) => updateFilter('status', value)}
+            style={{ width: 160 }}
+            options={[
+              { label: t('products.allStatuses'), value: 'all' },
+              { label: t('products.inStock'), value: 'available' },
+              { label: t('products.outOfStock'), value: 'out_of_stock' },
+            ]}
+          />
+          <Select
+            showSearch
+            value={filters.category || 'all'}
+            onChange={(value) => updateFilter('category', value === 'all' ? undefined : value)}
+            filterOption={(input, option) =>
+              String(option?.label || '').toLowerCase().includes(input.toLowerCase())
+            }
+            style={{ width: 190 }}
+            options={[
+              { label: t('products.allCategories'), value: 'all' },
+              ...categoryOptions.map((category) => ({ label: category, value: category })),
+            ]}
+          />
+          <InputNumber
+            min={0}
+            value={filters.minPrice}
+            onChange={(value) => updateFilter('minPrice', value)}
+            placeholder={t('products.minPrice')}
+            formatter={(value) => `${value || ''}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+            parser={(value) => value.replace(/,/g, '')}
+            style={{ width: 150 }}
+          />
+          <InputNumber
+            min={0}
+            value={filters.maxPrice}
+            onChange={(value) => updateFilter('maxPrice', value)}
+            placeholder={t('products.maxPrice')}
+            formatter={(value) => `${value || ''}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+            parser={(value) => value.replace(/,/g, '')}
+            style={{ width: 150 }}
+          />
+          <Button type="primary" icon={<SearchOutlined />} onClick={() => fetchProducts()}>
+            {t('common.search')}
+          </Button>
+          <Button icon={<ReloadOutlined />} onClick={handleResetFilters} disabled={!hasActiveFilters}>
+            {t('products.resetFilters')}
+          </Button>
+        </Space>
         <Table
           dataSource={products}
           columns={columns}
@@ -239,7 +367,7 @@ export default function Products() {
           pagination={{ pageSize: 10 }}
           scroll={{ x: 1220 }}
           style={{ maxWidth: '100%' }}
-          locale={{ emptyText: t('products.empty') }}
+          locale={{ emptyText: hasActiveFilters ? t('products.noFilteredProducts') : t('products.empty') }}
         />
       </Card>
 
@@ -314,7 +442,7 @@ export default function Products() {
         confirmLoading={deletingAll}
       >
         <Typography.Paragraph>
-          {t('products.deleteAllDescription', { count: products.length })}
+          {t('products.deleteAllDescription', { count: deleteAllCount ?? products.length })}
         </Typography.Paragraph>
         <Typography.Text type="danger">
           {t('products.deleteAllWarning')}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   Card,
+  Checkbox,
   Table,
   Button,
   Modal,
@@ -13,6 +14,7 @@ import {
   Tag,
   message,
   Popconfirm,
+  Popover,
 } from 'antd'
 import {
   PlusOutlined,
@@ -21,10 +23,38 @@ import {
   UploadOutlined,
   SearchOutlined,
   ReloadOutlined,
+  SettingOutlined,
 } from '@ant-design/icons'
 import client from '../api/client'
 import { useI18n } from '../i18n/useI18n'
 import dayjs from 'dayjs'
+
+const PRODUCT_COLUMN_STORAGE_KEY = 'chatdesk_product_visible_columns'
+const PRODUCT_COLUMN_KEYS = [
+  'name',
+  'sku',
+  'category',
+  'description',
+  'price',
+  'stock_quantity',
+  'status',
+  'updated_at',
+  'actions',
+]
+
+const getStoredProductColumns = () => {
+  if (typeof window === 'undefined') return PRODUCT_COLUMN_KEYS
+
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(PRODUCT_COLUMN_STORAGE_KEY))
+    const validColumns = Array.isArray(parsed)
+      ? parsed.filter((key) => PRODUCT_COLUMN_KEYS.includes(key))
+      : []
+    return validColumns.length > 0 ? validColumns : PRODUCT_COLUMN_KEYS
+  } catch {
+    return PRODUCT_COLUMN_KEYS
+  }
+}
 
 export default function Products() {
   const [products, setProducts] = useState([])
@@ -36,6 +66,7 @@ export default function Products() {
   const [deletingAll, setDeletingAll] = useState(false)
   const [deleteAllCount, setDeleteAllCount] = useState(null)
   const [categoryOptions, setCategoryOptions] = useState([])
+  const [visibleColumnKeys, setVisibleColumnKeys] = useState(getStoredProductColumns)
   const [filters, setFilters] = useState({
     search: '',
     status: 'all',
@@ -45,6 +76,7 @@ export default function Products() {
   })
   const [form] = Form.useForm()
   const { t } = useI18n()
+  const visibleColumnKeySet = useMemo(() => new Set(visibleColumnKeys), [visibleColumnKeys])
 
   const hasActiveFilters = useMemo(
     () =>
@@ -102,6 +134,19 @@ export default function Products() {
     }
     setFilters(resetFilters)
     fetchProducts(resetFilters)
+  }
+
+  const updateVisibleColumns = (nextKeys) => {
+    const normalizedKeys = PRODUCT_COLUMN_KEYS.filter((key) => nextKeys.includes(key))
+    if (normalizedKeys.length === 0) return
+
+    setVisibleColumnKeys(normalizedKeys)
+    window.localStorage.setItem(PRODUCT_COLUMN_STORAGE_KEY, JSON.stringify(normalizedKeys))
+  }
+
+  const resetVisibleColumns = () => {
+    setVisibleColumnKeys(PRODUCT_COLUMN_KEYS)
+    window.localStorage.setItem(PRODUCT_COLUMN_STORAGE_KEY, JSON.stringify(PRODUCT_COLUMN_KEYS))
   }
 
   const handleSubmit = async () => {
@@ -193,8 +238,9 @@ export default function Products() {
   }
 
   const columns = [
-    { title: t('products.productName'), dataIndex: 'name', ellipsis: true, width: 180 },
+    { key: 'name', title: t('products.productName'), dataIndex: 'name', ellipsis: true, width: 180 },
     {
+      key: 'sku',
       title: t('products.sku'),
       dataIndex: 'sku',
       ellipsis: true,
@@ -202,6 +248,7 @@ export default function Products() {
       render: (v) => v || '-',
     },
     {
+      key: 'category',
       title: t('products.category'),
       dataIndex: 'category',
       ellipsis: true,
@@ -209,6 +256,7 @@ export default function Products() {
       render: (v) => v || '-',
     },
     {
+      key: 'description',
       title: t('products.description'),
       dataIndex: 'description',
       ellipsis: true,
@@ -216,18 +264,21 @@ export default function Products() {
       render: (v) => v || '-',
     },
     {
+      key: 'price',
       title: t('products.price'),
       dataIndex: 'price',
       render: (v) => (v != null ? Number(v).toLocaleString('vi-VN') : '-'),
       width: 140,
     },
     {
+      key: 'stock_quantity',
       title: t('products.stockQuantity'),
       dataIndex: 'stock_quantity',
       width: 120,
       render: (v) => (v != null ? v : '-'),
     },
     {
+      key: 'status',
       title: t('common.status'),
       dataIndex: 'status',
       width: 120,
@@ -239,12 +290,14 @@ export default function Products() {
         ),
     },
     {
+      key: 'updated_at',
       title: t('common.updatedAt'),
       dataIndex: 'updated_at',
       width: 160,
       render: (v) => dayjs(v).format('DD/MM/YYYY HH:mm'),
     },
     {
+      key: 'actions',
       title: t('common.actions'),
       width: 110,
       render: (_, record) => (
@@ -262,6 +315,24 @@ export default function Products() {
       ),
     },
   ]
+  const visibleColumns = columns.filter((column) => visibleColumnKeySet.has(column.key))
+  const columnOptions = columns.map((column) => ({
+    label: column.title,
+    value: column.key,
+  }))
+  const columnPicker = (
+    <div style={{ width: 240 }}>
+      <Checkbox.Group
+        value={visibleColumnKeys}
+        onChange={updateVisibleColumns}
+        style={{ display: 'grid', gap: 8 }}
+        options={columnOptions}
+      />
+      <Button size="small" type="link" onClick={resetVisibleColumns} style={{ padding: 0, marginTop: 10 }}>
+        {t('products.resetColumns')}
+      </Button>
+    </div>
+  )
 
   return (
     <div style={{ padding: 24 }}>
@@ -358,10 +429,18 @@ export default function Products() {
           <Button icon={<ReloadOutlined />} onClick={handleResetFilters} disabled={!hasActiveFilters}>
             {t('products.resetFilters')}
           </Button>
+          <Popover
+            trigger="click"
+            placement="bottomRight"
+            title={t('products.visibleColumns')}
+            content={columnPicker}
+          >
+            <Button icon={<SettingOutlined />}>{t('products.columns')}</Button>
+          </Popover>
         </Space>
         <Table
           dataSource={products}
-          columns={columns}
+          columns={visibleColumns}
           rowKey="id"
           loading={loading}
           pagination={{ pageSize: 10 }}

@@ -63,10 +63,13 @@ export const useChatStore = create((set, get) => ({
   labelsLoading: false,
   assigneesLoading: false,
 
-  fetchConversations: async (filters) => {
+  fetchConversations: async (filters, options = {}) => {
     const activeFilters = normalizeConversationFilters(filters || get().conversationFilters)
-    const requestId = ++conversationRequestSeq
-    set({ loading: true, conversationFilters: activeFilters })
+    const requestId = options.silent ? conversationRequestSeq : ++conversationRequestSeq
+    set({
+      conversationFilters: activeFilters,
+      ...(options.silent ? {} : { loading: true }),
+    })
     try {
       const res = await client.get('/api/conversations', {
         params: buildConversationParams(activeFilters),
@@ -77,7 +80,7 @@ export const useChatStore = create((set, get) => ({
     } catch (err) {
       console.error('Failed to fetch conversations:', err)
     } finally {
-      if (requestId === conversationRequestSeq) {
+      if (requestId === conversationRequestSeq && !options.silent) {
         set({ loading: false })
       }
     }
@@ -207,7 +210,7 @@ export const useChatStore = create((set, get) => ({
         return { messages: [...state.messages, res.data] }
       })
       // Refresh conversations to update last_message_at
-      get().fetchConversations()
+      get().fetchConversations(undefined, { silent: true })
     } catch (err) {
       console.error('Failed to send message:', err)
       throw err
@@ -225,7 +228,7 @@ export const useChatStore = create((set, get) => ({
         if (exists) return state
         return { messages: [...state.messages, res.data] }
       })
-      get().fetchConversations()
+      get().fetchConversations(undefined, { silent: true })
       return res.data
     } catch (err) {
       console.error('Failed to upload message file:', err)

@@ -1,10 +1,13 @@
+import { useMemo } from 'react'
 import { Linking, StyleSheet, View } from 'react-native'
 import { Button, Text } from 'react-native-paper'
 import dayjs from 'dayjs'
 
-import { colors } from '../theme/theme'
+import { useThemeStore } from '../store/themeStore'
 
 export default function MessageBubble({ message }) {
+  const colors = useThemeStore((state) => state.colors)
+  const styles = useMemo(() => createStyles(colors), [colors])
   const isMine = message.sender_type === 'business'
   const isAi = message.sender_type === 'ai'
   const hasAttachment = Boolean(message.attachment_url)
@@ -36,7 +39,7 @@ export default function MessageBubble({ message }) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   wrap: {
     paddingHorizontal: 14,
     paddingVertical: 4,
@@ -63,7 +66,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   ai: {
-    backgroundColor: '#f8fafc',
+    backgroundColor: colors.softSurface,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
   },

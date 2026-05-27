@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native'
 import { Button, HelperText, Text, TextInput } from 'react-native-paper'
 
 import { useAuthStore } from '../store/authStore'
-import { colors } from '../theme/theme'
+import { useThemeStore } from '../store/themeStore'
 
 export default function RegisterScreen({ navigation }) {
   const register = useAuthStore((state) => state.register)
+  const colors = useThemeStore((state) => state.colors)
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [businessName, setBusinessName] = useState('')
@@ -49,7 +51,7 @@ export default function RegisterScreen({ navigation }) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',

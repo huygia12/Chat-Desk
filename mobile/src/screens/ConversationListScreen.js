@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { FlatList, StyleSheet, View } from 'react-native'
 import { Appbar, ActivityIndicator, Button, Searchbar, SegmentedButtons, Text } from 'react-native-paper'
 
@@ -6,12 +6,16 @@ import ConversationItem from '../components/ConversationItem'
 import { connectChatSocket, disconnectChatSocket } from '../realtime/websocket'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
-import { colors } from '../theme/theme'
+import { useThemeStore } from '../store/themeStore'
 
 export default function ConversationListScreen({ navigation }) {
   const token = useAuthStore((state) => state.token)
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
+  const colors = useThemeStore((state) => state.colors)
+  const isDark = useThemeStore((state) => state.isDark)
+  const toggleTheme = useThemeStore((state) => state.toggleTheme)
+  const styles = useMemo(() => createStyles(colors), [colors])
   const {
     conversations,
     conversationsLoading,
@@ -58,6 +62,14 @@ export default function ConversationListScreen({ navigation }) {
     <View style={styles.container}>
       <Appbar.Header mode="small" elevated>
         <Appbar.Content title="Hoi thoai" subtitle={user?.full_name || user?.business_name || user?.email} />
+        {user?.role === 'business' ? (
+          <>
+            <Appbar.Action icon="account-group" onPress={() => navigation.navigate('Employees')} />
+            <Appbar.Action icon="package-variant" onPress={() => navigation.navigate('Products')} />
+            <Appbar.Action icon="link-variant" onPress={() => navigation.navigate('Channels')} />
+          </>
+        ) : null}
+        <Appbar.Action icon={isDark ? 'white-balance-sunny' : 'moon-waning-crescent'} onPress={toggleTheme} />
         <Appbar.Action icon="logout" onPress={logout} />
       </Appbar.Header>
 
@@ -108,7 +120,7 @@ export default function ConversationListScreen({ navigation }) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
@@ -123,7 +135,7 @@ const styles = StyleSheet.create({
   search: {
     height: 44,
     borderRadius: 8,
-    backgroundColor: '#f8fafc',
+    backgroundColor: colors.inputBg,
   },
   searchInput: {
     minHeight: 44,

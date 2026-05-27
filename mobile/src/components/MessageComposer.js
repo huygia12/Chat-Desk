@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import * as DocumentPicker from 'expo-document-picker'
 import * as ImagePicker from 'expo-image-picker'
 import { IconButton, TextInput } from 'react-native-paper'
 
-import { colors } from '../theme/theme'
+import { useThemeStore } from '../store/themeStore'
 
 export default function MessageComposer({ sending, onSend, onUpload }) {
+  const colors = useThemeStore((state) => state.colors)
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [value, setValue] = useState('')
 
   const handleSend = async () => {
@@ -60,7 +62,7 @@ export default function MessageComposer({ sending, onSend, onUpload }) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-end',

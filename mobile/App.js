@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { PaperProvider } from 'react-native-paper'
@@ -7,11 +7,15 @@ import * as Notifications from 'expo-notifications'
 
 import { useAuthStore } from './src/store/authStore'
 import { useChatStore } from './src/store/chatStore'
-import { theme } from './src/theme/theme'
+import { useThemeStore } from './src/store/themeStore'
+import { createNavigationTheme, createTheme } from './src/theme/theme'
 import LoginScreen from './src/screens/LoginScreen'
 import RegisterScreen from './src/screens/RegisterScreen'
 import ConversationListScreen from './src/screens/ConversationListScreen'
 import ChatScreen from './src/screens/ChatScreen'
+import ChannelsScreen from './src/screens/ChannelsScreen'
+import EmployeesScreen from './src/screens/EmployeesScreen'
+import ProductsScreen from './src/screens/ProductsScreen'
 import { registerForPushNotifications } from './src/notifications'
 import { navigate, navigationRef } from './src/navigation/rootNavigation'
 
@@ -32,10 +36,19 @@ export default function App() {
   const user = useAuthStore((state) => state.user)
   const bootstrapped = useAuthStore((state) => state.bootstrapped)
   const loadSession = useAuthStore((state) => state.loadSession)
+  const themeBootstrapped = useThemeStore((state) => state.bootstrapped)
+  const isDark = useThemeStore((state) => state.isDark)
+  const loadTheme = useThemeStore((state) => state.loadTheme)
+  const paperTheme = useMemo(() => createTheme(isDark), [isDark])
+  const navigationTheme = useMemo(() => createNavigationTheme(isDark), [isDark])
 
   useEffect(() => {
     loadSession()
   }, [loadSession])
+
+  useEffect(() => {
+    loadTheme()
+  }, [loadTheme])
 
   useEffect(() => {
     if (token && user && ['business', 'employee'].includes(user.role)) {
@@ -68,19 +81,22 @@ export default function App() {
     return () => subscription.remove()
   }, [token, user])
 
-  if (!bootstrapped) {
+  if (!bootstrapped || !themeBootstrapped) {
     return null
   }
 
   return (
     <SafeAreaProvider>
-      <PaperProvider theme={theme}>
-        <NavigationContainer ref={navigationRef}>
+      <PaperProvider theme={paperTheme}>
+        <NavigationContainer ref={navigationRef} theme={navigationTheme}>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             {token && user ? (
               <>
                 <Stack.Screen name="Conversations" component={ConversationListScreen} />
                 <Stack.Screen name="Chat" component={ChatScreen} />
+                <Stack.Screen name="Channels" component={ChannelsScreen} />
+                <Stack.Screen name="Employees" component={EmployeesScreen} />
+                <Stack.Screen name="Products" component={ProductsScreen} />
               </>
             ) : (
               <>

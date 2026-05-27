@@ -118,6 +118,121 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
+  refreshActiveConversation: async () => {
+    const conversation = get().activeConversation
+    if (!conversation?.id) return null
+
+    const res = await client.get(`/api/conversations/${conversation.id}`)
+    const refreshed = res.data
+    set((state) => ({
+      activeConversation: refreshed,
+      conversations: state.conversations.map((item) =>
+        String(item.id) === String(refreshed.id) ? refreshed : item,
+      ),
+    }))
+    return refreshed
+  },
+
+  toggleAI: async (isEnabled) => {
+    const conversation = get().activeConversation
+    if (!conversation?.id) return null
+
+    const res = await client.patch(`/api/conversations/${conversation.id}/ai`, {
+      is_ai_enabled: isEnabled,
+    })
+    const refreshed = res.data
+    set((state) => ({
+      activeConversation: refreshed,
+      conversations: state.conversations.map((item) =>
+        String(item.id) === String(refreshed.id) ? refreshed : item,
+      ),
+    }))
+    return refreshed
+  },
+
+  assignConversation: async (assignmentValue) => {
+    const conversation = get().activeConversation
+    if (!conversation?.id) return null
+
+    const assignedToId =
+      assignmentValue === '__business__' || assignmentValue === '__unassigned__'
+        ? null
+        : assignmentValue
+    const res = await client.patch(`/api/conversations/${conversation.id}/assignee`, {
+      assigned_to_id: assignedToId,
+      assigned_to_business: assignmentValue === '__business__',
+    })
+    const refreshed = res.data
+    set((state) => ({
+      activeConversation: refreshed,
+      conversations: state.conversations.map((item) =>
+        String(item.id) === String(refreshed.id) ? refreshed : item,
+      ),
+    }))
+    return refreshed
+  },
+
+  assignLabel: async (labelId) => {
+    const conversation = get().activeConversation
+    if (!conversation?.contact_id || !labelId) return null
+
+    const res = await client.post(`/api/contacts/${conversation.contact_id}/labels`, {
+      label_id: labelId,
+      conversation_id: conversation.id,
+    })
+    const labels = res.data.labels || []
+    set((state) => ({
+      activeConversation:
+        state.activeConversation && String(state.activeConversation.id) === String(conversation.id)
+          ? {
+              ...state.activeConversation,
+              contact: state.activeConversation.contact
+                ? { ...state.activeConversation.contact, labels }
+                : state.activeConversation.contact,
+            }
+          : state.activeConversation,
+      conversations: state.conversations.map((item) =>
+        String(item.contact_id) === String(conversation.contact_id)
+          ? {
+              ...item,
+              contact: item.contact ? { ...item.contact, labels } : item.contact,
+            }
+          : item,
+      ),
+    }))
+    return res.data
+  },
+
+  removeLabel: async (labelId) => {
+    const conversation = get().activeConversation
+    if (!conversation?.contact_id || !labelId) return null
+
+    const res = await client.delete(
+      `/api/contacts/${conversation.contact_id}/labels/${labelId}?conversation_id=${conversation.id}`,
+    )
+    const labels = res.data.labels || []
+    set((state) => ({
+      activeConversation:
+        state.activeConversation && String(state.activeConversation.id) === String(conversation.id)
+          ? {
+              ...state.activeConversation,
+              contact: state.activeConversation.contact
+                ? { ...state.activeConversation.contact, labels }
+                : state.activeConversation.contact,
+            }
+          : state.activeConversation,
+      conversations: state.conversations.map((item) =>
+        String(item.contact_id) === String(conversation.contact_id)
+          ? {
+              ...item,
+              contact: item.contact ? { ...item.contact, labels } : item.contact,
+            }
+          : item,
+      ),
+    }))
+    return res.data
+  },
+
   loadOlderMessages: async () => {
     const state = get()
     if (!state.activeConversation || !state.messagesHasMore || !state.messagesCursor || state.olderMessagesLoading) return

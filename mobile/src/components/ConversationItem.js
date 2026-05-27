@@ -1,8 +1,9 @@
+import { useMemo } from 'react'
 import { Image, StyleSheet, View } from 'react-native'
 import { Avatar, Badge, Text, TouchableRipple } from 'react-native-paper'
 import dayjs from 'dayjs'
 
-import { colors } from '../theme/theme'
+import { useThemeStore } from '../store/themeStore'
 
 const platformColors = {
   facebook: '#1877f2',
@@ -12,6 +13,8 @@ const platformColors = {
 }
 
 export default function ConversationItem({ conversation, onPress }) {
+  const colors = useThemeStore((state) => state.colors)
+  const styles = useMemo(() => createStyles(colors), [colors])
   const contact = conversation.contact || {}
   const displayName = contact.display_name || contact.visitor_email || `Khach ${String(contact.platform_user_id || '').slice(-6)}`
   const platform = conversation.platform || contact.platform
@@ -57,7 +60,7 @@ export default function ConversationItem({ conversation, onPress }) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     gap: 12,

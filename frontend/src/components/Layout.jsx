@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Layout as AntLayout, Button, Menu, Modal, Tag, Tooltip, Typography, theme } from "antd";
+import { Avatar, Layout as AntLayout, Button, Menu, Modal, Tag, Tooltip, Typography, theme } from "antd";
 import {
   ApiOutlined,
   BarChartOutlined,
@@ -24,6 +24,7 @@ import { useAuthStore } from "../store/authStore";
 import { useChatStore } from "../store/chatStore";
 import { useLanguageStore } from "../store/languageStore";
 import { useThemeStore } from "../store/themeStore";
+import { useFileObjectUrl } from "../hooks/useFileObjectUrl";
 import { connectWebSocket, disconnectWebSocket } from "../utils/websocket";
 import AIAssistantModal from "./AIAssistantModal";
 
@@ -45,6 +46,7 @@ export default function Layout() {
   const isAdmin = user?.role === "admin";
   const isEmployee = user?.role === "employee";
   const isBusiness = user?.role === "business";
+  const businessAvatarSrc = useFileObjectUrl(user?.avatar_url);
 
   const businessMenuItems = [
     { key: "/chat", icon: <MessageOutlined />, label: t("nav.chat") },
@@ -112,6 +114,19 @@ export default function Layout() {
     : isAdmin
       ? t("layout.adminPanel")
       : user?.business_name || user?.email;
+  const businessInitial = (user?.business_name || user?.email || "C").trim().charAt(0).toUpperCase();
+  const businessAvatarRingStyle = {
+    width: 40,
+    height: 40,
+    padding: 3,
+    borderRadius: "50%",
+    background: "linear-gradient(135deg, #1677ff 0%, #13c2c2 48%, #52c41a 100%)",
+    boxShadow: `0 0 0 1px ${token.colorBgContainer}, 0 6px 18px rgba(22, 119, 255, 0.24)`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flex: "0 0 auto",
+  };
 
   return (
     <AntLayout style={{ minHeight: "100vh", background: token.colorBgLayout }}>
@@ -193,7 +208,29 @@ export default function Layout() {
             borderBottom: `1px solid ${token.colorBorderSecondary}`,
           }}
         >
-          <Typography.Text strong>{displayName}</Typography.Text>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+            {isBusiness && (
+              <div style={businessAvatarRingStyle}>
+                <Avatar
+                  size={34}
+                  src={businessAvatarSrc}
+                  style={{
+                    background: token.colorBgElevated,
+                    color: token.colorPrimary,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 700,
+                  }}
+                >
+                  {businessInitial}
+                </Avatar>
+              </div>
+            )}
+            <Typography.Text strong ellipsis style={{ maxWidth: 260 }}>
+              {displayName}
+            </Typography.Text>
+          </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <AIAssistantModal />
             <Tooltip title={t("language.toggleTooltip")}>

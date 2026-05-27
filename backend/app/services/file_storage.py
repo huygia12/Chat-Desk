@@ -146,3 +146,20 @@ def resolve_stored_file(stored_filename: str) -> Path | None:
     if not path.is_file():
         return None
     return path
+
+
+def delete_public_file_url(url: str | None) -> bool:
+    if not url:
+        return False
+
+    parsed = urlparse(url)
+    if not parsed.path.startswith("/api/files/"):
+        return False
+
+    stored_filename = Path(parsed.path).name
+    path = resolve_stored_file(stored_filename)
+    if not path:
+        return False
+
+    path.unlink(missing_ok=True)
+    return True

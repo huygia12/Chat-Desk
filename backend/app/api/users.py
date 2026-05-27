@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.models.user import User
 from app.schemas.user import UserOut, UserUpdate
 from app.api.deps import get_current_user
+from app.services.file_storage import delete_public_file_url, save_upload_file
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -41,4 +42,32 @@ async def update_profile(
 
     await db.flush()
     await db.refresh(current_user)
+    return current_user
+
+
+@router.post("/profile/avatar", response_model=UserOut)
+async def update_business_avatar(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    if current_user.role != "business":
+        raise HTTPException(status_code=403, detail="Only business users can update avatar")
+
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Avatar must be an image")
+
+    old_avatar_url = current_user.avatar_url
+    saved_file = await save_upload_file(file)
+    if saved_file["attachment_kind"] != "image":
+        delete_public_file_url(saved_file["attachment_url"])
+        raise HTTPException(status_code=400, detail="Avatar must be an image")
+
+    current_user.avatar_url = saved_file["attachment_url"]
+    await db.commit()
+    await db.refresh(current_user)
+
+    if old_avatar_url and old_avatar_url != current_user.avatar_url:
+        delete_public_file_url(old_avatar_url)
+
     return current_user

@@ -15,6 +15,7 @@ class User(Base):
     role: Mapped[str] = mapped_column(SAEnum("business", "admin", "employee", name="user_role"), nullable=False, default="business")
     business_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     business_description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     store_address: Mapped[str | None] = mapped_column(Text, nullable=True)
     opening_hours: Mapped[str | None] = mapped_column(Text, nullable=True)
     shipping_policy: Mapped[str | None] = mapped_column(Text, nullable=True)

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { List, Avatar, Typography, Input, Button, Spin, Switch, Badge, Empty, Select, message, Segmented, theme, Space, Tooltip, Popover } from 'antd'
+import { List, Avatar, Typography, Input, Button, Spin, Switch, Badge, Empty, Select, message, Segmented, theme, Space, Tooltip, Popover, Modal } from 'antd'
 import {
   SendOutlined,
   FacebookOutlined,
@@ -18,6 +18,7 @@ import {
 import { useChatStore } from '../store/chatStore'
 import { useAuthStore } from '../store/authStore'
 import { useI18n } from '../i18n/useI18n'
+import { useFileObjectUrl } from '../hooks/useFileObjectUrl'
 import CustomerLabel from '../components/CustomerLabel'
 import MessageMarkdown from '../components/MessageMarkdown'
 import client from '../api/client'
@@ -29,6 +30,7 @@ const CONVERSATION_WIDTH_STORAGE_KEY = 'chatdesk_conversation_list_width'
 const CONVERSATION_DETAIL_STORAGE_KEY = 'chatdesk_conversation_detail_open'
 const CONVERSATION_FILTERS_STORAGE_KEY = 'chatdesk_conversation_filters'
 const MESSAGE_GROUP_WINDOW_MINUTES = 3
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
 const EMOJI_OPTIONS = [
   '😀',
   '😄',
@@ -67,6 +69,34 @@ const getLabelTextColor = (hexColor) => {
   const b = parseInt(hex.slice(4, 6), 16)
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
   return luminance > 0.58 ? '#111' : '#fff'
+}
+
+const resolveAttachmentUrl = (url) => {
+  if (!url) return ''
+
+  try {
+    const parsed = new URL(url, API_URL)
+    if (parsed.pathname.startsWith('/api/files/')) {
+      return `${API_URL}${parsed.pathname}${parsed.search}`
+    }
+    return parsed.href
+  } catch {
+    return url
+  }
+}
+
+function AttachmentImage({ alt, onClick, onLoad, src, style }) {
+  const fileUrl = useFileObjectUrl(src)
+
+  return (
+    <img
+      src={fileUrl || src}
+      alt={alt}
+      onClick={onClick}
+      onLoad={onLoad}
+      style={style}
+    />
+  )
 }
 
 const clampConversationWidth = (value) =>
@@ -156,6 +186,7 @@ export default function Chat() {
   const [selectedPlatforms, setSelectedPlatforms] = useState(storedConversationFilters.platforms)
   const [conversationHistory, setConversationHistory] = useState([])
   const [historyLoading, setHistoryLoading] = useState(false)
+  const [imagePreview, setImagePreview] = useState(null)
   const { t } = useI18n()
   const { token } = theme.useToken()
   const chatContainerRef = useRef(null)
@@ -775,6 +806,7 @@ export default function Chat() {
 
     const fileName = msg.attachment_filename || msg.content || 'attachment'
     const isImage = isImageAttachmentMessage(msg)
+    const attachmentUrl = resolveAttachmentUrl(msg.attachment_url)
 
     if (isImage) {
       return (
@@ -788,20 +820,23 @@ export default function Chat() {
           }}
         >
           {msg.content && msg.content !== fileName && <MessageMarkdown>{msg.content}</MessageMarkdown>}
-          <a
-            href={msg.attachment_url}
-            target="_blank"
-            rel="noreferrer"
+          <button
+            type="button"
+            onClick={() => setImagePreview({ url: attachmentUrl, name: fileName })}
             style={{
               display: 'block',
               width: 200,
               maxWidth: '100%',
               lineHeight: 0,
               flex: '0 0 auto',
+              border: 0,
+              padding: 0,
+              background: 'transparent',
+              cursor: 'zoom-in',
             }}
           >
-            <img
-              src={msg.attachment_url}
+            <AttachmentImage
+              src={attachmentUrl}
               alt={fileName}
               onLoad={() => scrollToLatestMessage('auto')}
               style={{
@@ -812,7 +847,7 @@ export default function Chat() {
                 objectFit: 'contain',
               }}
             />
-          </a>
+          </button>
         </div>
       )
     }
@@ -821,7 +856,7 @@ export default function Chat() {
       <div style={{ display: 'grid', gap: msg.content && msg.content !== fileName ? 8 : 0 }}>
         {msg.content && msg.content !== fileName && <MessageMarkdown>{msg.content}</MessageMarkdown>}
         <a
-          href={msg.attachment_url}
+          href={attachmentUrl}
           target="_blank"
           rel="noreferrer"
           style={{
@@ -1643,6 +1678,62 @@ export default function Chat() {
             {renderConversationHistory()}
           </aside>
       )}
+      <Modal
+        open={Boolean(imagePreview)}
+        footer={null}
+        centered
+        width="100vw"
+        closable={false}
+        maskClosable
+        styles={{
+          content: {
+            background: 'rgba(0,0,0,0.94)',
+            boxShadow: 'none',
+            padding: 0,
+          },
+          body: {
+            minHeight: '90vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 24,
+          },
+        }}
+        onCancel={() => setImagePreview(null)}
+      >
+        <Button
+          type="text"
+          shape="circle"
+          icon={<CloseCircleOutlined />}
+          onClick={() => setImagePreview(null)}
+          style={{
+            position: 'fixed',
+            top: 22,
+            right: 22,
+            zIndex: 2100,
+            width: 44,
+            height: 44,
+            color: '#fff',
+            background: 'rgba(255,255,255,0.16)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 24,
+          }}
+        />
+        {imagePreview ? (
+          <AttachmentImage
+            src={imagePreview.url}
+            alt={imagePreview.name}
+            style={{
+              maxWidth: '100%',
+              maxHeight: '88vh',
+              objectFit: 'contain',
+              borderRadius: 8,
+            }}
+          />
+        ) : null}
+      </Modal>
     </div>
   )
 }

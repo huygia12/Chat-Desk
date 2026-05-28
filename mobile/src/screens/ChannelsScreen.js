@@ -14,6 +14,7 @@ import {
 import dayjs from 'dayjs'
 
 import client from '../api/client'
+import { useI18n } from '../i18n/useI18n'
 import { useAuthStore } from '../store/authStore'
 import { useThemeStore } from '../store/themeStore'
 
@@ -36,6 +37,7 @@ const platformMeta = {
 }
 
 export default function ChannelsScreen({ navigation }) {
+  const { t } = useI18n()
   const user = useAuthStore((state) => state.user)
   const colors = useThemeStore((state) => state.colors)
   const styles = useMemo(() => createStyles(colors), [colors])
@@ -64,12 +66,12 @@ export default function ChannelsScreen({ navigation }) {
       const res = await client.get('/api/channels')
       setChannels(res.data)
     } catch (err) {
-      setError(err.response?.data?.detail || 'Khong the tai danh sach kenh ket noi.')
+      setError(err.response?.data?.detail || t('channels.loadFailed'))
     } finally {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [isBusiness])
+  }, [isBusiness, t])
 
   useEffect(() => {
     fetchChannels()
@@ -82,7 +84,7 @@ export default function ChannelsScreen({ navigation }) {
       const res = await client.get('/api/channels/facebook/oauth')
       await Linking.openURL(res.data.url)
     } catch (err) {
-      setError(err.response?.data?.detail || 'Khong the mo luong ket noi Meta.')
+      setError(err.response?.data?.detail || t('channels.openMetaFailed'))
     } finally {
       setMetaLoading(false)
     }
@@ -91,7 +93,7 @@ export default function ChannelsScreen({ navigation }) {
   const connectTelegram = async () => {
     const token = telegramToken.trim()
     if (!token) {
-      setError('Vui long nhap Bot Token.')
+      setError(t('channels.tokenRequired'))
       return
     }
 
@@ -103,7 +105,7 @@ export default function ChannelsScreen({ navigation }) {
       setTelegramDialogOpen(false)
       await fetchChannels({ refresh: true })
     } catch (err) {
-      setError(err.response?.data?.detail || 'Ket noi Telegram that bai.')
+      setError(err.response?.data?.detail || t('channels.telegramFailed'))
     } finally {
       setTelegramLoading(false)
     }
@@ -119,7 +121,7 @@ export default function ChannelsScreen({ navigation }) {
       setChannelToDisconnect(null)
       await fetchChannels({ refresh: true })
     } catch (err) {
-      setError(err.response?.data?.detail || 'Ngat ket noi that bai.')
+      setError(err.response?.data?.detail || t('channels.disconnectFailed'))
     } finally {
       setDisconnectingId(null)
     }
@@ -127,7 +129,7 @@ export default function ChannelsScreen({ navigation }) {
 
   const renderChannel = (channel) => {
     const meta = platformMeta[channel.platform] || {
-      label: channel.platform || 'Unknown',
+      label: channel.platform || t('common.unknown'),
       icon: 'link-variant',
       color: colors.primary,
     }
@@ -153,7 +155,7 @@ export default function ChannelsScreen({ navigation }) {
           </View>
           <View style={[styles.statusBadge, channel.is_active ? styles.statusActive : styles.statusInactive]}>
             <Text style={[styles.statusText, channel.is_active ? styles.statusActiveText : styles.statusInactiveText]}>
-              {channel.is_active ? 'Hoat dong' : 'Da tat'}
+              {channel.is_active ? t('common.active') : t('common.inactive')}
             </Text>
           </View>
         </View>
@@ -166,7 +168,7 @@ export default function ChannelsScreen({ navigation }) {
             </Text>
           </View>
           <View style={styles.metaRow}>
-            <Text variant="labelSmall" style={styles.metaLabel}>Ket noi luc</Text>
+            <Text variant="labelSmall" style={styles.metaLabel}>{t('channels.connectedAt')}</Text>
             <Text variant="bodySmall" style={styles.metaValue}>
               {channel.created_at ? dayjs(channel.created_at).format('DD/MM/YYYY HH:mm') : '-'}
             </Text>
@@ -182,7 +184,7 @@ export default function ChannelsScreen({ navigation }) {
           onPress={() => setChannelToDisconnect(channel)}
           style={styles.disconnectButton}
         >
-          Ngat ket noi
+          {t('channels.disconnect')}
         </Button>
       </Surface>
     )
@@ -192,15 +194,15 @@ export default function ChannelsScreen({ navigation }) {
     <View style={styles.container}>
       <Appbar.Header mode="small" elevated>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Kenh ket noi" subtitle={isBusiness ? user?.business_name || user?.email : user?.email} />
+        <Appbar.Content title={t('channels.title')} subtitle={isBusiness ? user?.business_name || user?.email : user?.email} />
         {isBusiness ? <Appbar.Action icon="refresh" onPress={() => fetchChannels({ refresh: true })} /> : null}
       </Appbar.Header>
 
       {!isBusiness ? (
         <View style={styles.center}>
-          <Text variant="titleMedium" style={styles.permissionTitle}>Khong co quyen quan ly kenh</Text>
+          <Text variant="titleMedium" style={styles.permissionTitle}>{t('channels.noPermissionTitle')}</Text>
           <Text variant="bodySmall" style={styles.permissionText}>
-            Man hinh nay chi danh cho tai khoan doanh nghiep.
+            {t('channels.noPermissionText')}
           </Text>
         </View>
       ) : (
@@ -212,9 +214,9 @@ export default function ChannelsScreen({ navigation }) {
             }
           >
             <Surface mode="flat" style={styles.connectPanel}>
-              <Text variant="titleMedium" style={styles.sectionTitle}>Them kenh ket noi</Text>
+              <Text variant="titleMedium" style={styles.sectionTitle}>{t('channels.connectPanelTitle')}</Text>
               <Text variant="bodySmall" style={styles.helper}>
-                Ket noi Meta de nhan tin Facebook/Instagram, hoac Telegram Bot de nhan tin Telegram.
+                {t('channels.connectPanelHelper')}
               </Text>
               <View style={styles.actions}>
                 <Button
@@ -225,7 +227,7 @@ export default function ChannelsScreen({ navigation }) {
                   onPress={connectMeta}
                   style={styles.actionButton}
                 >
-                  Ket noi Meta
+                  {t('channels.connectMeta')}
                 </Button>
                 <Button
                   mode="outlined"
@@ -245,17 +247,17 @@ export default function ChannelsScreen({ navigation }) {
             ) : null}
 
             <View style={styles.listHeader}>
-              <Text variant="titleMedium" style={styles.sectionTitle}>Danh sach kenh</Text>
-              <Text variant="bodySmall" style={styles.countText}>{channels.length} kenh</Text>
+              <Text variant="titleMedium" style={styles.sectionTitle}>{t('channels.listTitle')}</Text>
+              <Text variant="bodySmall" style={styles.countText}>{t('channels.count', { count: channels.length })}</Text>
             </View>
 
             {loading ? (
               <ActivityIndicator style={styles.loading} />
             ) : channels.length === 0 ? (
               <Surface mode="flat" style={styles.empty}>
-                <Text variant="titleMedium">Chua co kenh ket noi</Text>
+                <Text variant="titleMedium">{t('channels.emptyTitle')}</Text>
                 <Text variant="bodySmall" style={styles.emptyText}>
-                  Kenh da ket noi se xuat hien tai day.
+                  {t('channels.emptySubtitle')}
                 </Text>
               </Surface>
             ) : (
@@ -271,10 +273,10 @@ export default function ChannelsScreen({ navigation }) {
                 setTelegramToken('')
               }}
             >
-              <Dialog.Title>Ket noi Telegram Bot</Dialog.Title>
+              <Dialog.Title>{t('channels.telegramTitle')}</Dialog.Title>
               <Dialog.Content>
                 <Text variant="bodySmall" style={styles.dialogHelper}>
-                  Tao bot voi @BotFather, copy Bot Token va dan vao ben duoi.
+                  {t('channels.telegramHelper')}
                 </Text>
                 <TextInput
                   mode="outlined"
@@ -287,29 +289,29 @@ export default function ChannelsScreen({ navigation }) {
                 />
               </Dialog.Content>
               <Dialog.Actions>
-                <Button onPress={() => setTelegramDialogOpen(false)}>Huy</Button>
+                <Button onPress={() => setTelegramDialogOpen(false)}>{t('common.cancel')}</Button>
                 <Button loading={telegramLoading} disabled={telegramLoading} onPress={connectTelegram}>
-                  Ket noi
+                  {t('channels.connect')}
                 </Button>
               </Dialog.Actions>
             </Dialog>
 
             <Dialog visible={Boolean(channelToDisconnect)} onDismiss={() => setChannelToDisconnect(null)}>
-              <Dialog.Title>Ngat ket noi kenh?</Dialog.Title>
+              <Dialog.Title>{t('channels.disconnectTitle')}</Dialog.Title>
               <Dialog.Content>
                 <Text>
-                  Kenh {channelToDisconnect?.page_name || channelToDisconnect?.platform} se khong nhan tin nhan moi.
+                  {t('channels.disconnectBody', { name: channelToDisconnect?.page_name || channelToDisconnect?.platform })}
                 </Text>
               </Dialog.Content>
               <Dialog.Actions>
-                <Button onPress={() => setChannelToDisconnect(null)}>Huy</Button>
+                <Button onPress={() => setChannelToDisconnect(null)}>{t('common.cancel')}</Button>
                 <Button
                   textColor={colors.danger}
                   loading={disconnectingId === channelToDisconnect?.id}
                   disabled={Boolean(disconnectingId)}
                   onPress={disconnectChannel}
                 >
-                  Ngat ket noi
+                  {t('channels.disconnect')}
                 </Button>
               </Dialog.Actions>
             </Dialog>

@@ -2,10 +2,13 @@ import { useMemo, useState } from 'react'
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native'
 import { Button, HelperText, Text, TextInput } from 'react-native-paper'
 
+import LanguageToggle from '../components/LanguageToggle'
+import { useI18n } from '../i18n/useI18n'
 import { useAuthStore } from '../store/authStore'
 import { useThemeStore } from '../store/themeStore'
 
 export default function LoginScreen({ navigation }) {
+  const { t } = useI18n()
   const login = useAuthStore((state) => state.login)
   const colors = useThemeStore((state) => state.colors)
   const isDark = useThemeStore((state) => state.isDark)
@@ -22,7 +25,7 @@ export default function LoginScreen({ navigation }) {
     try {
       await login(email.trim(), password)
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Dang nhap that bai')
+      setError(err.response?.data?.detail || (err.message ? t(err.message) : t('auth.loginFailed')))
     } finally {
       setLoading(false)
     }
@@ -34,11 +37,14 @@ export default function LoginScreen({ navigation }) {
       style={styles.container}
     >
       <View style={styles.card}>
-        <Text variant="headlineMedium" style={styles.title}>ChatDesk</Text>
-        <Text variant="bodyMedium" style={styles.subtitle}>Dang nhap danh cho doanh nghiep va nhan vien CSKH</Text>
+        <View style={styles.headerRow}>
+          <Text variant="headlineMedium" style={styles.title}>ChatDesk</Text>
+          <LanguageToggle compact />
+        </View>
+        <Text variant="bodyMedium" style={styles.subtitle}>{t('auth.loginSubtitle')}</Text>
 
         <TextInput
-          label="Email"
+          label={t('auth.email')}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -47,7 +53,7 @@ export default function LoginScreen({ navigation }) {
           style={styles.input}
         />
         <TextInput
-          label="Mat khau"
+          label={t('auth.password')}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -56,17 +62,17 @@ export default function LoginScreen({ navigation }) {
         />
         <HelperText type="error" visible={Boolean(error)}>{error}</HelperText>
         <Button mode="contained" loading={loading} disabled={loading} onPress={handleLogin}>
-          Dang nhap
+          {t('auth.loginButton')}
         </Button>
         <Button mode="text" onPress={() => navigation.navigate('Register')}>
-          Tao tai khoan doanh nghiep
+          {t('auth.registerBusiness')}
         </Button>
         <Button
           mode="text"
           icon={isDark ? 'white-balance-sunny' : 'moon-waning-crescent'}
           onPress={toggleTheme}
         >
-          {isDark ? 'Che do sang' : 'Che do toi'}
+          {isDark ? t('common.lightMode') : t('common.darkMode')}
         </Button>
       </View>
     </KeyboardAvoidingView>
@@ -86,7 +92,14 @@ const createStyles = (colors) => StyleSheet.create({
     borderRadius: 8,
     backgroundColor: colors.surface,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
   title: {
+    flex: 1,
     fontWeight: '700',
     color: colors.primary,
   },

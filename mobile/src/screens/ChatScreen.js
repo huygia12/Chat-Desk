@@ -15,12 +15,14 @@ import {
 import MessageBubble from '../components/MessageBubble'
 import MessageComposer from '../components/MessageComposer'
 import client from '../api/client'
+import { useI18n } from '../i18n/useI18n'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
 import { useThemeStore } from '../store/themeStore'
 import dayjs from 'dayjs'
 
 export default function ChatScreen({ navigation, route }) {
+  const { t } = useI18n()
   const listRef = useRef(null)
   const user = useAuthStore((state) => state.user)
   const colors = useThemeStore((state) => state.colors)
@@ -64,7 +66,7 @@ export default function ChatScreen({ navigation, route }) {
     }
   }, [activeConversation?.id, markConversationRead])
 
-  const title = route.params?.title || activeConversation?.contact?.display_name || 'Hoi thoai'
+  const title = route.params?.title || activeConversation?.contact?.display_name || t('chat.title')
   const contact = activeConversation?.contact || {}
   const assignedLabels = contact.labels || []
   const assignedLabelIds = useMemo(
@@ -76,7 +78,7 @@ export default function ChatScreen({ navigation, route }) {
   const activeAssigneeName =
     activeConversation?.assigned_to?.full_name ||
     activeConversation?.assigned_to?.email ||
-    (activeConversation?.assigned_to_business ? 'Business/shop' : 'Chua phan cong')
+    (activeConversation?.assigned_to_business ? t('chat.businessShop') : t('chat.unassigned'))
 
   const fetchHistory = useCallback(async () => {
     if (!activeConversation?.id) return
@@ -100,7 +102,7 @@ export default function ChatScreen({ navigation, route }) {
       setLabels(labelRes.data)
       setHistory(historyRes.data)
     } catch (error) {
-      setDetailError(error.response?.data?.detail || 'Khong the tai chi tiet hoi thoai.')
+      setDetailError(error.response?.data?.detail || t('chat.loadDetailsFailed'))
     } finally {
       setDetailLoading(false)
     }
@@ -116,7 +118,7 @@ export default function ChatScreen({ navigation, route }) {
     try {
       await toggleAI(value)
     } catch (error) {
-      setDetailError(error.response?.data?.detail || 'Cap nhat AI tu dong that bai.')
+      setDetailError(error.response?.data?.detail || t('chat.updateAIFailed'))
     } finally {
       setActionLoading(false)
     }
@@ -130,7 +132,7 @@ export default function ChatScreen({ navigation, route }) {
       await fetchHistory()
       setAssigneeDialogOpen(false)
     } catch (error) {
-      setDetailError(error.response?.data?.detail || 'Cap nhat phan cong that bai.')
+      setDetailError(error.response?.data?.detail || t('chat.updateAssignmentFailed'))
     } finally {
       setActionLoading(false)
     }
@@ -144,7 +146,7 @@ export default function ChatScreen({ navigation, route }) {
       await fetchHistory()
       setLabelDialogOpen(false)
     } catch (error) {
-      setDetailError(error.response?.data?.detail || 'Gan nhan that bai.')
+      setDetailError(error.response?.data?.detail || t('chat.assignLabelFailed'))
     } finally {
       setActionLoading(false)
     }
@@ -157,31 +159,34 @@ export default function ChatScreen({ navigation, route }) {
       await removeLabel(labelId)
       await fetchHistory()
     } catch (error) {
-      setDetailError(error.response?.data?.detail || 'Go nhan that bai.')
+      setDetailError(error.response?.data?.detail || t('chat.removeLabelFailed'))
     } finally {
       setActionLoading(false)
     }
   }
 
   const renderHistoryText = (event) => {
-    if (event.type === 'conversation') return 'Hoi thoai duoc tao'
+    if (event.type === 'conversation') return t('chat.conversationCreated')
     if (event.type === 'label') {
       return event.action === 'added'
-        ? `Da gan nhan ${event.label_name || ''}`.trim()
-        : `Da go nhan ${event.label_name || ''}`.trim()
+        ? t('chat.labelAdded', { name: event.label_name || '' }).trim()
+        : t('chat.labelRemoved', { name: event.label_name || '' }).trim()
     }
-    if (event.action === 'assigned_business') return 'Da phan cong cho business/shop'
-    if (event.action === 'unassigned') return 'Da bo phan cong'
+    if (event.action === 'assigned_business') return t('chat.assignedBusiness')
+    if (event.action === 'unassigned') return t('chat.unassignedHistory')
     if (event.action === 'reassigned') {
-      return `Chuyen tu ${event.from_assignee_name || 'chua phan cong'} sang ${event.to_assignee_name || 'chua phan cong'}`
+      return t('chat.reassigned', {
+        from: event.from_assignee_name || t('chat.unassigned'),
+        to: event.to_assignee_name || t('chat.unassigned'),
+      })
     }
-    return `Da phan cong cho ${event.to_assignee_name || 'nhan vien'}`
+    return t('chat.assignedTo', { name: event.to_assignee_name || t('employees.title') })
   }
 
   const renderDetailDialog = () => (
     <Portal>
       <Dialog visible={detailOpen} onDismiss={() => setDetailOpen(false)} style={styles.detailDialog}>
-        <Dialog.Title>Chi tiet hoi thoai</Dialog.Title>
+        <Dialog.Title>{t('chat.detailsTitle')}</Dialog.Title>
         <Dialog.ScrollArea>
           <ScrollView contentContainerStyle={styles.detailContent}>
             {detailLoading ? (
@@ -197,8 +202,8 @@ export default function ChatScreen({ navigation, route }) {
                 <View style={styles.detailSection}>
                   <View style={styles.detailRow}>
                     <View>
-                      <Text variant="titleSmall" style={styles.sectionTitle}>AI tu dong</Text>
-                      <Text variant="bodySmall" style={styles.sectionHint}>Bat/tat tra loi tu dong cho hoi thoai nay.</Text>
+                      <Text variant="titleSmall" style={styles.sectionTitle}>{t('chat.aiAuto')}</Text>
+                      <Text variant="bodySmall" style={styles.sectionHint}>{t('chat.aiHint')}</Text>
                     </View>
                     <Switch
                       value={Boolean(activeConversation?.is_ai_enabled)}
@@ -211,10 +216,10 @@ export default function ChatScreen({ navigation, route }) {
                 <Divider />
 
                 <View style={styles.detailSection}>
-                  <Text variant="titleSmall" style={styles.sectionTitle}>Phan cong</Text>
+                  <Text variant="titleSmall" style={styles.sectionTitle}>{t('chat.assignment')}</Text>
                   <Text variant="bodyMedium" style={styles.primaryText}>{activeAssigneeName}</Text>
                   {employeeAssignmentLocked ? (
-                    <Text variant="bodySmall" style={styles.sectionHint}>Nhan vien dang bi khoa quyen thay doi phan cong.</Text>
+                    <Text variant="bodySmall" style={styles.sectionHint}>{t('chat.employeeLocked')}</Text>
                   ) : null}
                   <Button
                     mode="outlined"
@@ -223,17 +228,17 @@ export default function ChatScreen({ navigation, route }) {
                     onPress={() => setAssigneeDialogOpen(true)}
                     style={styles.sectionButton}
                   >
-                    Doi phan cong
+                    {t('chat.changeAssignment')}
                   </Button>
                 </View>
 
                 <Divider />
 
                 <View style={styles.detailSection}>
-                  <Text variant="titleSmall" style={styles.sectionTitle}>Nhan</Text>
+                  <Text variant="titleSmall" style={styles.sectionTitle}>{t('chat.labels')}</Text>
                   <View style={styles.chipWrap}>
                     {assignedLabels.length === 0 ? (
-                      <Text variant="bodySmall" style={styles.sectionHint}>Chua co nhan</Text>
+                      <Text variant="bodySmall" style={styles.sectionHint}>{t('chat.noLabels')}</Text>
                     ) : (
                       assignedLabels.map((label) => (
                         <Chip
@@ -256,18 +261,18 @@ export default function ChatScreen({ navigation, route }) {
                     onPress={() => setLabelDialogOpen(true)}
                     style={styles.sectionButton}
                   >
-                    Them nhan
+                    {t('chat.addLabel')}
                   </Button>
                 </View>
 
                 <Divider />
 
                 <View style={styles.detailSection}>
-                  <Text variant="titleSmall" style={styles.sectionTitle}>Thong tin khach</Text>
+                  <Text variant="titleSmall" style={styles.sectionTitle}>{t('chat.contactInfo')}</Text>
                   {[
-                    ['Ten', contact.display_name || '-'],
+                    [t('chat.name'), contact.display_name || '-'],
                     ['Email', contact.visitor_email || '-'],
-                    ['SDT', contact.visitor_phone || '-'],
+                    [t('chat.phone'), contact.visitor_phone || '-'],
                     ['Platform', activeConversation?.platform || contact.platform || '-'],
                     ['Visitor ID', contact.platform_user_id || '-'],
                   ].map(([label, value]) => (
@@ -281,15 +286,15 @@ export default function ChatScreen({ navigation, route }) {
                 <Divider />
 
                 <View style={styles.detailSection}>
-                  <Text variant="titleSmall" style={styles.sectionTitle}>Lich su</Text>
+                  <Text variant="titleSmall" style={styles.sectionTitle}>{t('chat.history')}</Text>
                   {history.length === 0 ? (
-                    <Text variant="bodySmall" style={styles.sectionHint}>Chua co lich su</Text>
+                    <Text variant="bodySmall" style={styles.sectionHint}>{t('chat.noHistory')}</Text>
                   ) : (
                     history.map((event) => (
                       <View key={event.id} style={styles.historyItem}>
                         <Text variant="bodySmall" style={styles.primaryText}>{renderHistoryText(event)}</Text>
                         <Text variant="bodySmall" style={styles.sectionHint}>
-                          {event.actor_name || event.actor_email || 'System'} - {dayjs(event.created_at).format('DD/MM/YYYY HH:mm')}
+                          {event.actor_name || event.actor_email || t('common.system')} - {dayjs(event.created_at).format('DD/MM/YYYY HH:mm')}
                         </Text>
                       </View>
                     ))
@@ -300,12 +305,12 @@ export default function ChatScreen({ navigation, route }) {
           </ScrollView>
         </Dialog.ScrollArea>
         <Dialog.Actions>
-          <Button onPress={() => setDetailOpen(false)}>Dong</Button>
+          <Button onPress={() => setDetailOpen(false)}>{t('common.close')}</Button>
         </Dialog.Actions>
       </Dialog>
 
       <Dialog visible={assigneeDialogOpen} onDismiss={() => setAssigneeDialogOpen(false)}>
-        <Dialog.Title>Doi phan cong</Dialog.Title>
+        <Dialog.Title>{t('chat.changeAssignment')}</Dialog.Title>
         <Dialog.ScrollArea>
           <ScrollView contentContainerStyle={styles.optionList}>
             <Button
@@ -313,7 +318,7 @@ export default function ChatScreen({ navigation, route }) {
               onPress={() => handleAssignConversation('__unassigned__')}
               disabled={actionLoading}
             >
-              Chua phan cong
+              {t('chat.unassigned')}
             </Button>
             {assignees.map((assignee) => {
               const value = assignee.type === 'business' ? '__business__' : assignee.id
@@ -335,16 +340,16 @@ export default function ChatScreen({ navigation, route }) {
           </ScrollView>
         </Dialog.ScrollArea>
         <Dialog.Actions>
-          <Button onPress={() => setAssigneeDialogOpen(false)}>Huy</Button>
+          <Button onPress={() => setAssigneeDialogOpen(false)}>{t('common.cancel')}</Button>
         </Dialog.Actions>
       </Dialog>
 
       <Dialog visible={labelDialogOpen} onDismiss={() => setLabelDialogOpen(false)}>
-        <Dialog.Title>Them nhan</Dialog.Title>
+        <Dialog.Title>{t('chat.addLabel')}</Dialog.Title>
         <Dialog.ScrollArea>
           <ScrollView contentContainerStyle={styles.optionList}>
             {labels.length === 0 ? (
-              <Text style={styles.sectionHint}>Chua co nhan nao</Text>
+              <Text style={styles.sectionHint}>{t('chat.noLabelOptions')}</Text>
             ) : (
               labels.map((label) => {
                 const assigned = assignedLabelIds.has(String(label.id))
@@ -363,7 +368,7 @@ export default function ChatScreen({ navigation, route }) {
           </ScrollView>
         </Dialog.ScrollArea>
         <Dialog.Actions>
-          <Button onPress={() => setLabelDialogOpen(false)}>Huy</Button>
+          <Button onPress={() => setLabelDialogOpen(false)}>{t('common.cancel')}</Button>
         </Dialog.Actions>
       </Dialog>
     </Portal>
@@ -401,7 +406,7 @@ export default function ChatScreen({ navigation, route }) {
           ListHeaderComponent={olderMessagesLoading ? <ActivityIndicator style={styles.older} /> : null}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Text style={styles.emptyText}>Chua co tin nhan trong hoi thoai nay.</Text>
+              <Text style={styles.emptyText}>{t('chat.empty')}</Text>
             </View>
           }
         />

@@ -16,6 +16,8 @@ import {
 import dayjs from 'dayjs'
 
 import client from '../api/client'
+import BottomNavBar from '../components/BottomNavBar'
+import { useI18n } from '../i18n/useI18n'
 import { useAuthStore } from '../store/authStore'
 import { useThemeStore } from '../store/themeStore'
 
@@ -50,6 +52,7 @@ const formatPrice = (value) => {
 }
 
 export default function ProductsScreen({ navigation }) {
+  const { t } = useI18n()
   const user = useAuthStore((state) => state.user)
   const colors = useThemeStore((state) => state.colors)
   const styles = useMemo(() => createStyles(colors), [colors])
@@ -66,6 +69,7 @@ export default function ProductsScreen({ navigation }) {
   const [deletingId, setDeletingId] = useState(null)
   const [deletingAll, setDeletingAll] = useState(false)
   const [error, setError] = useState('')
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
 
   const isBusiness = user?.role === 'business'
   const hasActiveFilters = Boolean(
@@ -89,7 +93,7 @@ export default function ProductsScreen({ navigation }) {
 
     const params = buildParams(nextFilters)
     if (Number.isNaN(params.min_price) || Number.isNaN(params.max_price)) {
-      setError('Gia loc khong hop le.')
+      setError(t('products.invalidFilterPrice'))
       return
     }
 
@@ -104,12 +108,12 @@ export default function ProductsScreen({ navigation }) {
       const res = await client.get('/api/products', { params })
       setProducts(res.data)
     } catch (err) {
-      setError(err.response?.data?.detail || 'Khong the tai danh sach san pham.')
+      setError(err.response?.data?.detail || t('products.loadFailed'))
     } finally {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [buildParams, filters, isBusiness])
+  }, [buildParams, filters, isBusiness, t])
 
   useEffect(() => {
     fetchProducts()
@@ -167,10 +171,10 @@ export default function ProductsScreen({ navigation }) {
     const price = parseOptionalNumber(form.price)
     const stock = parseOptionalNumber(form.stock_quantity)
 
-    if (!name) return 'Vui long nhap ten san pham.'
-    if (Number.isNaN(price)) return 'Gia san pham khong hop le.'
-    if (Number.isNaN(stock)) return 'So luong ton kho khong hop le.'
-    if (stock != null && !Number.isInteger(stock)) return 'So luong ton kho phai la so nguyen.'
+    if (!name) return t('products.nameRequired')
+    if (Number.isNaN(price)) return t('products.invalidPrice')
+    if (Number.isNaN(stock)) return t('products.invalidStock')
+    if (stock != null && !Number.isInteger(stock)) return t('products.stockInteger')
     return ''
   }
 
@@ -204,7 +208,7 @@ export default function ProductsScreen({ navigation }) {
       closeProductDialog()
       await fetchProducts({ refresh: true })
     } catch (err) {
-      setError(err.response?.data?.detail || 'Luu san pham that bai.')
+      setError(err.response?.data?.detail || t('products.saveFailed'))
     } finally {
       setSubmitting(false)
     }
@@ -220,7 +224,7 @@ export default function ProductsScreen({ navigation }) {
       setProductToDelete(null)
       await fetchProducts({ refresh: true })
     } catch (err) {
-      setError(err.response?.data?.detail || 'Xoa san pham that bai.')
+      setError(err.response?.data?.detail || t('products.deleteFailed'))
     } finally {
       setDeletingId(null)
     }
@@ -235,7 +239,7 @@ export default function ProductsScreen({ navigation }) {
       await fetchProducts({ nextFilters: emptyFilters, refresh: true })
       setFilters(emptyFilters)
     } catch (err) {
-      setError(err.response?.data?.detail || 'Xoa tat ca san pham that bai.')
+      setError(err.response?.data?.detail || t('products.deleteAllFailed'))
     } finally {
       setDeletingAll(false)
     }
@@ -257,23 +261,23 @@ export default function ProductsScreen({ navigation }) {
               {item.name}
             </Text>
             <Text variant="bodySmall" numberOfLines={1} style={styles.productMeta}>
-              {item.sku || 'Khong co SKU'}{item.category ? ` - ${item.category}` : ''}
+              {item.sku || t('products.noSku')}{item.category ? ` - ${item.category}` : ''}
             </Text>
           </View>
           <View style={[styles.statusBadge, isAvailable ? styles.statusAvailable : styles.statusOut]}>
             <Text style={[styles.statusText, isAvailable ? styles.statusAvailableText : styles.statusOutText]}>
-              {isAvailable ? 'Con hang' : 'Het hang'}
+              {isAvailable ? t('products.available') : t('products.outOfStock')}
             </Text>
           </View>
         </View>
 
         <View style={styles.detailGrid}>
           <View style={styles.detailItem}>
-            <Text variant="labelSmall" style={styles.detailLabel}>Gia</Text>
+            <Text variant="labelSmall" style={styles.detailLabel}>{t('products.price')}</Text>
             <Text variant="bodyMedium" style={styles.detailValue}>{formatPrice(item.price)}</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text variant="labelSmall" style={styles.detailLabel}>Ton kho</Text>
+            <Text variant="labelSmall" style={styles.detailLabel}>{t('products.stock')}</Text>
             <Text variant="bodyMedium" style={styles.detailValue}>
               {item.stock_quantity != null ? item.stock_quantity : '-'}
             </Text>
@@ -287,12 +291,12 @@ export default function ProductsScreen({ navigation }) {
         ) : null}
 
         <Text variant="bodySmall" style={styles.updatedAt}>
-          Cap nhat {item.updated_at ? dayjs(item.updated_at).format('DD/MM/YYYY HH:mm') : '-'}
+          {t('products.updatedAt', { date: item.updated_at ? dayjs(item.updated_at).format('DD/MM/YYYY HH:mm') : '-' })}
         </Text>
 
         <View style={styles.rowActions}>
           <Button mode="outlined" compact icon="pencil" onPress={() => openEditDialog(item)}>
-            Sua
+            {t('common.edit')}
           </Button>
           <IconButton
             icon="delete"
@@ -310,72 +314,88 @@ export default function ProductsScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Appbar.Header mode="small" elevated>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Quan ly san pham" subtitle={isBusiness ? `${products.length} san pham` : user?.email} />
+        <Appbar.Content
+          title="ChatDesk"
+          subtitle={isBusiness ? t('products.subtitle', { count: products.length }) : user?.email}
+          titleStyle={styles.brandTitle}
+        />
         {isBusiness ? <Appbar.Action icon="plus" onPress={openCreateDialog} /> : null}
       </Appbar.Header>
 
       {!isBusiness ? (
         <View style={styles.center}>
-          <Text variant="titleMedium" style={styles.permissionTitle}>Khong co quyen quan ly san pham</Text>
+          <Text variant="titleMedium" style={styles.permissionTitle}>{t('products.noPermissionTitle')}</Text>
           <Text variant="bodySmall" style={styles.permissionText}>
-            Man hinh nay chi danh cho tai khoan doanh nghiep.
+            {t('products.noPermissionText')}
           </Text>
         </View>
       ) : (
         <>
           <View style={styles.toolbar}>
             <Searchbar
-              placeholder="Tim theo ten hoac SKU"
+              placeholder={t('products.searchPlaceholder')}
               value={filters.search}
               onChangeText={(value) => updateFilter('search', value)}
               style={styles.search}
               inputStyle={styles.searchInput}
+              right={(props) => (
+                <IconButton
+                  {...props}
+                  icon={filtersExpanded ? 'chevron-up' : 'tune'}
+                  selected={hasActiveFilters}
+                  accessibilityLabel={t('products.filters')}
+                  onPress={() => setFiltersExpanded((current) => !current)}
+                />
+              )}
             />
-            <SegmentedButtons
-              value={filters.status}
-              onValueChange={(value) => updateFilter('status', value)}
-              buttons={[
-                { value: 'all', label: 'Tat ca' },
-                { value: 'available', label: 'Con' },
-                { value: 'out_of_stock', label: 'Het' },
-              ]}
-              density="small"
-            />
-            <View style={styles.filterRow}>
-              <TextInput
-                mode="outlined"
-                dense
-                label="Danh muc"
-                value={filters.category}
-                onChangeText={(value) => updateFilter('category', value)}
-                style={styles.filterInput}
-              />
-              <TextInput
-                mode="outlined"
-                dense
-                label="Gia tu"
-                value={filters.minPrice}
-                onChangeText={(value) => updateFilter('minPrice', value)}
-                keyboardType="numeric"
-                style={styles.filterInput}
-              />
-              <TextInput
-                mode="outlined"
-                dense
-                label="Gia den"
-                value={filters.maxPrice}
-                onChangeText={(value) => updateFilter('maxPrice', value)}
-                keyboardType="numeric"
-                style={styles.filterInput}
-              />
-            </View>
-            <View style={styles.summaryRow}>
-              <Text variant="bodySmall" style={styles.summaryText}>
-                {statusSummary.available} con hang / {statusSummary.outOfStock} het hang
-              </Text>
-              {hasActiveFilters ? <Button compact onPress={resetFilters}>Xoa loc</Button> : null}
-            </View>
+            {filtersExpanded ? (
+              <Surface mode="flat" style={styles.filterPanel}>
+                <SegmentedButtons
+                  value={filters.status}
+                  onValueChange={(value) => updateFilter('status', value)}
+                  buttons={[
+                    { value: 'all', label: t('products.all') },
+                    { value: 'available', label: t('products.availableShort') },
+                    { value: 'out_of_stock', label: t('products.outShort') },
+                  ]}
+                  density="small"
+                />
+                <View style={styles.filterRow}>
+                  <TextInput
+                    mode="outlined"
+                    dense
+                    label={t('products.category')}
+                    value={filters.category}
+                    onChangeText={(value) => updateFilter('category', value)}
+                    style={styles.filterInput}
+                  />
+                  <TextInput
+                    mode="outlined"
+                    dense
+                    label={t('products.minPrice')}
+                    value={filters.minPrice}
+                    onChangeText={(value) => updateFilter('minPrice', value)}
+                    keyboardType="numeric"
+                    style={styles.filterInput}
+                  />
+                  <TextInput
+                    mode="outlined"
+                    dense
+                    label={t('products.maxPrice')}
+                    value={filters.maxPrice}
+                    onChangeText={(value) => updateFilter('maxPrice', value)}
+                    keyboardType="numeric"
+                    style={styles.filterInput}
+                  />
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text variant="bodySmall" style={styles.summaryText}>
+                    {t('products.summary', { available: statusSummary.available, outOfStock: statusSummary.outOfStock })}
+                  </Text>
+                  {hasActiveFilters ? <Button compact onPress={resetFilters}>{t('products.clearFilters')}</Button> : null}
+                </View>
+              </Surface>
+            ) : null}
           </View>
 
           {error ? (
@@ -396,7 +416,7 @@ export default function ProductsScreen({ navigation }) {
               products.length > 0 ? (
                 <View style={styles.listActions}>
                   <Button mode="contained" icon="plus" onPress={openCreateDialog}>
-                    Them san pham
+                    {t('products.addProduct')}
                   </Button>
                   <Button
                     mode="outlined"
@@ -404,7 +424,7 @@ export default function ProductsScreen({ navigation }) {
                     textColor={colors.danger}
                     onPress={() => setDeleteAllDialogOpen(true)}
                   >
-                    Xoa tat ca
+                    {t('products.deleteAll')}
                   </Button>
                 </View>
               ) : null
@@ -412,13 +432,13 @@ export default function ProductsScreen({ navigation }) {
             ListEmptyComponent={!loading ? (
               <Surface mode="flat" style={styles.empty}>
                 <Text variant="titleMedium">
-                  {hasActiveFilters ? 'Khong co san pham phu hop' : 'Chua co san pham nao'}
+                  {hasActiveFilters ? t('products.emptyFiltered') : t('products.emptyTitle')}
                 </Text>
                 <Text variant="bodySmall" style={styles.emptyText}>
-                  Them san pham de AI co du lieu tu van cho khach hang.
+                  {t('products.emptySubtitle')}
                 </Text>
                 <Button mode="contained" icon="plus" onPress={openCreateDialog}>
-                  Them san pham
+                  {t('products.addProduct')}
                 </Button>
               </Surface>
             ) : null}
@@ -427,31 +447,31 @@ export default function ProductsScreen({ navigation }) {
 
           <Portal>
             <Dialog visible={productDialogOpen} onDismiss={closeProductDialog}>
-              <Dialog.Title>{editingProduct ? 'Chinh sua san pham' : 'Them san pham'}</Dialog.Title>
+              <Dialog.Title>{editingProduct ? t('products.editTitle') : t('products.addProduct')}</Dialog.Title>
               <Dialog.ScrollArea>
                 <ScrollView contentContainerStyle={styles.dialogContent}>
                   <TextInput
                     mode="outlined"
-                    label="Ten san pham"
+                    label={t('products.name')}
                     value={form.name}
                     onChangeText={(value) => updateForm('name', value)}
                   />
                   <TextInput
                     mode="outlined"
-                    label="SKU"
+                    label={t('products.sku')}
                     value={form.sku}
                     onChangeText={(value) => updateForm('sku', value)}
                     autoCapitalize="characters"
                   />
                   <TextInput
                     mode="outlined"
-                    label="Danh muc"
+                    label={t('products.category')}
                     value={form.category}
                     onChangeText={(value) => updateForm('category', value)}
                   />
                   <TextInput
                     mode="outlined"
-                    label="Mo ta"
+                    label={t('products.description')}
                     value={form.description}
                     onChangeText={(value) => updateForm('description', value)}
                     multiline
@@ -460,7 +480,7 @@ export default function ProductsScreen({ navigation }) {
                   <View style={styles.formRow}>
                     <TextInput
                       mode="outlined"
-                      label="Gia"
+                      label={t('products.price')}
                       value={form.price}
                       onChangeText={(value) => updateForm('price', value)}
                       keyboardType="numeric"
@@ -468,7 +488,7 @@ export default function ProductsScreen({ navigation }) {
                     />
                     <TextInput
                       mode="outlined"
-                      label="Ton kho"
+                      label={t('products.stock')}
                       value={form.stock_quantity}
                       onChangeText={(value) => updateForm('stock_quantity', value)}
                       keyboardType="numeric"
@@ -479,55 +499,56 @@ export default function ProductsScreen({ navigation }) {
                     value={form.status}
                     onValueChange={(value) => updateForm('status', value)}
                     buttons={[
-                      { value: 'available', label: 'Con hang' },
-                      { value: 'out_of_stock', label: 'Het hang' },
+                      { value: 'available', label: t('products.available') },
+                      { value: 'out_of_stock', label: t('products.outOfStock') },
                     ]}
                   />
                 </ScrollView>
               </Dialog.ScrollArea>
               <Dialog.Actions>
-                <Button onPress={closeProductDialog}>Huy</Button>
+                <Button onPress={closeProductDialog}>{t('common.cancel')}</Button>
                 <Button loading={submitting} disabled={submitting} onPress={saveProduct}>
-                  {editingProduct ? 'Cap nhat' : 'Them'}
+                  {editingProduct ? t('common.update') : t('common.add')}
                 </Button>
               </Dialog.Actions>
             </Dialog>
 
             <Dialog visible={Boolean(productToDelete)} onDismiss={() => setProductToDelete(null)}>
-              <Dialog.Title>Xoa san pham?</Dialog.Title>
+              <Dialog.Title>{t('products.deleteTitle')}</Dialog.Title>
               <Dialog.Content>
-                <Text>Ban co chac muon xoa {productToDelete?.name}?</Text>
+                <Text>{t('products.deleteBody', { name: productToDelete?.name })}</Text>
               </Dialog.Content>
               <Dialog.Actions>
-                <Button onPress={() => setProductToDelete(null)}>Huy</Button>
+                <Button onPress={() => setProductToDelete(null)}>{t('common.cancel')}</Button>
                 <Button
                   textColor={colors.danger}
                   loading={deletingId === productToDelete?.id}
                   disabled={Boolean(deletingId)}
                   onPress={deleteProduct}
                 >
-                  Xoa
+                  {t('common.delete')}
                 </Button>
               </Dialog.Actions>
             </Dialog>
 
             <Dialog visible={deleteAllDialogOpen} onDismiss={() => setDeleteAllDialogOpen(false)}>
-              <Dialog.Title>Xoa tat ca san pham?</Dialog.Title>
+              <Dialog.Title>{t('products.deleteAllTitle')}</Dialog.Title>
               <Dialog.Content>
                 <Text>
-                  Toan bo san pham se bi xoa khoi he thong va AI tim kiem. Thao tac nay khong the hoan tac.
+                  {t('products.deleteAllBody')}
                 </Text>
               </Dialog.Content>
               <Dialog.Actions>
-                <Button onPress={() => setDeleteAllDialogOpen(false)}>Huy</Button>
+                <Button onPress={() => setDeleteAllDialogOpen(false)}>{t('common.cancel')}</Button>
                 <Button textColor={colors.danger} loading={deletingAll} disabled={deletingAll} onPress={deleteAllProducts}>
-                  Xoa tat ca
+                  {t('products.deleteAll')}
                 </Button>
               </Dialog.Actions>
             </Dialog>
           </Portal>
         </>
       )}
+      <BottomNavBar active="Products" navigation={navigation} />
     </View>
   )
 }
@@ -536,6 +557,10 @@ const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
+  },
+  brandTitle: {
+    color: colors.primary,
+    fontWeight: '800',
   },
   center: {
     flex: 1,
@@ -566,6 +591,14 @@ const createStyles = (colors) => StyleSheet.create({
   },
   searchInput: {
     minHeight: 44,
+  },
+  filterPanel: {
+    gap: 10,
+    borderRadius: 8,
+    padding: 10,
+    backgroundColor: colors.softSurface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
   },
   filterRow: {
     flexDirection: 'row',

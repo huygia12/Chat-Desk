@@ -40,7 +40,7 @@ export const useAuthStore = create((set, get) => ({
     const user = get().user
     if (!['business', 'employee'].includes(user?.role)) {
       await get().logout()
-      throw new Error('Ung dung mobile chi danh cho tai khoan doanh nghiep hoac nhan vien CSKH.')
+      throw new Error('auth.mobileOnly')
     }
   },
 

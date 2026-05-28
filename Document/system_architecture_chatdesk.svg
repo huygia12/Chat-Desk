@@ -1,0 +1,195 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900">
+  <defs>
+    <marker id="arrowDark" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1f2933"/>
+    </marker>
+    <marker id="arrowTeal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f766e"/>
+    </marker>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#17202a" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .bg { fill: #fbf7ec; }
+      .group { fill: #fffdf7; stroke: #1f2933; stroke-width: 2; filter: url(#shadow); }
+      .client { fill: #d9f0ff; stroke: #27496d; stroke-width: 1.8; }
+      .channel { fill: #e3f7ee; stroke: #24735c; stroke-width: 1.8; }
+      .backend { fill: #ffe0ad; stroke: #965f17; stroke-width: 2.1; filter: url(#shadow); }
+      .module { fill: #fff8ea; stroke: #a66a1f; stroke-width: 1.5; }
+      .service { fill: #dff7f3; stroke: #0f766e; stroke-width: 1.5; }
+      .storage { fill: #ebe6ff; stroke: #6750a4; stroke-width: 1.8; }
+      .external { fill: #fff1cf; stroke: #9a6a00; stroke-width: 1.8; }
+      .section { font-family: Arial, Helvetica, sans-serif; font-size: 21px; font-weight: 700; fill: #17202a; }
+      .label { font-family: Arial, Helvetica, sans-serif; font-size: 17px; font-weight: 700; fill: #17202a; }
+      .small { font-family: Arial, Helvetica, sans-serif; font-size: 13px; fill: #344955; }
+      .tiny { font-family: Arial, Helvetica, sans-serif; font-size: 12px; fill: #52616b; }
+      .line { stroke: #1f2933; stroke-width: 2.1; fill: none; marker-end: url(#arrowDark); }
+      .lineSoft { stroke: #59636e; stroke-width: 1.8; fill: none; marker-end: url(#arrowDark); }
+      .lineRt { stroke: #0f766e; stroke-width: 2; fill: none; stroke-dasharray: 7 6; marker-end: url(#arrowTeal); }
+      .lineAi { stroke: #6750a4; stroke-width: 1.9; fill: none; stroke-dasharray: 4 5; marker-end: url(#arrowDark); }
+      .icon { stroke: #17202a; stroke-width: 2.7; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1500" height="900"/>
+
+  <!-- Main columns -->
+  <rect class="group" x="45" y="50" width="330" height="790" rx="16"/>
+  <rect class="backend" x="480" y="50" width="540" height="790" rx="16"/>
+  <rect class="group" x="1125" y="50" width="330" height="790" rx="16"/>
+
+  <text class="section" x="210" y="88" text-anchor="middle">Clients &amp; Customer Channels</text>
+  <text class="section" x="750" y="88" text-anchor="middle">ChatDesk Backend</text>
+  <text class="section" x="1290" y="88" text-anchor="middle">Data &amp; External Services</text>
+
+  <!-- Left column: business clients -->
+  <rect class="client" x="82" y="125" width="256" height="82" rx="12"/>
+  <rect x="108" y="146" width="54" height="36" rx="5" fill="#ffffff" stroke="#27496d" stroke-width="1.4"/>
+  <line class="icon" x1="116" y1="189" x2="154" y2="189"/>
+  <text class="label" x="237" y="158" text-anchor="middle">Web Dashboard</text>
+  <text class="small" x="237" y="181" text-anchor="middle">React 18 + Vite</text>
+
+  <rect class="client" x="82" y="232" width="256" height="82" rx="12"/>
+  <rect x="114" y="249" width="38" height="48" rx="7" fill="#ffffff" stroke="#27496d" stroke-width="1.7"/>
+  <circle cx="133" cy="290" r="2.4" fill="#17202a"/>
+  <text class="label" x="237" y="265" text-anchor="middle">Mobile App</text>
+  <text class="small" x="237" y="288" text-anchor="middle">Expo / React Native</text>
+
+  <text class="section" x="210" y="374" text-anchor="middle">Kênh khách hàng đầu vào</text>
+
+  <rect class="channel" x="82" y="410" width="256" height="64" rx="12"/>
+  <text class="label" x="210" y="437" text-anchor="middle">Facebook Messenger</text>
+  <text class="small" x="210" y="458" text-anchor="middle">Meta webhook + Graph API</text>
+
+  <rect class="channel" x="82" y="496" width="256" height="64" rx="12"/>
+  <text class="label" x="210" y="523" text-anchor="middle">Instagram Direct</text>
+  <text class="small" x="210" y="544" text-anchor="middle">Meta webhook + Graph API</text>
+
+  <rect class="channel" x="82" y="582" width="256" height="64" rx="12"/>
+  <text class="label" x="210" y="609" text-anchor="middle">Telegram</text>
+  <text class="small" x="210" y="630" text-anchor="middle">Bot webhook + Bot API</text>
+
+  <rect class="channel" x="82" y="668" width="256" height="64" rx="12"/>
+  <text class="label" x="210" y="695" text-anchor="middle">Website Widget</text>
+  <text class="small" x="210" y="716" text-anchor="middle">Embedded customer chat</text>
+
+  <!-- Center column: backend -->
+  <rect class="module" x="525" y="125" width="210" height="104" rx="10"/>
+  <text class="label" x="630" y="154" text-anchor="middle">REST API</text>
+  <text class="small" x="630" y="178" text-anchor="middle">Auth, Users, Channels</text>
+  <text class="small" x="630" y="199" text-anchor="middle">Conversations, Products</text>
+
+  <rect class="service" x="765" y="125" width="210" height="104" rx="10"/>
+  <text class="label" x="870" y="154" text-anchor="middle">WebSocket Manager</text>
+  <text class="small" x="870" y="178" text-anchor="middle">/ws/me</text>
+  <text class="small" x="870" y="199" text-anchor="middle">/ws/widget/{id}</text>
+
+  <rect class="module" x="525" y="275" width="210" height="112" rx="10"/>
+  <text class="label" x="630" y="304" text-anchor="middle">Webhook Handlers</text>
+  <text class="small" x="630" y="329" text-anchor="middle">/api/webhooks/meta</text>
+  <text class="small" x="630" y="350" text-anchor="middle">/facebook, /instagram</text>
+  <text class="small" x="630" y="371" text-anchor="middle">/telegram/{bot_id}</text>
+
+  <rect class="service" x="765" y="275" width="210" height="112" rx="10"/>
+  <text class="label" x="870" y="304" text-anchor="middle">Widget API</text>
+  <text class="small" x="870" y="329" text-anchor="middle">/api/widgets/send</text>
+  <text class="small" x="870" y="350" text-anchor="middle">history, messages</text>
+  <text class="small" x="870" y="371" text-anchor="middle">public widget auth</text>
+
+  <rect class="module" x="525" y="445" width="450" height="124" rx="10"/>
+  <text class="label" x="750" y="474" text-anchor="middle">Core Business Services</text>
+  <text class="small" x="750" y="499" text-anchor="middle">Assignment, Labels, Saved replies, Statistics</text>
+  <text class="small" x="750" y="522" text-anchor="middle">Facebook / Instagram / Telegram service adapters</text>
+  <text class="small" x="750" y="545" text-anchor="middle">OAuth, contact/conversation/message processing</text>
+
+  <rect class="service" x="525" y="625" width="450" height="130" rx="10"/>
+  <text class="label" x="750" y="654" text-anchor="middle">AI / RAG Pipeline</text>
+  <text class="small" x="750" y="680" text-anchor="middle">Product data -> all-MiniLM-L6-v2 embeddings</text>
+  <text class="small" x="750" y="704" text-anchor="middle">Semantic search in Milvus by business_id</text>
+  <text class="small" x="750" y="728" text-anchor="middle">Business context + chat history -> LLM response</text>
+
+  <!-- Right column -->
+  <rect class="storage" x="1162" y="125" width="256" height="92" rx="12"/>
+  <ellipse cx="1200" cy="157" rx="24" ry="9" fill="#ffffff" stroke="#6750a4" stroke-width="2"/>
+  <path d="M1176 157 V187 C1176 199,1224 199,1224 187 V157" fill="#ffffff" stroke="#6750a4" stroke-width="2"/>
+  <ellipse cx="1200" cy="187" rx="24" ry="9" fill="#ffffff" stroke="#6750a4" stroke-width="2"/>
+  <text class="label" x="1308" y="158" text-anchor="middle">PostgreSQL</text>
+  <text class="small" x="1308" y="181" text-anchor="middle">Railway database</text>
+  <text class="tiny" x="1308" y="201" text-anchor="middle">users, channels, messages...</text>
+
+  <rect class="storage" x="1162" y="255" width="256" height="92" rx="12"/>
+  <ellipse cx="1200" cy="287" rx="24" ry="9" fill="#ffffff" stroke="#6750a4" stroke-width="2"/>
+  <path d="M1176 287 V317 C1176 329,1224 329,1224 317 V287" fill="#ffffff" stroke="#6750a4" stroke-width="2"/>
+  <ellipse cx="1200" cy="317" rx="24" ry="9" fill="#ffffff" stroke="#6750a4" stroke-width="2"/>
+  <text class="label" x="1308" y="288" text-anchor="middle">Milvus / Zilliz</text>
+  <text class="small" x="1308" y="311" text-anchor="middle">product embeddings</text>
+  <text class="tiny" x="1308" y="331" text-anchor="middle">384-dim cosine search</text>
+
+  <rect class="external" x="1162" y="385" width="256" height="88" rx="12"/>
+  <path class="icon" d="M1188 438 C1200 419,1217 419,1229 438"/>
+  <path class="icon" d="M1189 415 C1200 402,1217 402,1228 415"/>
+  <text class="label" x="1308" y="420" text-anchor="middle">LLM Provider</text>
+  <text class="small" x="1308" y="443" text-anchor="middle">Groq hoặc OpenAI</text>
+
+  <rect class="external" x="1162" y="513" width="256" height="88" rx="12"/>
+  <circle cx="1192" cy="558" r="9" fill="#ffffff" stroke="#9a6a00" stroke-width="2"/>
+  <circle cx="1227" cy="539" r="9" fill="#ffffff" stroke="#9a6a00" stroke-width="2"/>
+  <circle cx="1227" cy="577" r="9" fill="#ffffff" stroke="#9a6a00" stroke-width="2"/>
+  <line class="icon" x1="1200" y1="554" x2="1219" y2="543"/>
+  <line class="icon" x1="1200" y1="562" x2="1219" y2="574"/>
+  <text class="label" x="1308" y="548" text-anchor="middle">Meta Graph API</text>
+  <text class="small" x="1308" y="571" text-anchor="middle">Facebook / Instagram</text>
+
+  <rect class="external" x="1162" y="641" width="256" height="88" rx="12"/>
+  <path class="icon" d="M1184 684 L1234 662 L1222 706 L1206 691 L1194 702 Z"/>
+  <text class="label" x="1308" y="676" text-anchor="middle">Telegram Bot API</text>
+  <text class="small" x="1308" y="699" text-anchor="middle">send/reply messages</text>
+
+  <!-- Left to backend arrows: separated lanes -->
+  <path class="line" d="M338 166 H525"/>
+  <text class="tiny" x="430" y="153" text-anchor="middle">HTTP REST</text>
+  <path class="lineRt" d="M338 273 H430 V177 H765"/>
+  <text class="tiny" x="430" y="260" text-anchor="middle">Realtime</text>
+
+  <path class="line" d="M338 442 H445 V310 H525"/>
+  <text class="tiny" x="430" y="426" text-anchor="middle">Webhook</text>
+  <path class="line" d="M338 528 H430 V331 H525"/>
+  <path class="line" d="M338 614 H415 V352 H525"/>
+  <path class="line" d="M338 700 H450 V331 H765"/>
+  <path class="lineRt" d="M338 718 H462 V177 H765"/>
+
+  <!-- Backend internal arrows -->
+  <path class="lineSoft" d="M630 229 V275"/>
+  <path class="lineSoft" d="M870 229 V275"/>
+  <path class="lineSoft" d="M630 387 V445"/>
+  <path class="lineSoft" d="M870 387 V445"/>
+  <path class="lineSoft" d="M750 569 V625"/>
+  <path class="lineRt" d="M765 177 H735"/>
+  <path class="lineRt" d="M765 331 H735"/>
+
+  <!-- Backend to right services: horizontal, separated lanes -->
+  <path class="lineSoft" d="M975 505 H1088 V171 H1162"/>
+  <text class="tiny" x="1088" y="157" text-anchor="middle">ORM</text>
+
+  <path class="lineAi" d="M975 684 H1066 V301 H1162"/>
+  <text class="tiny" x="1066" y="290" text-anchor="middle">Vector search</text>
+
+  <path class="lineAi" d="M975 718 H1090 V429 H1162"/>
+  <text class="tiny" x="1090" y="418" text-anchor="middle">LLM call</text>
+
+  <path class="line" d="M975 526 H1068 V557 H1162"/>
+  <text class="tiny" x="1068" y="544" text-anchor="middle">Send message</text>
+
+  <path class="line" d="M975 548 H1046 V685 H1162"/>
+  <text class="tiny" x="1046" y="674" text-anchor="middle">Send message</text>
+
+  <!-- Realtime back to clients/widgets -->
+  <path class="lineRt" d="M765 198 H448 V300 H338"/>
+  <path class="lineRt" d="M765 214 H466 V718 H338"/>
+
+  <!-- Compact notes -->
+  <rect class="group" x="45" y="858" width="1410" height="28" rx="10" filter="none"/>
+  <text class="tiny" x="750" y="877" text-anchor="middle">
+    Kiến trúc hiện tại: FastAPI xử lý REST, webhook và WebSocket trực tiếp; chưa tách API Gateway, Redis Pub/Sub hoặc Kafka/Message Queue.
+  </text>
+</svg>

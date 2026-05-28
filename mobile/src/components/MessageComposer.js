@@ -4,9 +4,11 @@ import * as DocumentPicker from 'expo-document-picker'
 import * as ImagePicker from 'expo-image-picker'
 import { IconButton, TextInput } from 'react-native-paper'
 
+import { useI18n } from '../i18n/useI18n'
 import { useThemeStore } from '../store/themeStore'
 
 export default function MessageComposer({ sending, onSend, onUpload }) {
+  const { t } = useI18n()
   const colors = useThemeStore((state) => state.colors)
   const styles = useMemo(() => createStyles(colors), [colors])
   const [value, setValue] = useState('')
@@ -43,7 +45,7 @@ export default function MessageComposer({ sending, onSend, onUpload }) {
         mode="outlined"
         value={value}
         onChangeText={setValue}
-        placeholder="Nhap tin nhan"
+        placeholder={t('chat.inputPlaceholder')}
         dense
         multiline
         maxLength={2000}

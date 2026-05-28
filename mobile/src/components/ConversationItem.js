@@ -3,6 +3,7 @@ import { Image, StyleSheet, View } from 'react-native'
 import { Avatar, Badge, Text, TouchableRipple } from 'react-native-paper'
 import dayjs from 'dayjs'
 
+import { useI18n } from '../i18n/useI18n'
 import { useThemeStore } from '../store/themeStore'
 
 const platformColors = {
@@ -13,10 +14,11 @@ const platformColors = {
 }
 
 export default function ConversationItem({ conversation, onPress }) {
+  const { t } = useI18n()
   const colors = useThemeStore((state) => state.colors)
   const styles = useMemo(() => createStyles(colors), [colors])
   const contact = conversation.contact || {}
-  const displayName = contact.display_name || contact.visitor_email || `Khach ${String(contact.platform_user_id || '').slice(-6)}`
+  const displayName = contact.display_name || contact.visitor_email || `${t('conversations.guest')} ${String(contact.platform_user_id || '').slice(-6)}`
   const platform = conversation.platform || contact.platform
   const label = platform ? platform[0]?.toUpperCase() : '?'
   const unreadCount = Number(conversation.unread_count || 0)
@@ -45,7 +47,7 @@ export default function ConversationItem({ conversation, onPress }) {
           </View>
           <View style={styles.row}>
             <Text numberOfLines={1} variant="bodySmall" style={styles.meta}>
-              {platform || 'unknown'}{conversation.assigned_to?.full_name ? ` - ${conversation.assigned_to.full_name}` : ''}
+              {platform || t('conversations.unknownPlatform')}{conversation.assigned_to?.full_name ? ` - ${conversation.assigned_to.full_name}` : ''}
             </Text>
             {unreadCount > 0 ? (
               <Badge size={22} style={styles.unread}>

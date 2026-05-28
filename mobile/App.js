@@ -7,7 +7,9 @@ import * as Notifications from 'expo-notifications'
 
 import { useAuthStore } from './src/store/authStore'
 import { useChatStore } from './src/store/chatStore'
+import { useLanguageStore } from './src/store/languageStore'
 import { useThemeStore } from './src/store/themeStore'
+import { translate } from './src/i18n/dictionaries'
 import { createNavigationTheme, createTheme } from './src/theme/theme'
 import LoginScreen from './src/screens/LoginScreen'
 import RegisterScreen from './src/screens/RegisterScreen'
@@ -16,6 +18,13 @@ import ChatScreen from './src/screens/ChatScreen'
 import ChannelsScreen from './src/screens/ChannelsScreen'
 import EmployeesScreen from './src/screens/EmployeesScreen'
 import ProductsScreen from './src/screens/ProductsScreen'
+import AssignmentCenterScreen from './src/screens/AssignmentCenterScreen'
+import SavedRepliesScreen from './src/screens/SavedRepliesScreen'
+import LabelsScreen from './src/screens/LabelsScreen'
+import StatisticsScreen from './src/screens/StatisticsScreen'
+import AccountSettingsScreen from './src/screens/AccountSettingsScreen'
+import MenuScreen from './src/screens/MenuScreen'
+import AIAssistantBubble from './src/components/AIAssistantBubble'
 import { registerForPushNotifications } from './src/notifications'
 import { navigate, navigationRef } from './src/navigation/rootNavigation'
 
@@ -36,6 +45,9 @@ export default function App() {
   const user = useAuthStore((state) => state.user)
   const bootstrapped = useAuthStore((state) => state.bootstrapped)
   const loadSession = useAuthStore((state) => state.loadSession)
+  const language = useLanguageStore((state) => state.language)
+  const languageBootstrapped = useLanguageStore((state) => state.bootstrapped)
+  const loadLanguage = useLanguageStore((state) => state.loadLanguage)
   const themeBootstrapped = useThemeStore((state) => state.bootstrapped)
   const isDark = useThemeStore((state) => state.isDark)
   const loadTheme = useThemeStore((state) => state.loadTheme)
@@ -45,6 +57,10 @@ export default function App() {
   useEffect(() => {
     loadSession()
   }, [loadSession])
+
+  useEffect(() => {
+    loadLanguage()
+  }, [loadLanguage])
 
   useEffect(() => {
     loadTheme()
@@ -67,7 +83,7 @@ export default function App() {
 
       try {
         const conversation = await useChatStore.getState().openConversationById(conversationId)
-        navigate('Chat', { title: conversation.contact?.display_name || 'Hoi thoai' })
+        navigate('Chat', { title: conversation.contact?.display_name || translate(language, 'chat.title') })
       } catch (error) {
         console.warn('Failed to open notification conversation:', error)
       }
@@ -79,9 +95,9 @@ export default function App() {
       .catch((error) => console.warn('Failed to read last notification response:', error))
 
     return () => subscription.remove()
-  }, [token, user])
+  }, [language, token, user])
 
-  if (!bootstrapped || !themeBootstrapped) {
+  if (!bootstrapped || !languageBootstrapped || !themeBootstrapped) {
     return null
   }
 
@@ -97,6 +113,12 @@ export default function App() {
                 <Stack.Screen name="Channels" component={ChannelsScreen} />
                 <Stack.Screen name="Employees" component={EmployeesScreen} />
                 <Stack.Screen name="Products" component={ProductsScreen} />
+                <Stack.Screen name="Assignments" component={AssignmentCenterScreen} />
+                <Stack.Screen name="SavedReplies" component={SavedRepliesScreen} />
+                <Stack.Screen name="Labels" component={LabelsScreen} />
+                <Stack.Screen name="Statistics" component={StatisticsScreen} />
+                <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} />
+                <Stack.Screen name="Menu" component={MenuScreen} />
               </>
             ) : (
               <>
@@ -105,6 +127,7 @@ export default function App() {
               </>
             )}
           </Stack.Navigator>
+          {token && user ? <AIAssistantBubble /> : null}
         </NavigationContainer>
       </PaperProvider>
     </SafeAreaProvider>

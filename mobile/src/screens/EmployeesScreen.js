@@ -14,6 +14,7 @@ import {
 } from 'react-native-paper'
 
 import client from '../api/client'
+import { useI18n } from '../i18n/useI18n'
 import { useAuthStore } from '../store/authStore'
 import { useThemeStore } from '../store/themeStore'
 
@@ -33,6 +34,7 @@ const emptyEditForm = {
 }
 
 export default function EmployeesScreen({ navigation }) {
+  const { t } = useI18n()
   const user = useAuthStore((state) => state.user)
   const colors = useThemeStore((state) => state.colors)
   const styles = useMemo(() => createStyles(colors), [colors])
@@ -71,12 +73,12 @@ export default function EmployeesScreen({ navigation }) {
       })
       setEmployees(res.data)
     } catch (err) {
-      setError(err.response?.data?.detail || 'Khong the tai danh sach nhan vien.')
+      setError(err.response?.data?.detail || t('employees.loadFailed'))
     } finally {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [isBusiness, search])
+  }, [isBusiness, search, t])
 
   useEffect(() => {
     fetchEmployees()
@@ -107,16 +109,16 @@ export default function EmployeesScreen({ navigation }) {
     const fullName = values.full_name.trim()
     const email = values.email.trim()
 
-    if (!fullName) return 'Vui long nhap ho ten.'
-    if (!email) return 'Vui long nhap email.'
-    if (!EMAIL_PATTERN.test(email)) return 'Email khong hop le.'
+    if (!fullName) return t('employees.fullNameRequired')
+    if (!email) return t('employees.emailRequired')
+    if (!EMAIL_PATTERN.test(email)) return t('employees.invalidEmail')
     return ''
   }
 
   const validatePassword = (password, confirmPassword = password) => {
-    if (!password) return 'Vui long nhap mat khau.'
-    if (password.length < 6) return 'Mat khau toi thieu 6 ky tu.'
-    if (password !== confirmPassword) return 'Mat khau nhap lai khong khop.'
+    if (!password) return t('employees.passwordRequired')
+    if (password.length < 6) return t('employees.passwordMin')
+    if (password !== confirmPassword) return t('employees.passwordMismatch')
     return ''
   }
 
@@ -141,7 +143,7 @@ export default function EmployeesScreen({ navigation }) {
       setCreateForm(emptyCreateForm)
       await fetchEmployees({ refresh: true })
     } catch (err) {
-      setError(err.response?.data?.detail || 'Tao tai khoan nhan vien that bai.')
+      setError(err.response?.data?.detail || t('employees.createFailed'))
     } finally {
       setSubmitting(false)
     }
@@ -181,7 +183,7 @@ export default function EmployeesScreen({ navigation }) {
       })
       await fetchEmployees({ refresh: true })
     } catch (err) {
-      setError(err.response?.data?.detail || 'Cap nhat thong tin that bai.')
+      setError(err.response?.data?.detail || t('employees.updateProfileFailed'))
     } finally {
       setProfileSubmitting(false)
     }
@@ -203,7 +205,7 @@ export default function EmployeesScreen({ navigation }) {
       })
       setEditForm((current) => ({ ...current, password: '', confirm_password: '' }))
     } catch (err) {
-      setError(err.response?.data?.detail || 'Doi mat khau that bai.')
+      setError(err.response?.data?.detail || t('employees.updatePasswordFailed'))
     } finally {
       setPasswordSubmitting(false)
     }
@@ -218,7 +220,7 @@ export default function EmployeesScreen({ navigation }) {
       })
       await fetchEmployees({ refresh: true })
     } catch (err) {
-      setError(err.response?.data?.detail || 'Cap nhat trang thai that bai.')
+      setError(err.response?.data?.detail || t('employees.updateStatusFailed'))
     } finally {
       setStatusUpdatingId(null)
     }
@@ -234,7 +236,7 @@ export default function EmployeesScreen({ navigation }) {
       setEmployeeToDelete(null)
       await fetchEmployees({ refresh: true })
     } catch (err) {
-      setError(err.response?.data?.detail || 'Xoa tai khoan that bai.')
+      setError(err.response?.data?.detail || t('employees.deleteFailed'))
     } finally {
       setDeletingId(null)
     }
@@ -270,18 +272,18 @@ export default function EmployeesScreen({ navigation }) {
           </View>
           <View style={[styles.statusBadge, item.is_active ? styles.statusActive : styles.statusLocked]}>
             <Text style={[styles.statusText, item.is_active ? styles.statusActiveText : styles.statusLockedText]}>
-              {item.is_active ? 'Hoat dong' : 'Da khoa'}
+              {item.is_active ? t('common.active') : t('employees.locked')}
             </Text>
           </View>
         </View>
 
         <Text variant="bodySmall" style={styles.createdAt}>
-          Tao luc {item.created_at ? new Date(item.created_at).toLocaleDateString('vi-VN') : '-'}
+          {t('employees.createdAt', { date: item.created_at ? new Date(item.created_at).toLocaleDateString('vi-VN') : '-' })}
         </Text>
 
         <View style={styles.rowActions}>
           <Button mode="outlined" compact icon="pencil" onPress={() => openEditDialog(item)}>
-            Sua
+            {t('common.edit')}
           </Button>
           <Button
             mode="outlined"
@@ -291,7 +293,7 @@ export default function EmployeesScreen({ navigation }) {
             disabled={Boolean(statusUpdatingId)}
             onPress={() => toggleStatus(item)}
           >
-            {item.is_active ? 'Khoa' : 'Mo khoa'}
+            {item.is_active ? t('employees.lock') : t('employees.unlock')}
           </Button>
           <IconButton
             icon="delete"
@@ -310,22 +312,22 @@ export default function EmployeesScreen({ navigation }) {
     <View style={styles.container}>
       <Appbar.Header mode="small" elevated>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Quan ly nhan vien" subtitle={isBusiness ? `${employees.length} nhan vien` : user?.email} />
+        <Appbar.Content title={t('employees.title')} subtitle={isBusiness ? t('employees.subtitle', { count: employees.length }) : user?.email} />
         {isBusiness ? <Appbar.Action icon="account-plus" onPress={() => setCreateDialogOpen(true)} /> : null}
       </Appbar.Header>
 
       {!isBusiness ? (
         <View style={styles.center}>
-          <Text variant="titleMedium" style={styles.permissionTitle}>Khong co quyen quan ly nhan vien</Text>
+          <Text variant="titleMedium" style={styles.permissionTitle}>{t('employees.noPermissionTitle')}</Text>
           <Text variant="bodySmall" style={styles.permissionText}>
-            Man hinh nay chi danh cho tai khoan doanh nghiep.
+            {t('employees.noPermissionText')}
           </Text>
         </View>
       ) : (
         <>
           <View style={styles.toolbar}>
             <Searchbar
-              placeholder="Tim theo ho ten hoac email"
+              placeholder={t('employees.searchPlaceholder')}
               value={search}
               onChangeText={setSearch}
               style={styles.search}
@@ -333,9 +335,9 @@ export default function EmployeesScreen({ navigation }) {
             />
             <View style={styles.summaryRow}>
               <Text variant="bodySmall" style={styles.summaryText}>
-                {activeCount} dang hoat dong / {employees.length} nhan vien
+                {t('employees.activeSummary', { active: activeCount, total: employees.length })}
               </Text>
-              {search.trim() ? <Button compact onPress={resetSearch}>Xoa tim kiem</Button> : null}
+              {search.trim() ? <Button compact onPress={resetSearch}>{t('employees.clearSearch')}</Button> : null}
             </View>
           </View>
 
@@ -356,13 +358,13 @@ export default function EmployeesScreen({ navigation }) {
             ListEmptyComponent={!loading ? (
               <Surface mode="flat" style={styles.empty}>
                 <Text variant="titleMedium">
-                  {search.trim() ? 'Khong co nhan vien phu hop' : 'Chua co nhan vien nao'}
+                  {search.trim() ? t('employees.emptyFiltered') : t('employees.emptyTitle')}
                 </Text>
                 <Text variant="bodySmall" style={styles.emptyText}>
-                  Tai khoan nhan vien se xuat hien tai day.
+                  {t('employees.emptySubtitle')}
                 </Text>
                 <Button mode="contained" icon="account-plus" onPress={() => setCreateDialogOpen(true)}>
-                  Them nhan vien
+                  {t('employees.addEmployee')}
                 </Button>
               </Surface>
             ) : null}
@@ -377,18 +379,18 @@ export default function EmployeesScreen({ navigation }) {
                 setCreateForm(emptyCreateForm)
               }}
             >
-              <Dialog.Title>Them nhan vien</Dialog.Title>
+              <Dialog.Title>{t('employees.createTitle')}</Dialog.Title>
               <Dialog.ScrollArea>
                 <ScrollView contentContainerStyle={styles.dialogContent}>
                   <TextInput
                     mode="outlined"
-                    label="Ho ten"
+                    label={t('employees.fullName')}
                     value={createForm.full_name}
                     onChangeText={(value) => updateCreateForm('full_name', value)}
                   />
                   <TextInput
                     mode="outlined"
-                    label="Email dang nhap"
+                    label={t('employees.loginEmail')}
                     value={createForm.email}
                     onChangeText={(value) => updateCreateForm('email', value)}
                     autoCapitalize="none"
@@ -396,7 +398,7 @@ export default function EmployeesScreen({ navigation }) {
                   />
                   <TextInput
                     mode="outlined"
-                    label="Mat khau tam thoi"
+                    label={t('employees.temporaryPassword')}
                     value={createForm.password}
                     onChangeText={(value) => updateCreateForm('password', value)}
                     secureTextEntry
@@ -404,27 +406,27 @@ export default function EmployeesScreen({ navigation }) {
                 </ScrollView>
               </Dialog.ScrollArea>
               <Dialog.Actions>
-                <Button onPress={() => setCreateDialogOpen(false)}>Huy</Button>
+                <Button onPress={() => setCreateDialogOpen(false)}>{t('common.cancel')}</Button>
                 <Button loading={submitting} disabled={submitting} onPress={createEmployee}>
-                  Tao tai khoan
+                  {t('employees.createAccount')}
                 </Button>
               </Dialog.Actions>
             </Dialog>
 
             <Dialog visible={editDialogOpen} onDismiss={closeEditDialog}>
-              <Dialog.Title>Chinh sua nhan vien</Dialog.Title>
+              <Dialog.Title>{t('employees.editTitle')}</Dialog.Title>
               <Dialog.ScrollArea>
                 <ScrollView contentContainerStyle={styles.dialogContent}>
-                  <Text variant="titleSmall" style={styles.dialogSectionTitle}>Thong tin co ban</Text>
+                  <Text variant="titleSmall" style={styles.dialogSectionTitle}>{t('employees.basicInfo')}</Text>
                   <TextInput
                     mode="outlined"
-                    label="Ho ten"
+                    label={t('employees.fullName')}
                     value={editForm.full_name}
                     onChangeText={(value) => updateEditForm('full_name', value)}
                   />
                   <TextInput
                     mode="outlined"
-                    label="Email dang nhap"
+                    label={t('employees.loginEmail')}
                     value={editForm.email}
                     onChangeText={(value) => updateEditForm('email', value)}
                     autoCapitalize="none"
@@ -437,22 +439,22 @@ export default function EmployeesScreen({ navigation }) {
                     onPress={updateProfile}
                     style={styles.dialogButton}
                   >
-                    Luu thong tin
+                    {t('employees.saveInfo')}
                   </Button>
 
                   <View style={styles.divider} />
 
-                  <Text variant="titleSmall" style={styles.dialogSectionTitle}>Doi mat khau</Text>
+                  <Text variant="titleSmall" style={styles.dialogSectionTitle}>{t('employees.changePassword')}</Text>
                   <TextInput
                     mode="outlined"
-                    label="Mat khau moi"
+                    label={t('employees.newPassword')}
                     value={editForm.password}
                     onChangeText={(value) => updateEditForm('password', value)}
                     secureTextEntry
                   />
                   <TextInput
                     mode="outlined"
-                    label="Nhap lai mat khau moi"
+                    label={t('employees.confirmNewPassword')}
                     value={editForm.confirm_password}
                     onChangeText={(value) => updateEditForm('confirm_password', value)}
                     secureTextEntry
@@ -464,31 +466,31 @@ export default function EmployeesScreen({ navigation }) {
                     onPress={updatePassword}
                     style={styles.dialogButton}
                   >
-                    Doi mat khau
+                    {t('employees.changePassword')}
                   </Button>
                 </ScrollView>
               </Dialog.ScrollArea>
               <Dialog.Actions>
-                <Button onPress={closeEditDialog}>Dong</Button>
+                <Button onPress={closeEditDialog}>{t('common.close')}</Button>
               </Dialog.Actions>
             </Dialog>
 
             <Dialog visible={Boolean(employeeToDelete)} onDismiss={() => setEmployeeToDelete(null)}>
-              <Dialog.Title>Xoa tai khoan nhan vien?</Dialog.Title>
+              <Dialog.Title>{t('employees.deleteTitle')}</Dialog.Title>
               <Dialog.Content>
                 <Text>
-                  Ban co chac muon xoa tai khoan {employeeToDelete?.full_name || employeeToDelete?.email}?
+                  {t('employees.deleteBody', { name: employeeToDelete?.full_name || employeeToDelete?.email })}
                 </Text>
               </Dialog.Content>
               <Dialog.Actions>
-                <Button onPress={() => setEmployeeToDelete(null)}>Huy</Button>
+                <Button onPress={() => setEmployeeToDelete(null)}>{t('common.cancel')}</Button>
                 <Button
                   textColor={colors.danger}
                   loading={deletingId === employeeToDelete?.id}
                   disabled={Boolean(deletingId)}
                   onPress={deleteEmployee}
                 >
-                  Xoa
+                  {t('common.delete')}
                 </Button>
               </Dialog.Actions>
             </Dialog>

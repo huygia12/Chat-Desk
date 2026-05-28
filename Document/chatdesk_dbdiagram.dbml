@@ -1,0 +1,320 @@
+Project ChatDesk {
+  database_type: 'PostgreSQL'
+  Note: 'Generated from backend/app/models SQLAlchemy models. Embeddings are stored in Milvus, not PostgreSQL.'
+}
+
+Enum user_role {
+  business
+  admin
+  employee
+}
+
+Enum platform_type {
+  facebook
+  instagram
+  telegram
+  widget
+}
+
+Enum conversation_status {
+  open
+  closed
+}
+
+Enum sender_type {
+  contact
+  business
+  ai
+}
+
+Enum product_status {
+  available
+  out_of_stock
+}
+
+Enum saved_reply_visibility {
+  business
+  personal
+}
+
+Table users {
+  id uuid [pk]
+  email varchar(255) [not null]
+  password_hash varchar(255) [not null]
+  role user_role [not null, default: 'business']
+  business_name varchar(255)
+  business_description text
+  avatar_url text
+  store_address text
+  opening_hours text
+  shipping_policy text
+  warranty_policy text
+  payment_methods text
+  hotline varchar(50)
+  phone varchar(20)
+  full_name varchar(255)
+  business_id uuid [note: 'For employee users: parent business account']
+  is_active boolean [not null, default: true]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+
+  indexes {
+    email [unique, name: 'ix_users_email']
+  }
+}
+
+Table channels {
+  id uuid [pk]
+  business_id uuid [not null]
+  platform platform_type [not null]
+  platform_page_id varchar(255) [not null]
+  page_name varchar(255)
+  access_token text [not null]
+  is_active boolean [default: true]
+  widget_id varchar(255) [unique]
+  widget_secret text
+  allowed_origins text [note: 'JSON string']
+  created_at timestamptz [default: `now()`]
+}
+
+Table contacts {
+  id uuid [pk]
+  business_id uuid [not null]
+  platform platform_type [not null]
+  platform_user_id varchar(255) [not null]
+  display_name varchar(255)
+  profile_pic_url text
+  visitor_email varchar(255)
+  visitor_phone varchar(255)
+  created_at timestamptz [default: `now()`]
+}
+
+Table conversations {
+  id uuid [pk]
+  business_id uuid [not null]
+  channel_id uuid [not null]
+  contact_id uuid [not null]
+  platform platform_type [not null]
+  status conversation_status [not null, default: 'open']
+  assigned_to_id uuid
+  assigned_to_business boolean [not null, default: false]
+  last_message_at timestamptz
+  is_ai_enabled boolean [default: true]
+  created_at timestamptz [default: `now()`]
+}
+
+Table messages {
+  id uuid [pk]
+  conversation_id uuid [not null]
+  sender_type sender_type [not null]
+  content text [not null]
+  platform_message_id varchar(255)
+  attachment_url text
+  attachment_filename varchar(255)
+  attachment_mime_type varchar(255)
+  attachment_size int
+  attachment_kind varchar(32)
+  created_at timestamptz [default: `now()`]
+
+  indexes {
+    (conversation_id, created_at, id) [name: 'ix_messages_conversation_created_id']
+  }
+}
+
+Table products {
+  id uuid [pk]
+  business_id uuid [not null]
+  name varchar(255) [not null]
+  sku varchar(120)
+  category varchar(120)
+  description text
+  price numeric(12,2)
+  stock_quantity int
+  status product_status [not null, default: 'available']
+  extra_info jsonb
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table labels {
+  id uuid [pk]
+  business_id uuid [not null]
+  name varchar(80) [not null]
+  color varchar(7) [not null, default: '#d8d800']
+  internal_note text
+  created_by_id uuid
+  updated_by_id uuid
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+
+  indexes {
+    business_id [name: 'ix_labels_business_id']
+    (business_id, name) [unique, name: 'uq_labels_business_name']
+  }
+}
+
+Table contact_labels {
+  contact_id uuid [not null]
+  label_id uuid [not null]
+  created_at timestamptz [not null, default: `now()`]
+
+  indexes {
+    (contact_id, label_id) [pk]
+  }
+}
+
+Table saved_replies {
+  id uuid [pk]
+  business_id uuid [not null]
+  owner_id uuid
+  visibility saved_reply_visibility [not null]
+  title varchar(120) [not null]
+  shortcut varchar(80) [not null]
+  content text [not null]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+
+  indexes {
+    business_id [name: 'ix_saved_replies_business_id']
+    owner_id [name: 'ix_saved_replies_owner_id']
+  }
+}
+
+Table assignment_settings {
+  business_id uuid [pk]
+  employee_assignment_locked boolean [not null, default: false]
+  auto_assign_enabled boolean [not null, default: false]
+  auto_assign_strategy varchar(40) [not null, default: 'round_robin']
+  channel_assignment_rules json [not null]
+  label_assignment_rules json [not null]
+  last_round_robin_assignee_id uuid
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table conversation_assignment_history {
+  id uuid [pk]
+  conversation_id uuid [not null]
+  business_id uuid [not null]
+  actor_id uuid [not null]
+  from_assignee_id uuid
+  to_assignee_id uuid
+  action varchar(40) [not null]
+  created_at timestamptz [default: `now()`]
+
+  indexes {
+    conversation_id [name: 'ix_conversation_assignment_history_conversation_id']
+    business_id [name: 'ix_conversation_assignment_history_business_id']
+  }
+}
+
+Table conversation_label_history {
+  id uuid [pk]
+  conversation_id uuid
+  contact_id uuid [not null]
+  business_id uuid [not null]
+  actor_id uuid [not null]
+  label_id uuid [not null]
+  action varchar(40) [not null]
+  created_at timestamptz [default: `now()`]
+
+  indexes {
+    conversation_id [name: 'ix_conversation_label_history_conversation_id']
+    contact_id [name: 'ix_conversation_label_history_contact_id']
+    business_id [name: 'ix_conversation_label_history_business_id']
+  }
+}
+
+Table conversation_read_states {
+  id uuid [pk]
+  conversation_id uuid [not null]
+  user_id uuid [not null]
+  business_id uuid [not null]
+  last_read_at timestamptz [not null]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+
+  indexes {
+    conversation_id [name: 'ix_conversation_read_states_conversation_id']
+    user_id [name: 'ix_conversation_read_states_user_id']
+    business_id [name: 'ix_conversation_read_states_business_id']
+    (conversation_id, user_id) [unique, name: 'uq_conversation_read_states_conversation_user']
+  }
+}
+
+Table ai_assistant_messages {
+  id uuid [pk]
+  business_id uuid [not null]
+  user_id uuid [not null]
+  conversation_id uuid
+  role varchar(20) [not null]
+  content text [not null]
+  created_at timestamptz [not null, default: `now()`]
+
+  indexes {
+    (user_id, created_at, id) [name: 'ix_ai_assistant_messages_user_created']
+  }
+}
+
+Table device_tokens {
+  id uuid [pk]
+  user_id uuid [not null]
+  business_id uuid [not null]
+  expo_push_token varchar(255) [not null]
+  platform varchar(32)
+  device_name varchar(255)
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+
+  indexes {
+    user_id [name: 'ix_device_tokens_user_id']
+    business_id [name: 'ix_device_tokens_business_id']
+    expo_push_token [unique, name: 'uq_device_tokens_expo_push_token']
+  }
+}
+
+Ref: users.business_id > users.id [delete: cascade]
+
+Ref: channels.business_id > users.id
+Ref: contacts.business_id > users.id
+Ref: conversations.business_id > users.id
+Ref: conversations.channel_id > channels.id
+Ref: conversations.contact_id > contacts.id
+Ref: conversations.assigned_to_id > users.id
+Ref: messages.conversation_id > conversations.id
+Ref: products.business_id > users.id
+
+Ref: labels.business_id > users.id [delete: cascade]
+Ref: labels.created_by_id > users.id
+Ref: labels.updated_by_id > users.id
+Ref: contact_labels.contact_id > contacts.id [delete: cascade]
+Ref: contact_labels.label_id > labels.id [delete: cascade]
+
+Ref: saved_replies.business_id > users.id [delete: cascade]
+Ref: saved_replies.owner_id > users.id [delete: cascade]
+
+Ref: assignment_settings.business_id > users.id [delete: cascade]
+Ref: assignment_settings.last_round_robin_assignee_id > users.id
+
+Ref: conversation_assignment_history.conversation_id > conversations.id [delete: cascade]
+Ref: conversation_assignment_history.business_id > users.id [delete: cascade]
+Ref: conversation_assignment_history.actor_id > users.id
+Ref: conversation_assignment_history.from_assignee_id > users.id
+Ref: conversation_assignment_history.to_assignee_id > users.id
+
+Ref: conversation_label_history.conversation_id > conversations.id [delete: cascade]
+Ref: conversation_label_history.contact_id > contacts.id [delete: cascade]
+Ref: conversation_label_history.business_id > users.id [delete: cascade]
+Ref: conversation_label_history.actor_id > users.id
+Ref: conversation_label_history.label_id > labels.id [delete: cascade]
+
+Ref: conversation_read_states.conversation_id > conversations.id [delete: cascade]
+Ref: conversation_read_states.user_id > users.id [delete: cascade]
+Ref: conversation_read_states.business_id > users.id [delete: cascade]
+
+Ref: ai_assistant_messages.business_id > users.id [delete: cascade]
+Ref: ai_assistant_messages.user_id > users.id [delete: cascade]
+Ref: ai_assistant_messages.conversation_id > conversations.id [delete: set null]
+
+Ref: device_tokens.user_id > users.id [delete: cascade]
+Ref: device_tokens.business_id > users.id [delete: cascade]

@@ -153,16 +153,6 @@ Table labels {
   }
 }
 
-Table contact_labels {
-  contact_id uuid [not null]
-  label_id uuid [not null]
-  created_at timestamptz [not null, default: `now()`]
-
-  indexes {
-    (contact_id, label_id) [pk]
-  }
-}
-
 Table saved_replies {
   id uuid [pk]
   business_id uuid [not null]
@@ -287,8 +277,7 @@ Ref: products.business_id > users.id
 Ref: labels.business_id > users.id [delete: cascade]
 Ref: labels.created_by_id > users.id
 Ref: labels.updated_by_id > users.id
-Ref: contact_labels.contact_id > contacts.id [delete: cascade]
-Ref: contact_labels.label_id > labels.id [delete: cascade]
+Ref: contacts.id <> labels.id
 
 Ref: saved_replies.business_id > users.id [delete: cascade]
 Ref: saved_replies.owner_id > users.id [delete: cascade]

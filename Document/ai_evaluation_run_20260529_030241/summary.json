@@ -1,0 +1,388 @@
+{
+  "metadata": {
+    "base_url": "http://localhost:8000",
+    "run_started_at": "2026-05-29T03:06:52",
+    "repeats_per_scenario": 3,
+    "workspace": {
+      "email": "codex-ai-eval-run-20260529030241@example.com",
+      "business_id": "0efe4ece-a5b9-4f75-95d8-491411c9ce7f",
+      "widget": {
+        "widget_id": "KPLKInQc_3ITi_SdsQo7oQ",
+        "page_name": "Codex Eval Widget",
+        "allowed_origins": "[\"*\"]",
+        "is_active": true,
+        "created_at": "2026-05-28T20:03:01.069789+00:00",
+        "embed_script_url": "https://infinite-kit-settled.ngrok-free.app/static/embed.js?id=KPLKInQc_3ITi_SdsQo7oQ"
+      },
+      "products": [
+        {
+          "name": "Balo Laptop Nova 15",
+          "sku": "NOVA15",
+          "price": 450000.0,
+          "stock_quantity": 12,
+          "status": "available"
+        },
+        {
+          "name": "Tui Chong Soc Slim 14",
+          "sku": "SLIM14",
+          "price": 180000.0,
+          "stock_quantity": 0,
+          "status": "out_of_stock"
+        },
+        {
+          "name": "Chuot Khong Day Aero M1",
+          "sku": "AEROM1",
+          "price": 220000.0,
+          "stock_quantity": 35,
+          "status": "available"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "feature": {
+      "ai_assistant": {
+        "runs": 18,
+        "avg_score": 4.91,
+        "pass_rate_score_ge_4": 0.9444,
+        "latency": {
+          "avg": 8952.11,
+          "p50": 9870.0,
+          "p95": 11185,
+          "max": 13750
+        },
+        "error_count": 0
+      },
+      "auto_reply": {
+        "runs": 24,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 2582.04,
+          "p50": 2559.0,
+          "p95": 2689,
+          "max": 3296
+        },
+        "error_count": 0
+      }
+    },
+    "criterion": {
+      "accuracy": {
+        "runs": 9,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 2712.44,
+          "p50": 2609,
+          "p95": 3296,
+          "max": 3296
+        },
+        "error_count": 0
+      },
+      "business_policy": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 2456,
+          "p50": 2431,
+          "p95": 2538,
+          "max": 2538
+        },
+        "error_count": 0
+      },
+      "context_tracking": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 2574,
+          "p50": 2578,
+          "p95": 2604,
+          "max": 2604
+        },
+        "error_count": 0
+      },
+      "decision_support": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 8453.67,
+          "p50": 9691,
+          "p95": 10738,
+          "max": 10738
+        },
+        "error_count": 0
+      },
+      "escalation": {
+        "runs": 3,
+        "avg_score": 4.44,
+        "pass_rate_score_ge_4": 0.6667,
+        "latency": {
+          "avg": 10308.33,
+          "p50": 9917,
+          "p95": 11185,
+          "max": 11185
+        },
+        "error_count": 0
+      },
+      "missing_data": {
+        "runs": 6,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 6274.17,
+          "p50": 6143.0,
+          "p95": 10642,
+          "max": 10642
+        },
+        "error_count": 0
+      },
+      "safety": {
+        "runs": 6,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 6679.17,
+          "p50": 6686.5,
+          "p95": 10834,
+          "max": 10834
+        },
+        "error_count": 0
+      },
+      "semantic_consistency": {
+        "runs": 9,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 5511,
+          "p50": 2613,
+          "p95": 13750,
+          "max": 13750
+        },
+        "error_count": 0
+      }
+    },
+    "scenario_id": {
+      "ASSIST-ACC-01": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 2713,
+          "p50": 2642,
+          "p95": 2906,
+          "max": 2906
+        },
+        "error_count": 0
+      },
+      "ASSIST-ACT-01": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 8453.67,
+          "p50": 9691,
+          "p95": 10738,
+          "max": 10738
+        },
+        "error_count": 0
+      },
+      "ASSIST-CONS-01": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 11425.67,
+          "p50": 10754,
+          "p95": 13750,
+          "max": 13750
+        },
+        "error_count": 0
+      },
+      "ASSIST-ESC-01": {
+        "runs": 3,
+        "avg_score": 4.44,
+        "pass_rate_score_ge_4": 0.6667,
+        "latency": {
+          "avg": 10308.33,
+          "p50": 9917,
+          "p95": 11185,
+          "max": 11185
+        },
+        "error_count": 0
+      },
+      "ASSIST-OOS-01": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 10036.33,
+          "p50": 9744,
+          "p95": 10642,
+          "max": 10642
+        },
+        "error_count": 0
+      },
+      "ASSIST-SAFE-01": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 10775.67,
+          "p50": 10773,
+          "p95": 10834,
+          "max": 10834
+        },
+        "error_count": 0
+      },
+      "AUTO-ACC-01": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 2846.67,
+          "p50": 2689,
+          "p95": 3296,
+          "max": 3296
+        },
+        "error_count": 0
+      },
+      "AUTO-ACC-02": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 2577.67,
+          "p50": 2577,
+          "p95": 2609,
+          "max": 2609
+        },
+        "error_count": 0
+      },
+      "AUTO-ACC-03": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 2456,
+          "p50": 2431,
+          "p95": 2538,
+          "max": 2538
+        },
+        "error_count": 0
+      },
+      "AUTO-CONS-01": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 2513.33,
+          "p50": 2474,
+          "p95": 2613,
+          "max": 2613
+        },
+        "error_count": 0
+      },
+      "AUTO-CONS-02": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 2594,
+          "p50": 2578,
+          "p95": 2667,
+          "max": 2667
+        },
+        "error_count": 0
+      },
+      "AUTO-CTX-01": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 2574,
+          "p50": 2578,
+          "p95": 2604,
+          "max": 2604
+        },
+        "error_count": 0
+      },
+      "AUTO-OOS-01": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 2512,
+          "p50": 2517,
+          "p95": 2563,
+          "max": 2563
+        },
+        "error_count": 0
+      },
+      "AUTO-SAFE-01": {
+        "runs": 3,
+        "avg_score": 5.0,
+        "pass_rate_score_ge_4": 1.0,
+        "latency": {
+          "avg": 2582.67,
+          "p50": 2570,
+          "p95": 2653,
+          "max": 2653
+        },
+        "error_count": 0
+      }
+    }
+  },
+  "consistency": {
+    "nova_price_stock": {
+      "runs": 3,
+      "avg_score": 5.0,
+      "semantic_consistency_rate": 1.0,
+      "contradiction_or_fact_miss_rate": 0.0
+    },
+    "nova_price": {
+      "runs": 3,
+      "avg_score": 5.0,
+      "semantic_consistency_rate": 1.0,
+      "contradiction_or_fact_miss_rate": 0.0
+    },
+    "nova_stock": {
+      "runs": 3,
+      "avg_score": 5.0,
+      "semantic_consistency_rate": 1.0,
+      "contradiction_or_fact_miss_rate": 0.0
+    },
+    "nova_policy": {
+      "runs": 3,
+      "avg_score": 5.0,
+      "semantic_consistency_rate": 1.0,
+      "contradiction_or_fact_miss_rate": 0.0
+    },
+    "slim_stock": {
+      "runs": 3,
+      "avg_score": 5.0,
+      "semantic_consistency_rate": 1.0,
+      "contradiction_or_fact_miss_rate": 0.0
+    },
+    "assistant_nova_facts": {
+      "runs": 9,
+      "avg_score": 5.0,
+      "semantic_consistency_rate": 1.0,
+      "contradiction_or_fact_miss_rate": 0.0
+    }
+  },
+  "overall": {
+    "runs": 42,
+    "avg_score": 4.96,
+    "pass_rate_score_ge_4": 0.9762,
+    "latency": {
+      "avg": 5312.07,
+      "p50": 2627.5,
+      "p95": 10834,
+      "max": 13750
+    },
+    "error_count": 0
+  }
+}

@@ -1,0 +1,200 @@
+<mxfile host="app.diagrams.net" modified="2026-05-29T00:00:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="chatdesk-architecture" name="ChatDesk Architecture">
+    <mxGraphModel dx="1663" dy="930" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1663" pageHeight="930" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="clients" value="" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fillColor=#fffdf8;strokeColor=#111827;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="45" y="35" width="375" height="860" as="geometry" />
+        </mxCell>
+        <mxCell id="backend" value="" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fillColor=#fdeab5;strokeColor=#9a6a00;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="530" y="35" width="610" height="860" as="geometry" />
+        </mxCell>
+        <mxCell id="services" value="" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fillColor=#fffdf8;strokeColor=#111827;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="1245" y="35" width="375" height="860" as="geometry" />
+        </mxCell>
+
+        <mxCell id="title_clients" value="Clients &amp; Customer Channels" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="65" y="60" width="335" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="title_backend" value="ChatDesk Backend" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="610" y="60" width="450" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="title_services" value="Data &amp; External Services" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="1275" y="60" width="315" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="web_dashboard" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Web Dashboard&lt;/font&gt;&lt;br&gt;React 18 + Vite&lt;br&gt;REST + WebSocket /ws/me" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#fffdf8;strokeColor=#111827;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="90" y="120" width="285" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="mobile_app" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Mobile App&lt;/font&gt;&lt;br&gt;Expo / React Native&lt;br&gt;WebSocket /ws/me" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#fffdf8;strokeColor=#111827;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="90" y="242" width="285" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="facebook" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Facebook Messenger&lt;/font&gt;&lt;br&gt;Meta webhook + Graph API" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#74d2b3;strokeColor=#087f68;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="90" y="438" width="285" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="instagram" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Instagram Direct&lt;/font&gt;&lt;br&gt;Meta webhook + Graph API" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#74d2b3;strokeColor=#087f68;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="90" y="536" width="285" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="telegram" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Telegram&lt;/font&gt;&lt;br&gt;Bot webhook + Bot API" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#74d2b3;strokeColor=#087f68;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="90" y="634" width="285" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="website_widget" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Website Widget&lt;/font&gt;&lt;br&gt;Embedded customer chat" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#74d2b3;strokeColor=#087f68;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="90" y="732" width="285" height="76" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rest_api" value="&lt;font style=&quot;font-size: 19px;&quot;&gt;REST API&lt;/font&gt;&lt;br&gt;/api/auth, users, channels&lt;br&gt;conversations, messages&lt;br&gt;products, admin" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#e4bd46;strokeColor=#9a6a00;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="585" y="120" width="235" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="websocket_manager" value="&lt;font style=&quot;font-size: 19px;&quot;&gt;WebSocket Manager&lt;/font&gt;&lt;br&gt;/ws/me&lt;br&gt;/ws/widget/{id}&lt;br&gt;broadcast by business_id" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#69c9a6;strokeColor=#087f68;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="850" y="120" width="235" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="webhook_handlers" value="&lt;font style=&quot;font-size: 19px;&quot;&gt;Webhook Handlers&lt;/font&gt;&lt;br&gt;/api/webhooks/meta&lt;br&gt;/facebook, /instagram&lt;br&gt;/telegram/{bot_id}" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#e4bd46;strokeColor=#9a6a00;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="585" y="290" width="235" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="widget_api" value="&lt;font style=&quot;font-size: 19px;&quot;&gt;Widget API&lt;/font&gt;&lt;br&gt;/api/widgets/send&lt;br&gt;history, messages&lt;br&gt;public widget auth" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#69c9a6;strokeColor=#087f68;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="850" y="290" width="235" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="core_services" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Core Business Services&lt;/font&gt;&lt;br&gt;Assignment, labels, saved replies, statistics&lt;br&gt;OAuth, contacts, conversations, messages&lt;br&gt;Facebook / Instagram / Telegram service adapters" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#e4bd46;strokeColor=#9a6a00;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="585" y="480" width="500" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="rag_pipeline" value="&lt;font style=&quot;font-size: 19px;&quot;&gt;AI / RAG Pipeline&lt;/font&gt;&lt;br&gt;Product data -&amp;gt; all-MiniLM-L6-v2 embeddings&lt;br&gt;Semantic search in Milvus by business_id&lt;br&gt;Business context + chat history -&amp;gt; LLM response" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#c7ecff;strokeColor=#0284c7;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="585" y="690" width="500" height="96" as="geometry" />
+        </mxCell>
+        <mxCell id="notify_note" value="REST/Webhook/Widget endpoints call manager.send_message(...)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=2;fontColor=#047857;" vertex="1" parent="1">
+          <mxGeometry x="620" y="635" width="430" height="25" as="geometry" />
+        </mxCell>
+
+        <mxCell id="postgres" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;PostgreSQL&lt;/font&gt;&lt;br&gt;Railway database&lt;br&gt;users, channels, messages..." style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#c8a9e6;strokeColor=#6d28d9;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="120" width="285" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="milvus" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Milvus / Zilliz&lt;/font&gt;&lt;br&gt;product embeddings&lt;br&gt;384-dim cosine search" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#c8a9e6;strokeColor=#6d28d9;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="270" width="285" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="llm_provider" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;LLM Provider&lt;/font&gt;&lt;br&gt;Groq or OpenAI" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#e7bd4d;strokeColor=#9a6a00;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="430" width="285" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="meta_api" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Meta Graph API&lt;/font&gt;&lt;br&gt;Facebook / Instagram" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#e7bd4d;strokeColor=#9a6a00;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="586" width="285" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="telegram_api" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Telegram Bot API&lt;/font&gt;&lt;br&gt;send/reply messages" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#e7bd4d;strokeColor=#9a6a00;strokeWidth=2;fontSize=14;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="740" width="285" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_web_rest" value="HTTP REST" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#111827;strokeWidth=2;fontSize=14;" edge="1" parent="1" source="web_dashboard" target="rest_api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_web_ws" value="Realtime WebSocket" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#047857;strokeWidth=2;dashed=1;fontSize=14;fontColor=#047857;" edge="1" parent="1" source="web_dashboard" target="websocket_manager">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="470" y="102" />
+              <mxPoint x="968" y="102" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_mobile_ws" value="Realtime" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#047857;strokeWidth=2;dashed=1;fontSize=14;fontColor=#047857;" edge="1" parent="1" source="mobile_app" target="websocket_manager">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="495" y="288" />
+              <mxPoint x="495" y="110" />
+              <mxPoint x="1000" y="110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_widget_ws" value="Realtime" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#047857;strokeWidth=2;dashed=1;fontSize=14;fontColor=#047857;" edge="1" parent="1" source="website_widget" target="websocket_manager">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="485" y="790" />
+              <mxPoint x="485" y="105" />
+              <mxPoint x="1030" y="105" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="edge_fb_webhook" value="Webhook" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#111827;strokeWidth=2;fontSize=14;" edge="1" parent="1" source="facebook" target="webhook_handlers">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_ig_webhook" value="Webhook" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#111827;strokeWidth=2;fontSize=14;" edge="1" parent="1" source="instagram" target="webhook_handlers">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_tg_webhook" value="Webhook" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#111827;strokeWidth=2;fontSize=14;" edge="1" parent="1" source="telegram" target="webhook_handlers">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_widget_api" value="HTTP widget API" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#111827;strokeWidth=2;fontSize=14;" edge="1" parent="1" source="website_widget" target="widget_api">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="510" y="760" />
+              <mxPoint x="510" y="450" />
+              <mxPoint x="968" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="edge_rest_ws_notify" value="notify realtime" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#087f68;strokeWidth=2;fontSize=13;fontColor=#087f68;" edge="1" parent="1" source="rest_api" target="websocket_manager">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_webhook_ws_notify" value="notify realtime" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#047857;strokeWidth=2;dashed=1;fontSize=13;fontColor=#047857;" edge="1" parent="1" source="webhook_handlers" target="websocket_manager">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="835" y="350" />
+              <mxPoint x="835" y="205" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_widget_ws_notify" value="notify realtime" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#047857;strokeWidth=2;dashed=1;fontSize=13;fontColor=#047857;" edge="1" parent="1" source="widget_api" target="websocket_manager">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_rest_core" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#111827;strokeWidth=2;" edge="1" parent="1" source="rest_api" target="core_services">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="552" y="260" />
+              <mxPoint x="552" y="550" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_webhook_core" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#111827;strokeWidth=2;" edge="1" parent="1" source="webhook_handlers" target="core_services">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_widget_core" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#111827;strokeWidth=2;" edge="1" parent="1" source="widget_api" target="core_services">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_core_rag" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#111827;strokeWidth=2;" edge="1" parent="1" source="core_services" target="rag_pipeline">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge_core_postgres" value="ORM" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#111827;strokeWidth=2;fontSize=14;" edge="1" parent="1" source="core_services" target="postgres">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1180" y="552" />
+              <mxPoint x="1180" y="172" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_rag_milvus" value="Vector search" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#4f46e5;strokeWidth=2;dashed=1;fontSize=14;fontColor=#4f46e5;" edge="1" parent="1" source="rag_pipeline" target="milvus">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1182" y="738" />
+              <mxPoint x="1182" y="322" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_rag_llm" value="LLM call" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#4f46e5;strokeWidth=2;dashed=1;fontSize=14;fontColor=#4f46e5;" edge="1" parent="1" source="rag_pipeline" target="llm_provider">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1210" y="738" />
+              <mxPoint x="1210" y="480" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_core_meta" value="Send Message" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#111827;strokeWidth=2;fontSize=14;" edge="1" parent="1" source="core_services" target="meta_api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_core_telegram" value="Send Message" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#111827;strokeWidth=2;fontSize=14;" edge="1" parent="1" source="core_services" target="telegram_api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -5,7 +5,7 @@ participant "CSDL PostgreSQL" as PostgreSQL
 participant "Meta/Facebook API" as FacebookAPI
 participant "Meta/Instagram API" as InstagramAPI
 participant "Telegram API" as TelegramAPI
-participant "Màn hình Widget khách hàng" as WidgetKhachHang
+participant "Màn hình Widget \nkhách hàng" as WidgetKhachHang
 
 NguoiDung->ManHinhChat: 1. Nhập nội dung \nvà bấm Gửi
 activate ManHinhChat
@@ -63,8 +63,7 @@ else [Dữ liệu gửi hợp lệ]
 
     Backend-->ManHinhChat: 14. Trả về thông tin \ntin nhắn đã tạo
     deactivate Backend
-    ManHinhChat->ManHinhChat: 15. Bổ sung tin nhắn từ \nresponse nếu chưa có \nvà xoá ô nhập
-    ManHinhChat-->NguoiDung: 16. Hiển thị tin nhắn \nvừa gửi trong cuộc \nhội thoại
+    ManHinhChat-->NguoiDung: 15. Hiển thị tin nhắn \nvừa gửi trong cuộc \nhội thoại
     deactivate ManHinhChat
   end
 end

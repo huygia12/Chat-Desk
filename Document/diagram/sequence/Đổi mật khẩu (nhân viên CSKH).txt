@@ -34,8 +34,7 @@ else [Dữ liệu nhập hợp lệ]
 
       Backend-->ManHinh: 9. Trả về thông báo \nĐã cập nhật mật khẩu
       deactivate Backend
-      ManHinh->ManHinh: 10. Xóa dữ liệu trong \nform mật khẩu
-      ManHinh-->NhanVien: 11. Hiển thị thông báo thành công
+      ManHinh-->NhanVien: 10. Hiển thị thông báo thành công
       deactivate ManHinh
     end
   end

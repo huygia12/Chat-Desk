@@ -458,8 +458,8 @@ export default function Chat() {
     try {
       await sendMessage(activeConversationId, inputValue.trim())
       setInputValue('')
-    } catch {
-      // Error handled in store
+    } catch (err) {
+      message.error(err.response?.data?.detail || t('chat.sendFailed'))
     } finally {
       setSending(false)
     }

@@ -7,7 +7,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from app.api import auth, users, channels, contacts, conversations, messages, products, webhooks, admin, widgets, employees, labels, saved_replies, assignments, files, ai_assistant, statistics
+from jose import JWTError, jwt
+from sqlalchemy import select
+from app.api import auth, users, channels, contacts, conversations, messages, products, webhooks, admin, widgets, employees, labels, saved_replies, assignments, files, ai_assistant, statistics, devices
+from app.database import async_session
+from app.models.user import User
 from app.websocket.manager import manager
 from app.config import get_settings
 from app.i18n import (
@@ -137,10 +141,61 @@ app.include_router(statistics.router)
 app.include_router(webhooks.router)
 app.include_router(widgets.router)
 app.include_router(employees.router)
+app.include_router(devices.router)
 app.include_router(admin.router)
 
 
-# WebSocket endpoint (admin/business dashboard)
+async def _get_websocket_user(token: str | None) -> User | None:
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id = payload.get("sub")
+        if not user_id:
+            return None
+    except JWTError:
+        return None
+
+    try:
+        parsed_user_id = uuid.UUID(user_id)
+    except ValueError:
+        return None
+
+    async with async_session() as db:
+        result = await db.execute(select(User).where(User.id == parsed_user_id))
+        user = result.scalar_one_or_none()
+        if not user or not user.is_active or user.role not in ("business", "employee"):
+            return None
+        return user
+
+
+def _websocket_business_id(user: User) -> str | None:
+    if user.role == "business":
+        return str(user.id)
+    if user.role == "employee" and user.business_id:
+        return str(user.business_id)
+    return None
+
+
+# Authenticated WebSocket endpoint for business/employee dashboard clients.
+@app.websocket("/ws/me")
+async def authenticated_websocket_endpoint(websocket: WebSocket, token: str | None = None):
+    user = await _get_websocket_user(token)
+    business_id = _websocket_business_id(user) if user else None
+    if not business_id:
+        await websocket.close(code=4001)
+        return
+
+    await manager.connect(business_id, websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            logger.debug(f"WS received from authenticated business {business_id}: {data}")
+    except WebSocketDisconnect:
+        manager.disconnect(business_id, websocket)
+
+
+# Legacy WebSocket endpoint retained for older clients during migration.
 @app.websocket("/ws/{business_id}")
 async def websocket_endpoint(websocket: WebSocket, business_id: str):
     await manager.connect(business_id, websocket)

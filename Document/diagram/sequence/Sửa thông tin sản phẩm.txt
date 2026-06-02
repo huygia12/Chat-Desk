@@ -1,0 +1,42 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình Sản phẩm" as ManHinhSanPham
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as PostgreSQL
+participant "Vector DB" as VectorDB
+
+ChuDoanhNghiep->ManHinhSanPham: 1. Bấm biểu tượng sửa, nhập \nthông tin sản phẩm và chọn Cập nhật
+activate ManHinhSanPham
+ManHinhSanPham->ManHinhSanPham: 2. Kiểm tra dữ liệu form, \ntên sản phẩm là bắt buộc
+
+alt [Dữ liệu form không hợp lệ]
+    ManHinhSanPham-->ChuDoanhNghiep: 3. Hiển thị thông báo thất bại \nhoặc yêu cầu nhập tên sản phẩm
+else [Dữ liệu form hợp lệ]
+    ManHinhSanPham->Backend: 3. Gửi yêu cầu cập nhật sản phẩm \nPUT /api/products/{product_id}
+    activate Backend
+    Backend->PostgreSQL: 4. Tìm sản phẩm theo id
+    activate PostgreSQL
+    PostgreSQL-->Backend: 5. Trả về thông tin sản phẩm nếu tồn tại
+    deactivate PostgreSQL
+
+    alt [Không tìm thấy sản phẩm]
+        Backend-->ManHinhSanPham: 6. Trả về lỗi không tìm thấy sản phẩm
+        ManHinhSanPham-->ChuDoanhNghiep: 7. Hiển thị thông báo thất bại
+    else [Tìm thấy sản phẩm]
+        Backend->Backend: 6. Cập nhật các trường được gửi: \ntên, SKU, danh mục, mô tả, giá, \ntồn kho, trạng thái, thông tin thêm
+        Backend->Backend: 7. Tạo lại nội dung sản phẩm \nvà vector embedding
+        Backend->VectorDB: 8. Cập nhật embedding sản \nphẩm trong Vector DB
+        activate VectorDB
+        VectorDB-->Backend: 9. Xác nhận đã cập nhật embedding
+        deactivate VectorDB
+        Backend->PostgreSQL: 10. Ghi thay đổi sản phẩm \nvà đọc lại dữ liệu mới nhất
+        activate PostgreSQL
+        PostgreSQL-->Backend: 11. Trả về sản phẩm sau cập nhật
+        deactivate PostgreSQL
+        Backend-->ManHinhSanPham: 12. Trả về kết quả cập nhật thành công
+        deactivate Backend
+        ManHinhSanPham-->ChuDoanhNghiep: 13. Hiển thị thông báo thành \ncông và cập nhật giao diện
+        deactivate ManHinhSanPham
+    end
+    
+end
+

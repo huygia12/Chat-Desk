@@ -1,0 +1,72 @@
+actor "Khách hàng" as KhachHang
+participant "Màn hình Widget ChatDesk" as Widget
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as PostgreSQL
+participant "Màn hình Chat nội bộ" as ChatNoiBo
+
+KhachHang->Widget: 1. Nhập nội dung tin nhắn \nvà bấm gửi
+activate Widget
+Widget->Widget: 2. Kiểm tra thông tin visitor \nvà nội dung tin nhắn
+
+alt [Thiếu thông tin visitor hoặc nội dung trống]
+  Widget-->KhachHang: 3. Không gửi yêu cầu \nvà giữ trạng thái nhập liệu
+else [Dữ liệu nhập hợp lệ]
+  Widget->Backend: 3. Gửi tin nhắn qua Widget\nPOST /api/widgets/send\n{visitor_id, visitor_name, \nvisitor_email, message_text}
+  activate Backend
+  Backend->Backend: 4. Kiểm tra nội dung tin nhắn \nvà cấu hình Widget
+
+  Backend->PostgreSQL: 5. Tìm kênh Widget đang hoạt động \ntrong bảng channels
+  activate PostgreSQL
+  PostgreSQL-->Backend: 6. Trả về kênh Widget \nhoặc không tìm thấy
+  deactivate PostgreSQL
+
+
+    Backend->PostgreSQL: 7. Tìm contact theo \nvisitor_id hoặc visitor_email
+    activate PostgreSQL
+    PostgreSQL-->Backend: 8. Trả contact hoặc không tìm thấy
+    deactivate PostgreSQL
+
+    alt [Contact đã tồn tại]
+      Backend->PostgreSQL: 9. Cập nhật bổ sung thông tin \nvisitor nếu còn thiếu
+      activate PostgreSQL
+      PostgreSQL-->Backend: 10. Xác nhận cập nhật contact
+      deactivate PostgreSQL
+    else [Contact chưa tồn tại]
+      Backend->PostgreSQL: 9. Tạo contact mới \nvới platform = "widget"
+      activate PostgreSQL
+      PostgreSQL-->Backend: 10. Trả contact mới
+      deactivate PostgreSQL
+    end
+
+    Backend->PostgreSQL: 11. Tìm conversation của \ncontact trên kênh Widget
+    activate PostgreSQL
+    PostgreSQL-->Backend: 12. Trả conversation \nhoặc không tìm thấy
+    deactivate PostgreSQL
+
+    alt [Conversation chưa tồn tại]
+      Backend->PostgreSQL: 13. Tạo conversation mới \nvà áp dụng phân công tự động nếu có
+      activate PostgreSQL
+      PostgreSQL-->Backend: 14. Trả conversation mới
+      deactivate PostgreSQL
+    else [Conversation đã tồn tại]
+      Backend->Backend: 13. Sử dụng conversation hiện có
+    end
+
+    Backend->PostgreSQL: 15. Lưu message \nsender_type = "contact" và cập nhật \nconversations.last_message_at
+    activate PostgreSQL
+    PostgreSQL-->Backend: 16. Trả message_id đã lưu
+    deactivate PostgreSQL
+
+    Backend->ChatNoiBo: 17. Phát WebSocket \nnew_message cho màn hình nội bộ
+    activate ChatNoiBo
+    ChatNoiBo->ChatNoiBo: 18. Hiển thị tin nhắn \nmới trong hội thoại
+    deactivate ChatNoiBo
+
+
+    Backend-->Widget: 19. Trả status, conversation_id, \nmessage_id và ai_response nếu có
+    deactivate Backend
+    Widget->Widget: 20. Lưu conversation_id \nvà thêm tin nhắn vào giao diện
+    Widget-->KhachHang: 21. Hiển thị tin nhắn \nđã gửi trong Widget
+    deactivate Widget
+  end
+

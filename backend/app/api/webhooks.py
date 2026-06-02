@@ -12,6 +12,7 @@ from app.models.message import Message
 from app.services.assignment_service import auto_assign_conversation
 from app.services.ai_service import generate_ai_response
 from app.services.file_storage import save_remote_file
+from app.services.push_service import send_conversation_push
 from app.services.telegram_service import get_telegram_file_url, get_telegram_user_profile_photo_url
 from app.websocket.manager import manager
 
@@ -303,6 +304,7 @@ async def _process_incoming_message(
                     },
                 },
             )
+            await send_conversation_push(db, conversation, message, contact)
 
             # 6. If AI enabled, generate and send AI response
             if conversation.is_ai_enabled and not attachment:
@@ -390,6 +392,7 @@ async def _get_sender_profile(
         if platform == "telegram":
             profile_pic_url = await get_telegram_user_profile_photo_url(page_access_token, sender_id)
             if not profile_pic_url:
+                logger.info("Telegram profile photo URL not found for sender_id=%s", sender_id)
                 return None
 
             saved_photo = await save_remote_file(
@@ -398,6 +401,7 @@ async def _get_sender_profile(
                 mime_type="image/jpeg",
             )
             if not saved_photo:
+                logger.warning("Failed to save Telegram profile photo for sender_id=%s", sender_id)
                 return None
 
             return {"profile_pic_url": saved_photo["attachment_url"]}
@@ -426,7 +430,7 @@ def _profile_display_name(profile: dict | None) -> str | None:
 def _profile_pic_url(profile: dict | None) -> str | None:
     if not profile:
         return None
-    return profile.get("profile_pic") or profile.get("profile_picture_url")
+    return profile.get("profile_pic_url") or profile.get("profile_pic") or profile.get("profile_picture_url")
 
 
 def _message_payload(message: Message) -> dict:

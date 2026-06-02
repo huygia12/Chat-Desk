@@ -1,0 +1,38 @@
+actor "Chủ doanh nghiệp" as ChuDN
+participant "Màn hình cài đặt nhân viên" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDN->ManHinh: 1. Bấm Xóa tài khoản nhân viên
+activate ManHinh
+ManHinh->ManHinh: 2. Hiển thị hộp xác nhận xóa
+
+alt [Đã xác nhận xóa]
+  ManHinh->Backend: 3. Gửi yêu cầu xóa tài khoản nhân viên\nDELETE /api/employees/{employee_id}
+  activate Backend
+  Backend->Backend: 4. Kiểm tra quyền Chủ doanh nghiệp
+
+    Backend->CSDL: 5. Tìm nhân viên theo employee_id, \nbusiness_id và role employee
+    activate CSDL
+    CSDL-->Backend: 6. Trả về bản ghi nhân viên \nhoặc không có dữ liệu
+    deactivate CSDL
+
+    alt [Không tìm thấy nhân viên thuộc doanh nghiệp]
+      Backend-->ManHinh: 7. Trả về lỗi 404 Employee not found
+      ManHinh-->ChuDN: 8. Hiển thị thông báo xóa thất bại
+    else [Tìm thấy nhân viên thuộc doanh nghiệp]
+      Backend->CSDL: 7. Xóa bản ghi tài khoản nhân \nviên trong bảng users
+      activate CSDL
+      CSDL-->Backend: 8. Xóa thành công và lưu thay đổi
+      deactivate CSDL
+      Backend-->ManHinh: 9. Trả về 204 No Content
+      deactivate Backend
+      ManHinh-->ChuDN: 10. Hiển thị thông báo xóa thất bại
+    end
+
+  
+else [Hủy xác nhận xóa]
+  ManHinh-->ChuDN: 3. Giữ nguyên tài khoản nhân viên
+  deactivate ManHinh
+end
+

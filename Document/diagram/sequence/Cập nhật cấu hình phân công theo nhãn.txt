@@ -1,0 +1,42 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình Trung tâm phân công" as ManHinhPhanCong
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDoanhNghiep->ManHinhPhanCong: 1. Chọn nhãn khách hàng và \nchọn hoặc bỏ chọn nhân viên \nnhận phân công
+activate ManHinhPhanCong
+ManHinhPhanCong->ManHinhPhanCong: 2. Cập nhật tạm thời cấu hình trên giao diện
+
+alt [Có nhân viên được chọn cho nhãn]
+  ManHinhPhanCong->ManHinhPhanCong: 3. Gán danh sách mã nhân viên \nvào label_assignment_rules[label_id]
+else [Không còn nhân viên nào được chọn cho nhãn]
+  ManHinhPhanCong->ManHinhPhanCong: 3. Gán null \nvào label_assignment_rules[label_id] \nđể gỡ quy tắc
+end
+
+ManHinhPhanCong->Backend: 4. Gửi yêu cầu cập nhật quy tắc theo nhãn: \nPATCH /api/assignments/settings \nvới label_assignment_rules
+activate Backend
+Backend->CSDL: 5. Tìm cấu hình phân công trong bảng \nassignment_settings theo doanh nghiệp
+activate CSDL
+CSDL-->Backend: 6. Trả về cấu hình phân công nếu đã tồn tại
+
+alt [Chưa có cấu hình phân công]
+  Backend->CSDL: 7. Tạo cấu hình phân công mặc định
+  CSDL-->Backend: 8. Xác nhận cấu hình mới
+else [Đã có cấu hình phân công]
+  Backend->Backend: 7. Sử dụng cấu hình phân công hiện có
+end
+
+Backend->CSDL: 9. Lấy danh sách nhân viên \ncó thể nhận phân công tự động
+CSDL-->Backend: 10. Trả về danh sách mã nhân viên hợp lệ
+deactivate CSDL
+
+Backend->Backend: 11. Làm sạch label_assignment_rules: \nbỏ giá trị null, loại mã nhân viên không hợp lệ và loại trùng
+  Backend->CSDL: 12. Lưu label_assignment_rules mới \nvào bảng assignment_settings
+  activate CSDL
+  CSDL-->Backend: 13. Trả về cấu hình phân công đã cập nhật
+  deactivate CSDL
+  Backend-->ManHinhPhanCong: 14. Trả về cấu hình phân công mới
+  deactivate Backend
+  ManHinhPhanCong->ManHinhPhanCong: 15. Đồng bộ lại trạng thái \nmàn hình theo cấu hình trả về
+  ManHinhPhanCong-->ChuDoanhNghiep: 16. Hiển thị thông báo thành công
+  deactivate ManHinhPhanCong

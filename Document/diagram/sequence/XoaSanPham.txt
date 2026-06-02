@@ -1,0 +1,33 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình sản phẩm" as ManHinhSanPham
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+participant "Vector DB" as VectorDB
+
+ChuDoanhNghiep->ManHinhSanPham: 1. Bấm nút Xóa và xác\n nhận xóa sản phẩm
+activate ManHinhSanPham
+ManHinhSanPham->Backend: 2. Gửi yêu cầu xóa sản phẩm\nDELETE /api/products/{id}
+activate Backend
+Backend->CSDL: 3. Tìm sản phẩm theo id và \nbusiness_id trong bảng products
+activate CSDL
+CSDL-->Backend: 4. Trả về kết quả tìm kiếm
+deactivate CSDL
+
+alt [Không tìm thấy sản phẩm]
+  Backend-->ManHinhSanPham: 5. Trả về lỗi không \ntìm thấy sản phẩm
+  ManHinhSanPham-->ChuDoanhNghiep: 6. Hiển thị thông báo thất bại \nXóa thất bại
+else [Tìm thấy sản phẩm]
+  Backend->VectorDB: 5. Xóa embedding của sản phẩm \ntrong product_embeddings
+  activate VectorDB
+  VectorDB-->Backend: 6. Xác nhận đã xóa embedding
+  deactivate VectorDB
+  Backend->CSDL: 7. Xóa bản ghi sản phẩm \ntrong bảng products
+  activate CSDL
+  CSDL-->Backend: 8. Xác nhận xóa sản phẩm
+  deactivate CSDL
+  Backend-->ManHinhSanPham: 9. Trả về kết quả \nĐã xóa sản phẩm
+  deactivate Backend
+  ManHinhSanPham->ManHinhSanPham: 10. Cập nhật lại bảng sản \nphẩm trên giao diện
+  ManHinhSanPham-->ChuDoanhNghiep: 11. Hiển thị thông báo thành công \nXóa sản phẩm thành công
+  deactivate ManHinhSanPham
+end

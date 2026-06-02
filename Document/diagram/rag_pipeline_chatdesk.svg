@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="1540" viewBox="0 0 1180 1540">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#202124"/>
+    </marker>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .page { fill: #ffffff; }
+      .panel { fill: #f6f7f7; stroke: #202124; stroke-width: 2.4; }
+      .tab { fill: #f6f7f7; stroke: #202124; stroke-width: 2.4; }
+      .box-green { fill: #d7f4eb; stroke: #7a9b93; stroke-width: 1.4; }
+      .box-blue { fill: #e3f5fc; stroke: #8ca6b0; stroke-width: 1.4; }
+      .box-gray { fill: #dfe3e6; stroke: #8c9398; stroke-width: 1.4; }
+      .box-red { fill: #fde0dc; stroke: #b48c85; stroke-width: 1.4; }
+      .box-result { fill: #e5f3e4; stroke: #8fa28e; stroke-width: 1.4; }
+      .db { fill: #fff4c9; stroke: #9a8d5b; stroke-width: 1.4; }
+      .db-blue { fill: #e7f0ff; stroke: #8c9ab6; stroke-width: 1.4; }
+      .line { stroke: #202124; stroke-width: 1.8; fill: none; marker-end: url(#arrow); }
+      .line-soft { stroke: #4b5560; stroke-width: 1.6; fill: none; marker-end: url(#arrow); }
+      .label { fill: #202124; font-family: Arial, Helvetica, sans-serif; font-size: 19px; }
+      .small { fill: #202124; font-family: Arial, Helvetica, sans-serif; font-size: 18px; }
+      .title { fill: #202124; font-family: Arial, Helvetica, sans-serif; font-size: 21px; font-weight: 700; }
+      .boxtext { fill: #202124; font-family: Arial, Helvetica, sans-serif; font-size: 18px; }
+      .caption { fill: #202124; font-family: Arial, Helvetica, sans-serif; font-size: 17px; }
+    </style>
+  </defs>
+
+  <rect class="page" x="0" y="0" width="1180" height="1540"/>
+
+  <!-- Stage 1 panel -->
+  <path class="tab" d="M 8 8 H 352 Q 360 8 363 16 L 374 62 H 8 Z"/>
+  <text class="title" x="38" y="43">Giai đoạn 1: Xây dựng tri thức</text>
+  <rect class="panel" x="8" y="62" width="420" height="995" rx="8"/>
+
+  <rect class="box-green" x="92" y="100" width="252" height="76" rx="6" filter="url(#softShadow)"/>
+  <text class="boxtext" x="218" y="132" text-anchor="middle">Dữ liệu doanh nghiệp</text>
+  <text class="boxtext" x="218" y="157" text-anchor="middle">Sản phẩm + chính sách</text>
+
+  <line class="line" x1="218" y1="176" x2="218" y2="285"/>
+  <text class="small" x="246" y="237">1. Nhập/Cập nhật</text>
+
+  <rect class="box-green" x="66" y="285" width="310" height="92" rx="6" filter="url(#softShadow)"/>
+  <text class="boxtext" x="221" y="320" text-anchor="middle">Chuẩn hóa dữ liệu</text>
+  <text class="boxtext" x="221" y="345" text-anchor="middle">Product + Business Context</text>
+
+  <line class="line" x1="221" y1="377" x2="221" y2="498"/>
+  <text class="small" x="250" y="447">2. Tạo đơn vị tri thức</text>
+
+  <rect class="box-green" x="80" y="498" width="282" height="92" rx="6" filter="url(#softShadow)"/>
+  <text class="boxtext" x="221" y="532" text-anchor="middle">Vector hóa (Embedding)</text>
+  <text class="boxtext" x="221" y="557" text-anchor="middle">all-MiniLM-L6-v2</text>
+
+  <line class="line" x1="221" y1="590" x2="221" y2="704"/>
+  <text class="small" x="250" y="656">3. Lưu Vector</text>
+
+  <!-- Milvus cylinder -->
+  <path class="db" d="M 96 724 C 96 700, 346 700, 346 724 L 346 798 C 346 824, 96 824, 96 798 Z"/>
+  <ellipse class="db" cx="221" cy="724" rx="125" ry="24"/>
+  <text class="boxtext" x="221" y="756" text-anchor="middle">Cơ sở dữ liệu Vector</text>
+  <text class="boxtext" x="221" y="781" text-anchor="middle">Milvus</text>
+
+  <!-- PostgreSQL cylinder -->
+  <path class="db-blue" d="M 98 892 C 98 870, 344 870, 344 892 L 344 966 C 344 990, 98 990, 98 966 Z"/>
+  <ellipse class="db-blue" cx="221" cy="892" rx="123" ry="22"/>
+  <text class="boxtext" x="221" y="923" text-anchor="middle">CSDL nghiệp vụ</text>
+  <text class="boxtext" x="221" y="948" text-anchor="middle">PostgreSQL</text>
+
+  <path class="line-soft" d="M 376 331 C 414 331, 396 904, 344 916"/>
+  <text class="caption" x="268" y="855">Lưu bản ghi gốc</text>
+
+  <!-- Stage 2 panel -->
+  <path class="tab" d="M 680 255 H 1115 Q 1123 255 1126 263 L 1138 316 H 680 Z"/>
+  <text class="title" x="714" y="291">Giai đoạn 2: Truy xuất &amp; Sinh nội dung</text>
+  <rect class="panel" x="680" y="316" width="468" height="980" rx="8"/>
+
+  <!-- 3D-like input boxes -->
+  <polygon class="box-blue" points="770,365 1028,365 1050,342 792,342"/>
+  <polygon class="box-blue" points="1028,365 1050,342 1050,416 1028,439"/>
+  <rect class="box-blue" x="770" y="365" width="258" height="74"/>
+  <text class="boxtext" x="899" y="396" text-anchor="middle">Tin nhắn khách hàng</text>
+  <text class="boxtext" x="899" y="421" text-anchor="middle">FB / Instagram / Widget</text>
+
+  <polygon class="box-blue" points="770,475 1028,475 1050,452 792,452"/>
+  <polygon class="box-blue" points="1028,475 1050,452 1050,526 1028,549"/>
+  <rect class="box-blue" x="770" y="475" width="258" height="74"/>
+  <text class="boxtext" x="899" y="506" text-anchor="middle">Yêu cầu AI nội bộ</text>
+  <text class="boxtext" x="899" y="531" text-anchor="middle">Nhân viên / Doanh nghiệp</text>
+
+  <path class="line" d="M 899 439 L 899 475"/>
+  <line class="line" x1="899" y1="549" x2="899" y2="647"/>
+  <text class="small" x="930" y="604">4. Gửi câu hỏi/yêu cầu</text>
+
+  <rect class="box-blue" x="782" y="647" width="236" height="92" rx="6" filter="url(#softShadow)"/>
+  <text class="boxtext" x="900" y="682" text-anchor="middle">Chuyển đổi truy vấn</text>
+  <text class="boxtext" x="900" y="707" text-anchor="middle">Query Embedding</text>
+
+  <line class="line" x1="900" y1="739" x2="900" y2="860"/>
+  <text class="small" x="930" y="807">5. Đối sánh ngữ nghĩa</text>
+
+  <rect class="box-blue" x="778" y="860" width="246" height="96" rx="6" filter="url(#softShadow)"/>
+  <text class="boxtext" x="901" y="895" text-anchor="middle">Tìm kiếm tương đồng</text>
+  <text class="boxtext" x="901" y="920" text-anchor="middle">Top-K sản phẩm/tri thức</text>
+
+  <!-- Milvus query arrows -->
+  <path class="line-soft" d="M 778 914 C 662 914, 512 848, 346 774"/>
+  <text class="caption" x="510" y="832">6. Truy vấn Milvus</text>
+  <path class="line-soft" d="M 346 747 C 515 745, 650 875, 778 894"/>
+  <text class="caption" x="456" y="728">7. Trả về Top-K dữ liệu liên quan</text>
+
+  <line class="line" x1="901" y1="956" x2="901" y2="1063"/>
+  <text class="small" x="930" y="1020">8. Đóng gói bối cảnh</text>
+
+  <rect class="box-gray" x="774" y="1063" width="254" height="94" rx="6" filter="url(#softShadow)"/>
+  <text class="boxtext" x="901" y="1095" text-anchor="middle">Tổng hợp Prompt</text>
+  <text class="boxtext" x="901" y="1120" text-anchor="middle">Context + lịch sử</text>
+  <text class="boxtext" x="901" y="1145" text-anchor="middle">+ metadata</text>
+
+  <path class="line-soft" d="M 344 930 C 555 936, 642 1110, 774 1110"/>
+  <text class="caption" x="455" y="1020">Lấy chi tiết sản phẩm, chính sách, hội thoại</text>
+
+  <line class="line" x1="901" y1="1157" x2="901" y2="1264"/>
+  <text class="small" x="930" y="1224">9. Gửi Prompt</text>
+
+  <rect class="box-red" x="776" y="1264" width="250" height="78" rx="6" filter="url(#softShadow)"/>
+  <text class="boxtext" x="901" y="1294" text-anchor="middle">Groq API</text>
+  <text class="boxtext" x="901" y="1320" text-anchor="middle">llama-3.3-70b-versatile</text>
+
+  <line class="line" x1="901" y1="1342" x2="901" y2="1430"/>
+  <text class="small" x="930" y="1394">10. Trả lời / Gợi ý nội bộ</text>
+
+  <!-- 3D-like result box -->
+  <polygon class="box-result" points="738,1460 1060,1460 1086,1434 764,1434"/>
+  <polygon class="box-result" points="1060,1460 1086,1434 1086,1512 1060,1538"/>
+  <rect class="box-result" x="738" y="1460" width="322" height="78"/>
+  <text class="boxtext" x="899" y="1493" text-anchor="middle">Phản hồi khách hàng</text>
+  <text class="boxtext" x="899" y="1518" text-anchor="middle">hoặc gợi ý cho AI nội bộ</text>
+</svg>

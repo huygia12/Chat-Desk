@@ -1,0 +1,58 @@
+actor "Chủ doanh nghiệp\n Nhân viên CSKH " as NguoiDung
+participant "Màn hình Hội thoại" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NguoiDung->ManHinh: 1. Chọn nhãn cần dán \ntrong phần chi tiết hội thoại
+activate ManHinh
+ManHinh->ManHinh: 2. Kiểm tra hội thoại đang mở, \nkhách hàng và nhãn được chọn
+ManHinh->Backend: 3. Gửi yêu cầu dán nhãn: \nPOST /api/contacts/{contact_id}/labels\n{label_id, conversation_id}
+activate Backend
+
+Backend->CSDL: 4. Tìm khách hàng theo contact_id \nvà lấy danh sách nhãn hiện có
+activate CSDL
+CSDL-->Backend: 5. Trả về khách hàng kèm \ndanh sách nhãn hoặc rỗng
+deactivate CSDL
+
+  Backend->CSDL: 6. Tìm nhãn theo label_id trong doanh nghiệp
+  activate CSDL
+  CSDL-->Backend: 7. Trả về nhãn hoặc rỗng
+  deactivate CSDL
+
+    Backend->CSDL: 8. Kiểm tra hội thoại theo \nconversation_id và contact_id
+    activate CSDL
+    CSDL-->Backend: 9. Trả về hội thoại hoặc rỗng
+    deactivate CSDL
+
+
+      Backend->Backend: 10. Kiểm tra nhãn đã được \ndán cho khách hàng hay chưa
+
+      alt [Nhãn chưa được dán]
+        Backend->CSDL: 11. Thêm liên kết vào contact_labels \nvà ghi lịch sử conversation_label_history
+        activate CSDL
+        CSDL-->Backend: 12. Xác nhận lưu nhãn và lịch sử
+        deactivate CSDL
+
+        Backend->CSDL: 13. Lấy cấu hình phân công tự động \nvà nhân viên phù hợp nếu cần
+        activate CSDL
+        CSDL-->Backend: 14. Trả về cấu hình và dữ liệu phân công
+        deactivate CSDL
+
+        alt [Cần phân công tự động]
+          Backend->CSDL: 15. Cập nhật nhân viên phụ trách \nhội thoại và ghi conversation_assignment_history
+          activate CSDL
+          CSDL-->Backend: 16. Xác nhận cập nhật phân công
+          deactivate CSDL
+        else [Không cần phân công tự động]
+          Backend->Backend: 15. Giữ nguyên người phụ trách hội thoại
+        end
+      else [Nhãn đã được dán trước đó]
+        Backend->Backend: 11. Giữ nguyên danh sách nhãn hiện tại
+      end
+
+      Backend-->ManHinh: 17. Trả về thông tin khách hàng\n kèm danh sách nhãn hiện tại
+      
+      deactivate Backend
+      ManHinh->ManHinh: 18. Cập nhật nhãn trên hội thoại\n đang mở và danh sách hội thoại
+      ManHinh-->NguoiDung: 19. Hiển thị nhãn vừa \ndán trên giao diện
+      deactivate ManHinh

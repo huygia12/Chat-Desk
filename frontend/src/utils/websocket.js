@@ -3,10 +3,10 @@ const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000'
 let ws = null
 let reconnectTimer = null
 
-export function connectWebSocket(businessId, onMessage) {
+export function connectWebSocket(token, onMessage) {
   disconnectWebSocket()
 
-  const url = `${WS_URL}/ws/${businessId}`
+  const url = `${WS_URL}/ws/me?token=${encodeURIComponent(token)}`
   const socket = new WebSocket(url)
   ws = socket
 
@@ -36,7 +36,7 @@ export function connectWebSocket(businessId, onMessage) {
     if (socket !== ws) return
     console.log('WebSocket disconnected, reconnecting in 3s...')
     reconnectTimer = setTimeout(() => {
-      connectWebSocket(businessId, onMessage)
+      connectWebSocket(token, onMessage)
     }, 3000)
   }
 

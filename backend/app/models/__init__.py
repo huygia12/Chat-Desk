@@ -7,7 +7,9 @@ from app.models.product import Product
 from app.models.label import Label
 from app.models.saved_reply import SavedReply
 from app.models.conversation_assignment import AssignmentSetting, ConversationAssignmentHistory, ConversationLabelHistory
+from app.models.conversation_read_state import ConversationReadState
 from app.models.ai_assistant_message import AIAssistantMessage
+from app.models.device_token import DeviceToken
 
 __all__ = [
     "User",
@@ -21,5 +23,7 @@ __all__ = [
     "AssignmentSetting",
     "ConversationAssignmentHistory",
     "ConversationLabelHistory",
+    "ConversationReadState",
     "AIAssistantMessage",
+    "DeviceToken",
 ]

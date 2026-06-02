@@ -1,0 +1,28 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình Kênh" as ManHinhKenh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDoanhNghiep->ManHinhKenh: 1. Bấm "Ngắt" tại kênh \nFacebook/Instagram và xác nhận
+activate ManHinhKenh
+ManHinhKenh->Backend: 2. Gửi yêu cầu ngắt kết nối Meta\nDELETE /api/channels/{channel_id}
+activate Backend
+Backend->CSDL: 3. Tìm kênh theo channel_id trong bảng channels
+activate CSDL
+CSDL-->Backend: 4. Trả về thông tin kênh hoặc không tìm thấy
+
+alt [Tìm thấy kênh Meta]
+    Backend->CSDL: 5. Xóa bản ghi kênh Meta khỏi channels
+    CSDL-->Backend: 6. Xác nhận đã ghi nhận thao tác xóa
+    deactivate CSDL
+    Backend-->ManHinhKenh: 7. Trả về kết quả thành công
+    ManHinhKenh->ManHinhKenh: 8. Loại kênh vừa ngắt khỏi danh sách đang hiển thị
+    ManHinhKenh-->ChuDoanhNghiep: 9. Hiển thị thông báo thành công \nĐã ngắt kết nối
+else [Không tìm thấy kênh]
+    Backend-->ManHinhKenh: 7. Trả về lỗi không tìm thấy kênh
+    deactivate Backend
+    ManHinhKenh-->ChuDoanhNghiep: 8. Hiển thị thông báo thất bại \nNgắt kết nối thất bại
+    deactivate ManHinhKenh
+end
+
+

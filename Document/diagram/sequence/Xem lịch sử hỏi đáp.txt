@@ -1,0 +1,37 @@
+actor "Nhân viên CSKH\nChủ doanh nghiệp" as NguoiDung
+participant "Màn hình Trợ lý AI nội bộ" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NguoiDung->ManHinh: 1. Bấm nút "Trợ lý AI" để xem lịch sử hỏi đáp
+activate ManHinh
+ManHinh->ManHinh: 2. Đặt trạng thái đang tải lịch sử
+ManHinh->Backend: 3. Gửi yêu cầu lấy lịch sử hỏi đáp\nGET /api/ai-assistant/history?limit=50
+activate Backend
+Backend->CSDL: 4. Truy vấn bảng ai_assistant_messages \ntheo doanh nghiệp và người dùng hiện tại
+activate CSDL
+
+alt [Truy vấn thành công và có dữ liệu]
+CSDL-->Backend: 5. Trả về danh sách bản ghi lịch sử
+Backend->Backend: 6. Sắp xếp dữ liệu hiển thị từ cũ đến \nmới, xác định has_more và next_cursor
+Backend-->ManHinh: 7. Trả về items, has_more, next_cursor
+ManHinh->ManHinh: 8. Cập nhật danh sách câu hỏi/câu trả lời và trạng thái phân trang
+ManHinh-->NguoiDung: 9. Hiển thị lịch sử hỏi đáp trong modal
+else [Truy vấn thành công nhưng chưa có dữ liệu]
+CSDL-->Backend: 5. Trả về danh sách rỗng
+Backend->Backend: 6. Xác định không còn trang dữ liệu tiếp theo
+Backend-->ManHinh: 7. Trả về items rỗng, has_more=false, next_cursor=null
+ManHinh->ManHinh: 8. Cập nhật trạng thái lịch sử rỗng
+ManHinh-->NguoiDung: 9. Hiển thị "Chưa có lịch sử hỏi đáp"
+else [Truy vấn thất bại]
+CSDL-->Backend: 5. Báo lỗi truy vấn lịch sử
+deactivate CSDL
+Backend-->ManHinh: 6. Trả về lỗi tải lịch sử
+deactivate Backend
+ManHinh->ManHinh: 7. Ngừng trạng thái đang tải lịch sử
+ManHinh-->NguoiDung: 8. Hiển thị thông báo thất bại: "Không thể tải lịch sử trợ lý AI"
+deactivate ManHinh
+end
+
+
+

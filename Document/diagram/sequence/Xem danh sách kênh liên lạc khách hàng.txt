@@ -1,0 +1,29 @@
+actor "Doanh nghiệp" as DN
+participant "Màn hình Kênh kết nối" as MH
+participant "Backend ChatDesk" as BE
+participant "CSDL PostgreSQL" as DB
+
+DN->MH: 1. Chọn xem danh sách kênh kết nối
+activate MH
+MH->MH: 2. Bật trạng thái tải danh sách
+MH->BE: 3. Gửi yêu cầu lấy danh sách \nkênh kết nối (GET /api/channels)
+activate BE
+
+BE->DB: 4. Truy vấn bảng channels theo \ndoanh nghiệp, sắp xếp mới nhất trước
+activate DB
+DB-->BE: 5. Trả về danh sách kênh phù hợp
+deactivate DB
+BE-->MH: 6. Trả về danh sách ChannelOut
+deactivate BE
+alt [Danh sách có dữ liệu]
+MH->MH: 7. Lưu danh sách kênh vào trạng \nthái giao diện và tắt trạng thái tải
+MH-->DN: 8. Hiển thị bảng kênh gồm nền tảng, tên kênh, \nPlatform ID, trạng thái, ngày kết nối và thao tác
+else [Danh sách rỗng]
+MH->MH: 7. Lưu danh sách rỗng và tắt trạng thái tải
+MH-->DN: 8. Hiển thị thông báo "Chưa kết nối kênh nào"
+deactivate MH
+end
+
+
+
+

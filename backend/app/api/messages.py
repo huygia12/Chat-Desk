@@ -14,6 +14,7 @@ from app.api.deps import get_current_business_or_employee, get_effective_busines
 from app.services.facebook_service import send_facebook_attachment, send_facebook_message
 from app.services.file_storage import save_upload_file
 from app.services.instagram_service import send_instagram_attachment, send_instagram_message
+from app.services.meta_errors import MetaSendError
 from app.services.telegram_service import send_telegram_attachment, send_telegram_message
 from app.websocket.manager import manager
 
@@ -35,6 +36,18 @@ def serialize_message(message: Message) -> dict:
         "attachment_kind": message.attachment_kind,
         "created_at": message.created_at.isoformat(),
     }
+
+
+def platform_send_exception(platform: str, error: Exception) -> HTTPException:
+    if isinstance(error, MetaSendError) and error.is_outside_allowed_window:
+        return HTTPException(
+            status_code=400,
+            detail=(
+                f"{platform.title()} reply window is closed. "
+                "Ask the customer to send a new message before replying."
+            ),
+        )
+    return HTTPException(status_code=502, detail=f"Failed to send message: {str(error)}")
 
 
 async def get_sendable_conversation(
@@ -205,7 +218,7 @@ async def send_message(
             conversation.channel_id,
             e,
         )
-        raise HTTPException(status_code=502, detail=f"Failed to send message: {str(e)}")
+        raise platform_send_exception(conversation.platform, e)
 
     # Save message to DB
     message = Message(
@@ -248,7 +261,7 @@ async def upload_message_file(
             conversation.channel_id,
             e,
         )
-        raise HTTPException(status_code=502, detail=f"Failed to send message: {str(e)}")
+        raise platform_send_exception(conversation.platform, e)
 
     message = Message(
         conversation_id=conversation_id,

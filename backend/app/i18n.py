@@ -60,6 +60,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "vi": "Không tìm thấy hội thoại",
         "en": "Conversation not found",
     },
+    "Instagram reply window is closed. Ask the customer to send a new message before replying.": {
+        "vi": "Cửa sổ trả lời Instagram đã đóng. Hãy yêu cầu khách hàng gửi tin nhắn mới trước khi trả lời.",
+        "en": "Instagram reply window is closed. Ask the customer to send a new message before replying.",
+    },
+    "Facebook reply window is closed. Ask the customer to send a new message before replying.": {
+        "vi": "Cửa sổ trả lời Facebook đã đóng. Hãy yêu cầu khách hàng gửi tin nhắn mới trước khi trả lời.",
+        "en": "Facebook reply window is closed. Ask the customer to send a new message before replying.",
+    },
     "Contact not found": {
         "vi": "Không tìm thấy liên hệ",
         "en": "Contact not found",

@@ -1,0 +1,34 @@
+actor "Chủ doanh nghiệp \nNhân viên CSKH" as NguoiDung
+participant "Màn hình Hội thoại" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NguoiDung->ManHinh: 1. Chọn xem danh sách hội thoại
+activate ManHinh
+ManHinh->ManHinh: 2. Bật trạng thái tải danh sách
+ManHinh->Backend: 3. Gửi yêu cầu lấy danh sách hội thoại \nGET /api/conversations
+activate Backend
+
+Backend->CSDL: 4. Truy vấn conversations \ntheo doanh nghiệp, kèm contacts, \nlabels, channels và người \nđược phân công
+activate CSDL
+CSDL-->Backend: 5. Trả về danh sách \nhội thoại và dữ liệu liên quan
+deactivate CSDL
+
+Backend->CSDL: 6. Tính số tin chưa đọc từ messages\n và conversation_read_states
+activate CSDL
+CSDL-->Backend: 7. Trả về unread_count theo từng hội thoại
+deactivate CSDL
+
+Backend->Backend: 8. Sắp xếp theo last_message_at giảm dần\n và đóng gói danh sách ConversationOut
+Backend-->ManHinh: 9. Trả về danh sách hội thoại
+
+deactivate Backend
+
+alt [Danh sách có dữ liệu]
+ManHinh->ManHinh: 10. Lưu danh sách hội thoại \nvà áp dụng bộ lọc hiển thị nếu có
+ManHinh-->NguoiDung: 11. Hiển thị danh sách gồm \nkhách hàng, nền tảng, thời điểm \ntin nhắn cuối, nhãn, trạng thái AI và số tin chưa đọc
+else [Danh sách rỗng]
+ManHinh->ManHinh: 10. Lưu danh sách rỗng và tắt trạng thái tải
+ManHinh-->NguoiDung: 11. Hiển thị trạng thái chưa có hội thoại
+deactivate ManHinh
+end

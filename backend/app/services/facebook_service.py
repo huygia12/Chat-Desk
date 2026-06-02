@@ -1,16 +1,17 @@
 import httpx
 import logging
+from app.services.meta_errors import MetaSendError
 
 logger = logging.getLogger(__name__)
 
 FB_GRAPH_API = "https://graph.facebook.com/v21.0"
 
 
-def _meta_error_detail(response: httpx.Response) -> str:
+def _meta_error(response: httpx.Response) -> MetaSendError:
     try:
         error = response.json().get("error", {})
     except ValueError:
-        return response.text[:500]
+        return MetaSendError(response.text[:500], status_code=response.status_code)
 
     message = error.get("message") or response.text[:500]
     code = error.get("code")
@@ -23,7 +24,13 @@ def _meta_error_detail(response: httpx.Response) -> str:
         parts.append(f"subcode={subcode}")
     if fbtrace_id:
         parts.append(f"fbtrace_id={fbtrace_id}")
-    return " | ".join(parts)
+    return MetaSendError(
+        " | ".join(parts),
+        status_code=response.status_code,
+        code=code,
+        subcode=subcode,
+        fbtrace_id=fbtrace_id,
+    )
 
 
 async def send_facebook_message(
@@ -43,9 +50,9 @@ async def send_facebook_message(
     async with httpx.AsyncClient(timeout=30) as client:
         response = await client.post(url, json=payload, params=params)
         if response.status_code >= 400:
-            detail = _meta_error_detail(response)
-            logger.warning("Facebook send failed (%s): %s", response.status_code, detail)
-            raise RuntimeError(detail)
+            error = _meta_error(response)
+            logger.warning("Facebook send failed (%s): %s", response.status_code, error.detail)
+            raise error
         response.raise_for_status()
         data = response.json()
         return data.get("message_id")
@@ -76,9 +83,9 @@ async def send_facebook_attachment(
     async with httpx.AsyncClient(timeout=30) as client:
         response = await client.post(url, json=payload, params=params)
         if response.status_code >= 400:
-            detail = _meta_error_detail(response)
-            logger.warning("Facebook attachment send failed (%s): %s", response.status_code, detail)
-            raise RuntimeError(detail)
+            error = _meta_error(response)
+            logger.warning("Facebook attachment send failed (%s): %s", response.status_code, error.detail)
+            raise error
         response.raise_for_status()
         data = response.json()
         return data.get("message_id")
@@ -95,7 +102,7 @@ async def get_facebook_user_profile(page_access_token: str, user_id: str) -> dic
         async with httpx.AsyncClient(timeout=10) as client:
             response = await client.get(url, params=params)
             if response.status_code >= 400:
-                detail = _meta_error_detail(response)
+                detail = _meta_error(response).detail
                 logger.warning(
                     "Failed to get FB user profile for %s (%s): %s",
                     user_id,

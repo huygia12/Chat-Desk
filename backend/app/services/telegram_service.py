@@ -55,6 +55,10 @@ async def send_telegram_attachment(
 
 async def get_telegram_file_url(bot_token: str, file_id: str) -> str | None:
     """Return a temporary Telegram file URL for an incoming file_id."""
+    if not file_id:
+        logger.warning("Telegram getFile skipped: missing file_id")
+        return None
+
     url = f"{TELEGRAM_API}/bot{bot_token}/getFile"
     try:
         async with httpx.AsyncClient(timeout=10) as client:
@@ -65,6 +69,7 @@ async def get_telegram_file_url(bot_token: str, file_id: str) -> str | None:
                 return None
             file_path = data.get("result", {}).get("file_path")
             if not file_path:
+                logger.warning("Telegram getFile response missing file_path: %s", data)
                 return None
             return f"{TELEGRAM_API}/file/bot{bot_token}/{file_path}"
     except Exception as e:
@@ -85,6 +90,7 @@ async def get_telegram_user_profile_photo_url(bot_token: str, user_id: str) -> s
 
             photos = data.get("result", {}).get("photos") or []
             if not photos or not photos[0]:
+                logger.info("Telegram user %s has no profile photo visible to the bot", user_id)
                 return None
 
             largest_photo = photos[0][-1]

@@ -1,0 +1,56 @@
+actor "Chủ doanh nghiệp\nNhân viên CSKH" as NguoiDung
+participant "Màn hình Mẫu trả lời" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NguoiDung->ManHinh: 1. Bấm Sửa trên mẫu \ntrả lời cần chỉnh sửa
+activate ManHinh
+ManHinh->ManHinh: 2. Điền dữ liệu mẫu đã chọn \nvào biểu mẫu sửa
+ManHinh-->NguoiDung: 3. Hiển thị modal \nchỉnh sửa mẫu trả lời
+deactivate ManHinh
+
+NguoiDung->ManHinh: 4. Nhập tiêu đề, shortcut, \nnội dung và bấm Cập nhật
+activate ManHinh
+ManHinh->ManHinh: 5. Kiểm tra dữ liệu bắt buộc \nvà định dạng shortcut
+
+alt [Dữ liệu không hợp lệ trên giao diện]
+  ManHinh-->NguoiDung: 6. Hiển thị lỗi trên biểu mẫu
+else [Dữ liệu hợp lệ trên giao diện]
+  ManHinh->Backend: 6. Gửi yêu cầu cập nhật mẫu trả lời: \nPUT /api/saved-replies/{reply_id}
+  activate Backend
+
+  Backend->CSDL: 7. Tìm mẫu trả lời theo id
+  activate CSDL
+  CSDL-->Backend: 8. Trả về mẫu trả lời hoặc không tìm thấy
+  deactivate CSDL
+
+  Backend->Backend: 9. Chuẩn hóa tiêu đề, shortcut và nội dung
+
+  alt [Mẫu trả lời không tồn tại]
+    Backend-->ManHinh: 10. Trả về lỗi không \ntìm thấy mẫu trả lời
+    ManHinh-->NguoiDung: 11. Hiển thị thông báo \ncập nhật mẫu trả lời thất bại
+  else [Dữ liệu không hợp lệ]
+    Backend-->ManHinh: 10. Trả về lỗi dữ liệu không hợp lệ
+    ManHinh-->NguoiDung: 11. Hiển thị thông báo \ncập nhật mẫu trả lời thất bại
+  else [Dữ liệu hợp lệ]
+    Backend->CSDL: 10. Kiểm tra shortcut đã \ntồn tại trong cùng phạm vi
+    activate CSDL
+    CSDL-->Backend: 11. Trả về kết quả kiểm tra shortcut
+    deactivate CSDL
+
+    alt [Shortcut đã tồn tại]
+      Backend-->ManHinh: 12. Trả về lỗi shortcut đã tồn tại
+      ManHinh-->NguoiDung: 13. Hiển thị thông báo \ncập nhật mẫu trả lời thất bại
+    else [Shortcut chưa tồn tại]
+      Backend->CSDL: 12. Cập nhật title, shortcut, \ncontent trong bảng saved_replies
+      activate CSDL
+      CSDL-->Backend: 13. Trả về mẫu trả lời đã cập nhật
+      deactivate CSDL
+      Backend-->ManHinh: 14. Trả về mẫu trả lời đã cập nhật
+      deactivate Backend
+      ManHinh-->NguoiDung: 13. Hiển thị thông báo \ncập nhật mẫu trả lời thành công
+      deactivate ManHinh
+    end
+  end
+end
+

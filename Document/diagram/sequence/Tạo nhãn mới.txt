@@ -1,0 +1,40 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình quản lý nhãn" as ManHinhNhan
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDoanhNghiep->ManHinhNhan: 1. Bấm Thêm nhãn, nhập tên, màu, \nghi chú và bấm Tạo nhãn
+activate ManHinhNhan
+
+ManHinhNhan->ManHinhNhan: 2. Kiểm tra tên nhãn bắt buộc, \ntối đa 80 ký tự và màu nhãn
+
+alt [Dữ liệu nhập không hợp lệ]
+  ManHinhNhan-->ChuDoanhNghiep: 3. Hiển thị thông báo thất bại
+else [Dữ liệu nhập hợp lệ]
+  ManHinhNhan->Backend: 3. Gửi yêu cầu tạo nhãn\nPOST /api/labels\n{name, color, internal_note}
+  activate Backend
+
+  Backend->Backend: 4. Chuẩn hóa tên nhãn \nvà kiểm tra dữ liệu đầu vào
+
+  alt [Tên nhãn rỗng hoặc dữ liệu không hợp lệ]
+    Backend-->ManHinhNhan: 5. Trả về lỗi tạo nhãn
+    ManHinhNhan-->ChuDoanhNghiep: 6. Hiển thị thông báo thất bại
+  else [Dữ liệu hợp lệ]
+    Backend->CSDL: 5. Ghi nhãn mới vào bảng labels
+    activate CSDL
+
+    alt [Tên nhãn chưa tồn tại trong doanh nghiệp]
+      CSDL-->Backend: 6. Trả về bản ghi nhãn đã tạo
+      Backend-->ManHinhNhan: 7. Trả về thông tin nhãn mới
+      ManHinhNhan->ManHinhNhan: 8. Đóng hộp thoại và cập nhật danh sách nhãn
+      ManHinhNhan-->ChuDoanhNghiep: 9. Hiển thị thông báo thành công
+    else [Tên nhãn đã tồn tại trong doanh nghiệp]
+      CSDL-->Backend: 6. Trả về lỗi trùng tên nhãn
+      deactivate CSDL
+      Backend-->ManHinhNhan: 7. Trả về lỗi tạo nhãn
+      deactivate Backend
+      ManHinhNhan-->ChuDoanhNghiep: 9. Hiển thị thông báo thất bại
+      deactivate ManHinhNhan
+    end    
+  end
+end

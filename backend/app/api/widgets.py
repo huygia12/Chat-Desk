@@ -24,6 +24,7 @@ from app.services.widget_service import generate_widget_id, generate_widget_secr
 from app.services.file_storage import save_upload_file
 from app.services.assignment_service import auto_assign_conversation
 from app.services.ai_service import generate_ai_response
+from app.services.push_service import send_conversation_push
 from app.websocket.manager import manager
 from app.config import get_settings
 
@@ -439,6 +440,7 @@ async def send_widget_message(
             logger.error(f"Failed to generate AI response: {e}", exc_info=True)
 
     await db.commit()
+    await send_conversation_push(db, conversation, message, contact)
 
     # Return response that includes AI response if generated
     response = {
@@ -568,6 +570,7 @@ async def send_widget_file(
     )
 
     await db.commit()
+    await send_conversation_push(db, conversation, message, contact)
     return {
         "status": "ok",
         "conversation_id": str(conversation.id),

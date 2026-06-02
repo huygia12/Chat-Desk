@@ -1,0 +1,37 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình quản lý kênh" as ManHinhKenh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+participant "Telegram API" as TelegramAPI
+
+ChuDoanhNghiep->ManHinhKenh: 1. Bấm nút Ngắt tại kênh Telegram
+activate ManHinhKenh
+ManHinhKenh->ManHinhKenh: 2. Hiển thị hộp xác nhận ngắt kết nối
+ChuDoanhNghiep->ManHinhKenh: 3. Xác nhận ngắt kết nối
+ManHinhKenh->Backend: 4. Gửi yêu cầu ngắt kết nối kênh Telegram\nDELETE /api/channels/{channel_id}
+activate Backend
+
+Backend->CSDL: 5. Tìm kênh theo \nchannel_id trong bảng channels
+activate CSDL
+CSDL-->Backend: 6. Trả về thông tin \nkênh hoặc không có dữ liệu
+deactivate CSDL
+
+alt [Không tìm thấy kênh]
+  Backend-->ManHinhKenh: 7. Trả về lỗi không tìm thấy kênh
+  ManHinhKenh-->ChuDoanhNghiep: 8. Hiển thị thông báo thất bại
+else [Tìm thấy kênh Telegram]
+  Backend->TelegramAPI: 7. Gửi yêu cầu xóa webhook của bot Telegram\nPOST /bot{bot_token}/deleteWebhook
+  activate TelegramAPI
+  TelegramAPI-->Backend: 8. Trả về kết quả xóa webhook
+  deactivate TelegramAPI
+  Backend->CSDL: 9. Xóa bản ghi kênh \nTelegram trong bảng channels
+  activate CSDL
+  CSDL-->Backend: 10. Xác nhận đã lưu thay đổi
+  deactivate CSDL
+  Backend-->ManHinhKenh: 11. Trả về kết quả "Channel disconnected"
+  ManHinhKenh->ManHinhKenh: 12. Loại kênh Telegram \nkhỏi danh sách trên giao diện
+  ManHinhKenh-->ChuDoanhNghiep: 13. Hiển thị thông báo \nthành công "Đã ngắt kết nối"
+end
+
+deactivate Backend
+deactivate ManHinhKenh

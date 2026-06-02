@@ -1,0 +1,23 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình Thông tin doanh nghiệp" as ManHinhHoSo
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDoanhNghiep->ManHinhHoSo: 1. Yêu cầu xem hồ sơ doanh nghiệp
+activate ManHinhHoSo
+
+ManHinhHoSo->Backend: 2. Gửi yêu cầu lấy hồ sơ doanh nghiệp\nGET /api/users/profile
+activate Backend
+
+Backend->CSDL: 3. Truy vấn bảng users để \nlấy thông tin hồ sơ doanh nghiệp
+activate CSDL
+CSDL-->Backend: 4. Trả về dữ liệu hồ sơ doanh nghiệp
+deactivate CSDL
+
+  Backend-->ManHinhHoSo: 5. Trả về hồ sơ doanh nghiệp gồm email, tên doanh nghiệp,\nmô tả, số điện thoại, hotline, địa chỉ, giờ mở cửa,\nchính sách vận chuyển, bảo hành và phương thức thanh toán
+  deactivate Backend
+  ManHinhHoSo->ManHinhHoSo: 6. Điền dữ liệu hồ sơ vào biểu mẫu thông tin doanh nghiệp
+  ManHinhHoSo-->ChuDoanhNghiep: 7. Hiển thị hồ sơ doanh nghiệp
+  deactivate ManHinhHoSo
+
+

@@ -1,0 +1,40 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình sản phẩm" as ManHinhSanPham
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+participant "Vector DB Milvus" as VectorDB
+
+ChuDoanhNghiep->ManHinhSanPham: 1. Chọn Import JSON \nvà chọn file .json
+activate ManHinhSanPham
+ManHinhSanPham->ManHinhSanPham: 2. Đọc nội dung file và parse JSON
+ManHinhSanPham->ManHinhSanPham: 3. Lấy danh sách sản phẩm từ \nmảng JSON hoặc trường products
+
+alt [File JSON không có sản phẩm hoặc không đọc được]
+  ManHinhSanPham-->ChuDoanhNghiep: 4. Hiển thị thông báo thất bại
+else [File JSON có danh sách sản phẩm]
+  ManHinhSanPham->Backend: 4. Gửi danh sách \nsản phẩm cần import\nPOST /api/products/import
+  activate Backend
+  Backend->Backend: 5. Kiểm tra dữ liệu sản phẩm \nvà giới hạn tối đa 50 sản phẩm
+
+  alt [Dữ liệu không hợp lệ hoặc vượt quá 50 sản phẩm]
+    Backend-->ManHinhSanPham: 6. Trả về lỗi import
+    ManHinhSanPham-->ChuDoanhNghiep: 7. Hiển thị thông báo thất bại
+  else [Dữ liệu hợp lệ]
+    loop [Với từng sản phẩm trong file]
+      Backend->CSDL: 6. Thêm sản phẩm \nvào bảng products
+      activate CSDL
+      CSDL-->Backend: 7. Trả về sản phẩm đã tạo
+      deactivate CSDL
+      Backend->Backend: 8. Tạo nội dung tri \nthức và sinh embedding
+      Backend->VectorDB: 9. Lưu embedding sản phẩm\n vào product_embeddings
+      activate VectorDB
+      VectorDB-->Backend: 10. Xác nhận lưu embedding
+      deactivate VectorDB
+    end
+
+    Backend-->ManHinhSanPham: 11. Trả về danh \nsách sản phẩm đã import
+    deactivate Backend
+    ManHinhSanPham-->ChuDoanhNghiep: 12. Hiển thị thông báo \nimport thành công
+    deactivate ManHinhSanPham
+  end
+end

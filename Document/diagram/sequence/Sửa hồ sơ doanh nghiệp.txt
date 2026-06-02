@@ -1,0 +1,33 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình Thông tin doanh nghiệp" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDoanhNghiep->ManHinh: 1. Bấm Lưu sau khi \nchỉnh sửa hồ sơ doanh nghiệp
+activate ManHinh
+ManHinh->ManHinh: 2. Kiểm tra dữ liệu biểu mẫu,\nbắt buộc có tên doanh nghiệp
+
+alt [Tên doanh nghiệp bị bỏ trống]
+  ManHinh-->ChuDoanhNghiep: 3. Hiển thị thông báo thất bại
+else [Dữ liệu hợp lệ]
+  ManHinh->Backend: 3. Gửi yêu cầu sửa hồ sơ doanh nghiệp \nPUT /api/users/profile
+  activate Backend
+  Backend->Backend: 4. Lấy các trường được gửi \nvà gán vào hồ sơ hiện tại
+  Backend->CSDL: 5. Cập nhật bảng users\n với thông tin hồ sơ mới
+  activate CSDL
+
+  alt [Cập nhật thành công]
+    CSDL-->Backend: 6. Trả về bản ghi users đã cập nhật
+    Backend-->ManHinh: 7. Trả về hồ sơ doanh nghiệp đã cập nhật
+    ManHinh->ManHinh: 8. Đồng bộ lại thông tin hồ sơ trên giao diện
+    ManHinh-->ChuDoanhNghiep: 9. Hiển thị thông báo thành công
+  else [Cập nhật thất bại]
+    CSDL-->Backend: 6. Trả về lỗi lưu hồ sơ
+    deactivate CSDL
+    Backend-->ManHinh: 7. Trả về lỗi cập nhật hồ sơ
+    deactivate Backend
+    ManHinh-->ChuDoanhNghiep: 9. Hiển thị thông báo thất bại
+    deactivate ManHinh
+  end
+end
+

@@ -39,8 +39,15 @@ class ConversationOut(BaseModel):
     contact: ContactOut | None = None
     assigned_to: AssigneeOut | None = None
     channel: ConversationChannelOut | None = None
+    unread_count: int = 0
 
     model_config = {"from_attributes": True}
+
+
+class ConversationPageOut(BaseModel):
+    items: list[ConversationOut]
+    has_more: bool
+    next_cursor: str | None = None
 
 
 class ConversationAIToggle(BaseModel):
@@ -69,3 +76,8 @@ class ConversationHistoryEventOut(BaseModel):
     label_id: uuid.UUID | None = None
     label_name: str | None = None
     label_color: str | None = None
+
+
+class ConversationReadResponse(BaseModel):
+    status: str
+    unread_count: int = 0

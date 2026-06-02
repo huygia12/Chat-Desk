@@ -9,6 +9,7 @@ class UserOut(BaseModel):
     role: str
     business_name: str | None = None
     business_description: str | None = None
+    avatar_url: str | None = None
     store_address: str | None = None
     opening_hours: str | None = None
     shipping_policy: str | None = None

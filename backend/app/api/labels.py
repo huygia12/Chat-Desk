@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,13 +15,18 @@ router = APIRouter(prefix="/api/labels", tags=["labels"])
 
 @router.get("", response_model=list[LabelOut])
 async def list_labels(
+    search: str | None = Query(default=None, max_length=80),
     current_user: User = Depends(get_current_business_or_employee),
     db: AsyncSession = Depends(get_db),
 ):
     business_id = get_effective_business_id(current_user)
-    result = await db.execute(
-        select(Label).where(Label.business_id == business_id).order_by(Label.name.asc())
-    )
+    conditions = [Label.business_id == business_id]
+
+    search_text = search.strip() if search else ""
+    if search_text:
+        conditions.append(Label.name.ilike(f"%{search_text}%"))
+
+    result = await db.execute(select(Label).where(*conditions).order_by(Label.name.asc()))
     return result.scalars().all()
 
 

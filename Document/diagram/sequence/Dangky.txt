@@ -1,0 +1,38 @@
+actor "Chủ doanh nghiệp" as ChuDN
+participant "Màn hình đăng ký" as ManHinhDangKy
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDN->ManHinhDangKy: 1. Nhập tên doanh nghiệp, \nemail, mật khẩu, số điện thoại
+activate ManHinhDangKy
+ManHinhDangKy->ManHinhDangKy: 2. Kiểm tra dữ liệu nhập\n(tên doanh nghiệp, email, \nmật khẩu tối thiểu 6 ký tự)
+
+  ManHinhDangKy->Backend: 3. Gửi thông tin đăng ký\nPOST /api/auth/register
+  activate Backend
+  Backend->Backend: 4. Kiểm tra định dạng \ndữ liệu đăng ký
+  Backend->CSDL: 5. Kiểm tra email đã \ntồn tại trong bảng users
+  activate CSDL
+  CSDL-->Backend: 6. Trả về kết quả kiểm tra email
+  deactivate CSDL
+
+  alt [Email chưa được đăng ký]
+    Backend->Backend: 7. Mã hóa mật khẩu bằng bcrypt
+    Backend->CSDL: 8. Lưu tài khoản doanh nghiệp mới\nrole = business
+    activate CSDL
+    CSDL-->Backend: 9. Trả về thông tin tài khoản đã tạo
+    deactivate CSDL
+    Backend->Backend: 10. Tạo JWT access_token
+    Backend-->ManHinhDangKy: 11. Trả về access_token
+
+    ManHinhDangKy->ManHinhDangKy: 12. Lưu token
+ 
+      ManHinhDangKy-->ChuDN: 13. Hiển thị thông báo \nđăng ký thành công
+      ManHinhDangKy-->ChuDN: 14. Điều hướng đến \ntrang trò chuyện
+
+
+  else [Email đã được đăng ký]
+    Backend-->ManHinhDangKy: 7. Trả về lỗi Email \nalready registered
+    deactivate Backend
+    ManHinhDangKy-->ChuDN: 8. Hiển thị thông báo thất bại
+    deactivate ManHinhDangKy
+  end

@@ -1,6 +1,6 @@
 import re
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_business_or_employee, get_effective_business_id
@@ -72,6 +72,7 @@ def _can_modify(reply: SavedReply, current_user: User, business_id: uuid.UUID) -
 
 @router.get("", response_model=list[SavedReplyOut])
 async def list_saved_replies(
+    search: str | None = Query(default=None, max_length=120),
     current_user: User = Depends(get_current_business_or_employee),
     db: AsyncSession = Depends(get_db),
 ):
@@ -89,6 +90,16 @@ async def list_saved_replies(
                 SavedReply.visibility == "business",
                 SavedReply.owner_id == current_user.id,
             ),
+        )
+
+    search_text = search.strip().lstrip("/") if search else ""
+    if search_text:
+        search_pattern = f"%{search_text}%"
+        query = query.where(
+            or_(
+                SavedReply.title.ilike(search_pattern),
+                SavedReply.shortcut.ilike(search_pattern),
+            )
         )
 
     result = await db.execute(query.order_by(SavedReply.visibility.asc(), SavedReply.shortcut.asc()))

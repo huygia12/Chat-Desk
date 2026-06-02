@@ -1,0 +1,46 @@
+actor "Nhân viên" as NhanVien
+participant "Màn hình cài đặt nhân viên" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NhanVien->ManHinh: 1. Mở mục Cài đặt và nhập mật khẩu
+activate ManHinh
+
+ManHinh->ManHinh: 2. Kiểm tra người dùng đã đăng nhập\nvà có vai trò employee
+
+ManHinh->ManHinh: 3. Kiểm tra dữ liệu nhập\nMật khẩu hiện tại bắt buộc\nMật khẩu mới tối thiểu 6 ký tự\nNhập lại mật khẩu phải khớp
+
+  ManHinh->Backend: 4. Gửi yêu cầu cập nhật mật khẩu\nPATCH /api/employees/me/password\nBearer JWT, current_password, password
+  activate Backend
+
+  Backend->Backend: 5. Kiểm tra JWT, trạng thái tài khoản\nvà vai trò employee
+
+  Backend->Backend: 6. Kiểm tra mật khẩu mới \ntối thiểu 6 ký tự
+
+  alt [Mật khẩu mới không hợp lệ]
+    Backend-->ManHinh: 7. Trả về lỗi 422
+    ManHinh-->NhanVien: 8. Hiển thị thông báo thất bại
+
+  else [Mật khẩu mới hợp lệ]
+    Backend->Backend: 7. Xác minh mật khẩu hiện tại bằng bcrypt
+
+    alt [Mật khẩu hiện tại không đúng]
+      Backend-->ManHinh: 8. Trả về lỗi mật khẩu hiện tại không đúng
+      ManHinh-->NhanVien: 9. Hiển thị thông báo thất bại
+
+    else [Mật khẩu hiện tại đúng]
+      Backend->Backend: 8. Mã hóa mật khẩu mới bằng bcrypt
+
+      Backend->CSDL: 9. Cập nhật password_hash trong bảng users
+      activate CSDL
+      CSDL-->Backend: 10. Xác nhận cập nhật dữ liệu
+      deactivate CSDL
+
+      Backend-->ManHinh: 11. Trả về thông báo cập nhật thành công
+      deactivate Backend
+      ManHinh->ManHinh: 12. Xóa dữ liệu trong form mật khẩu
+
+      ManHinh-->NhanVien: 13. Hiển thị thông báo thành công
+      deactivate ManHinh
+    end
+  end

@@ -1,0 +1,42 @@
+actor "Chủ doanh nghiệp\n Nhân viên CSKH" as NguoiDung
+participant "Màn hình Mẫu trả lời" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NguoiDung->ManHinh: 1. Bấm Thêm template
+activate ManHinh
+ManHinh->ManHinh: 2. Mở form thêm mẫu trả lời \nvà thiết lập phạm vi mặc định
+NguoiDung->ManHinh: 3. Nhập tiêu đề, shortcut, \nnội dung và bấm Tạo
+ManHinh->ManHinh: 4. Kiểm tra dữ liệu bắt buộc \nvà định dạng shortcut
+
+alt [Dữ liệu form không hợp lệ]
+  ManHinh-->NguoiDung: 5. Hiển thị lỗi nhập liệu trên form
+else [Dữ liệu form hợp lệ]
+  ManHinh->Backend: 5. Gửi yêu cầu thêm mẫu trả lời \nPOST /api/saved-replies
+  activate Backend
+  Backend->Backend: 6. Chuẩn hóa shortcut, tiêu đề và nội dung
+
+  alt [Dữ liệu backend không hợp lệ]
+    Backend-->ManHinh: 7. Trả lỗi dữ liệu không hợp lệ
+    ManHinh-->NguoiDung: 8. Hiển thị thông báo thất bại
+  else [Dữ liệu backend hợp lệ]
+    Backend->CSDL: 7. Kiểm tra shortcut đã tồn tại trong cùng phạm vi
+    activate CSDL
+    CSDL-->Backend: 8. Trả kết quả kiểm tra shortcut
+    deactivate CSDL
+
+    alt [Shortcut đã tồn tại]
+      Backend-->ManHinh: 9. Trả lỗi shortcut đã tồn tại
+      ManHinh-->NguoiDung: 10. Hiển thị thông báo thất bại
+    else [Shortcut chưa tồn tại]
+      Backend->CSDL: 9. Tạo bản ghi mới trong bảng saved_replies
+      activate CSDL
+      CSDL-->Backend: 10. Trả mẫu trả lời vừa tạo
+      deactivate CSDL
+      Backend-->ManHinh: 11. Trả kết quả tạo thành công
+      deactivate Backend
+      ManHinh-->NguoiDung: 12. Hiển thị thông báo thành công
+      deactivate ManHinh
+    end
+  end
+end

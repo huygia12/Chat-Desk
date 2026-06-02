@@ -1,0 +1,46 @@
+actor "Chủ doanh nghiệp" as ChuDoanhNghiep
+participant "Màn hình Quản lý nhãn" as ManHinhNhan
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDoanhNghiep->ManHinhNhan: 1. Bấm Sửa trên nhãn cần cập nhật
+activate ManHinhNhan
+ManHinhNhan->ManHinhNhan: 2. Mở form chỉnh sửa và điền sẵn tên, \nmàu, ghi chú nội bộ
+
+ChuDoanhNghiep->ManHinhNhan: 3. Nhập thông tin mới và bấm Cập nhật
+ManHinhNhan->ManHinhNhan: 4. Kiểm tra dữ liệu form: tên nhãn bắt buộc, \ntối đa 80 ký tự; màu nhãn bắt buộc
+
+alt [Dữ liệu form không hợp lệ]
+  ManHinhNhan-->ChuDoanhNghiep: 5. Hiển thị lỗi nhập liệu trên form
+else [Dữ liệu form hợp lệ]
+  ManHinhNhan->Backend: 5. Gửi yêu cầu cập nhật nhãn: \nPUT /api/labels/{label_id} \nvới name, color, internal_note
+  activate Backend
+  Backend->CSDL: 6. Tìm nhãn theo label_id trong bảng labels
+  activate CSDL
+  CSDL-->Backend: 7. Trả về thông tin nhãn nếu tồn tại
+  deactivate CSDL
+
+  Backend->Backend: 8. Chuẩn hóa name, kiểm tra tên \nkhông rỗng và cập nhật name, color, \ninternal_note, updated_by_id
+
+  alt [Không tìm thấy nhãn]
+    Backend-->ManHinhNhan: 9. Trả về lỗi: Label not found
+    ManHinhNhan-->ChuDoanhNghiep: 10. Hiển thị thông báo thất bại
+  else [Tên nhãn bị trùng trong cùng doanh nghiệp]
+    Backend->CSDL: 9. Ghi cập nhật nhãn vào bảng labels
+    activate CSDL
+    CSDL-->Backend: 10. Báo lỗi ràng buộc trùng tên nhãn
+    deactivate CSDL
+    Backend-->ManHinhNhan: 11. Trả về lỗi: Label name already exists
+    ManHinhNhan-->ChuDoanhNghiep: 12. Hiển thị thông báo thất bại
+  else [Cập nhật hợp lệ]
+    Backend->CSDL: 9. Ghi cập nhật nhãn vào bảng\n labels và lưu thay đổi
+    activate CSDL
+    CSDL-->Backend: 10. Trả về nhãn đã cập nhật
+    deactivate CSDL
+    Backend-->ManHinhNhan: 11. Trả về thông tin nhãn đã cập nhật
+    deactivate Backend
+    ManHinhNhan->ManHinhNhan: 12. Đóng form chỉnh sửa và \ncập nhật lại giao diện danh sách nhãn
+    ManHinhNhan-->ChuDoanhNghiep: 13. Hiển thị thông báo \ncập nhật nhãn thành công
+    deactivate ManHinhNhan
+  end
+end

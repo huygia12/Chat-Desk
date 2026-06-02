@@ -1,0 +1,27 @@
+actor "Chủ doanh nghiệp" as ChuDN
+participant "Màn hình Cấu hình phân công" as ManHinh
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+ChuDN->ManHinh: 1. Bật công tắc khóa quyền \nnhân viên tự đổi phân công
+activate ManHinh
+ManHinh->ManHinh: 2. Cập nhật tạm thời trạng thái \ncông tắc và bật trạng thái đang lưu
+ManHinh->Backend: 3. Gửi yêu cầu cập nhật cấu hình \nPATCH /api/assignments/settings\n{ employee_assignment_locked: true }
+activate Backend
+Backend->CSDL: 4. Tìm hoặc tạo bản ghi \nassignment_settings của doanh nghiệp
+activate CSDL
+CSDL-->Backend: 5. Trả về cấu hình phân công hiện tại
+deactivate CSDL
+Backend->Backend: 6. Gán employee_assignment_locked = true
+Backend->CSDL: 7. Ghi thay đổi và làm mới bản ghi assignment_settings
+activate CSDL
+
+CSDL-->Backend: 8. Trả về bản ghi cấu hình đã cập nhật
+deactivate CSDL
+Backend-->ManHinh: 9. Trả về cấu hình phân công mới
+deactivate Backend
+ManHinh->ManHinh: 10. Đồng bộ trạng thái công tắc theo dữ liệu trả về
+ManHinh-->ChuDN: 11. Hiển thị thông báo thành công
+
+
+deactivate ManHinh

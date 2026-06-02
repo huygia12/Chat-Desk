@@ -1,0 +1,38 @@
+actor "Người dùng" as NguoiDung
+participant "Màn hình đăng nhập" as ManHinhDangNhap
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NguoiDung->ManHinhDangNhap: 1. Nhập email, mật \nkhẩu và bấm Đăng nhập
+activate ManHinhDangNhap
+ManHinhDangNhap->ManHinhDangNhap: 2. Kiểm tra dữ liệu nhập
+
+  ManHinhDangNhap->Backend: 3. Gửi thông tin đăng nhập\nPOST /api/auth/login
+  activate Backend
+  Backend->Backend: 4. Kiểm tra định dạng dữ \nliệu đăng nhập
+  Backend->CSDL: 5. Tìm người dùng theo email
+  activate CSDL
+  CSDL-->Backend: 6. Trả về thông tin người\n dùng và password_hash
+  deactivate CSDL
+  Backend->Backend: 7. So sánh mật khẩu bằng bcrypt
+
+  alt [Email tồn tại và mật khẩu đúng]
+    Backend->Backend: 8. Tạo JWT access_token
+    Backend-->ManHinhDangNhap: 9. Trả về access_token
+    deactivate Backend
+
+    ManHinhDangNhap->ManHinhDangNhap: 10. Lưu token và chuẩn \nbị lấy thông tin người dùng
+
+      alt [Vai trò là admin]
+        ManHinhDangNhap-->NguoiDung: 11. Hiển thị thông \nbáo đăng nhập thành công
+        ManHinhDangNhap-->NguoiDung: 12. Điều hướng đến trang Admin
+      else [Vai trò là business hoặc employee]
+        ManHinhDangNhap-->NguoiDung: 11. Hiển thị thông báo\n đăng nhập thành công
+        ManHinhDangNhap-->NguoiDung: 12. Điều hướng đến\n màn hình trò chuyện
+      end
+
+
+  else [Email không tồn tại hoặc mật khẩu sai]
+    Backend-->ManHinhDangNhap: 8. Trả về lỗi \nInvalid email or password
+    ManHinhDangNhap-->NguoiDung: 9. Hiển thị thông báo thất bại
+  end

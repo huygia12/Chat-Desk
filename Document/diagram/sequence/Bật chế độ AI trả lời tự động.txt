@@ -1,0 +1,32 @@
+actor "Chủ doanh nghiệp\nNhân viên CSKH" as NguoiQuanLy
+participant "Màn hình Hội thoại ChatDesk" as ManHinhHoiThoai
+participant "Backend ChatDesk" as BackendChatDesk
+participant "CSDL PostgreSQL" as CSDLPostgreSQL
+
+NguoiQuanLy->ManHinhHoiThoai: 1. Bật công tắc AI tự \nđộng trong hội thoại
+activate ManHinhHoiThoai
+
+ManHinhHoiThoai->BackendChatDesk: 2. Gửi yêu cầu bật AI tự động: \nPATCH /api/conversations\n/{conversation_id}/ai { is_ai_enabled: true }
+activate BackendChatDesk
+
+BackendChatDesk->CSDLPostgreSQL: 3. Tìm hội thoại cần cập nhật
+activate CSDLPostgreSQL
+CSDLPostgreSQL-->BackendChatDesk: 4. Trả về kết quả tìm kiếm
+deactivate CSDLPostgreSQL
+
+alt [Tìm thấy hội thoại]
+BackendChatDesk->BackendChatDesk: 5. Gán is_ai_enabled = true \ncho hội thoại
+BackendChatDesk->CSDLPostgreSQL: 6. Lưu trạng thái AI tự động \ncủa hội thoại
+activate CSDLPostgreSQL
+CSDLPostgreSQL-->BackendChatDesk: 7. Xác nhận đã lưu thay đổi
+deactivate CSDLPostgreSQL
+BackendChatDesk-->ManHinhHoiThoai: 8. Trả về thông tin hội thoại đã bật AI
+ManHinhHoiThoai->ManHinhHoiThoai: 9. Cập nhật trạng thái công tắc \nvà dấu hiệu AI trên danh sách hội thoại
+ManHinhHoiThoai-->NguoiQuanLy: 10. Hiển thị trạng thái AI đã bật
+else [Không tìm thấy hội thoại]
+BackendChatDesk-->ManHinhHoiThoai: 5. Trả về lỗi không tìm thấy hội thoại
+deactivate BackendChatDesk
+ManHinhHoiThoai->ManHinhHoiThoai: 6. Ghi nhận lỗi và không cập nhật trạng thái hội thoại
+ManHinhHoiThoai-->NguoiQuanLy: 7. Giữ nguyên trạng thái \ncông tắc AI trên giao diện
+deactivate ManHinhHoiThoai
+end

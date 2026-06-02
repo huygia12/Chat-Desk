@@ -64,6 +64,9 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = str(BACKEND_DIR / "uploads")
     MAX_UPLOAD_SIZE: int = 15 * 1024 * 1024
 
+    # Expo push notifications
+    EXPO_PUSH_URL: str = "https://exp.host/--/api/v2/push/send"
+
     model_config = SettingsConfigDict(env_file=str(BACKEND_DIR / ".env"), extra="ignore")
 
 

@@ -1,0 +1,36 @@
+actor "Người dùng" as NguoiDung
+participant "Màn hình Chat" as ManHinhChat
+participant "Backend ChatDesk" as Backend
+participant "CSDL PostgreSQL" as CSDL
+
+NguoiDung->ManHinhChat: 1. Bấm nút Chi tiết \ncủa hội thoại đang mở
+activate ManHinhChat
+ManHinhChat->ManHinhChat: 2. Mở panel chi tiết \nvà lưu trạng thái hiển thị vào localStorage
+ManHinhChat->ManHinhChat: 3. Đọc thông tin hội thoại đang chọn đã có \ntrên màn hình: người phụ trách, label,\nthông tin khách hàng và kênh
+
+ManHinhChat->Backend: 4. Gửi yêu cầu lấy lịch sử mở rộng\nGET /api/conversations/{conversation_id}/history
+activate Backend
+Backend->CSDL: 5. Tìm hội thoại theo conversation_id
+activate CSDL
+CSDL-->Backend: 6. Trả về hội thoại hoặc không tìm thấy
+deactivate CSDL
+
+  Backend->CSDL: 7. Truy vấn lịch sử phân công \nvà lịch sử gắn/xóa label
+  activate CSDL
+  CSDL-->Backend: 8. Trả về conversation_assignment_history\nvà conversation_label_history
+  deactivate CSDL
+
+  Backend->CSDL: 9. Truy vấn users và labels liên quan
+  activate CSDL
+  CSDL-->Backend: 10. Trả về tên người thao tác, \nngười được giao và thông tin label
+  deactivate CSDL
+
+  Backend->Backend: 11. Ghép sự kiện tạo hội thoại, \nphân công, label và sắp xếp mới nhất trước
+  Backend-->ManHinhChat: 12. Trả về danh sách lịch sử hội thoại
+  deactivate Backend
+  ManHinhChat->ManHinhChat: 13. Lưu lịch sử hội thoại \nvà dựng dữ liệu panel chi tiết
+  ManHinhChat-->NguoiDung: 14. Hiển thị thông tin \nmở rộng của hội thoại
+  deactivate ManHinhChat
+
+
+

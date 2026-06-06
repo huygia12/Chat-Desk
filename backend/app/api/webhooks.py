@@ -14,6 +14,7 @@ from app.services.ai_service import generate_ai_response
 from app.services.file_storage import save_remote_file
 from app.services.push_service import send_conversation_push
 from app.services.telegram_service import get_telegram_file_url, get_telegram_user_profile_photo_url
+from app.utils.logging import pretty_log
 from app.websocket.manager import manager
 
 logger = logging.getLogger(__name__)
@@ -48,7 +49,10 @@ async def facebook_verify(
 async def facebook_webhook(request: Request):
     """Receive Meta webhooks on the legacy Facebook callback URL."""
     body = await request.json()
-    logger.info("Meta webhook received on /facebook: object=%s body=%s", body.get("object"), body)
+    logger.info("Meta webhook received on /facebook:\n%s", pretty_log({
+        "object": body.get("object"),
+        "body": body,
+    }))
     return await _handle_meta_webhook_body(body)
 
 
@@ -69,7 +73,10 @@ async def instagram_verify(
 async def instagram_webhook(request: Request):
     """Receive Meta webhooks on the Instagram callback URL."""
     body = await request.json()
-    logger.info("Meta webhook received on /instagram: object=%s body=%s", body.get("object"), body)
+    logger.info("Meta webhook received on /instagram:\n%s", pretty_log({
+        "object": body.get("object"),
+        "body": body,
+    }))
     return await _handle_meta_webhook_body(body)
 
 
@@ -87,7 +94,10 @@ async def meta_verify(
 async def meta_webhook(request: Request):
     """Receive Facebook and Instagram webhooks on one callback URL."""
     body = await request.json()
-    logger.info("Meta webhook received on /meta: object=%s body=%s", body.get("object"), body)
+    logger.info("Meta webhook received on /meta:\n%s", pretty_log({
+        "object": body.get("object"),
+        "body": body,
+    }))
     return await _handle_meta_webhook_body(body)
 
 
@@ -136,7 +146,10 @@ async def telegram_webhook(bot_id: str, request: Request):
     used to identify which channel this webhook belongs to.
     """
     body = await request.json()
-    logger.info(f"Telegram webhook received for bot {bot_id}: {body}")
+    logger.info("Telegram webhook received:\n%s", pretty_log({
+        "bot_id": bot_id,
+        "body": body,
+    }))
 
     message_data = body.get("message")
     if not message_data:
@@ -308,13 +321,19 @@ async def _process_incoming_message(
 
             # 6. If AI enabled, generate and send AI response
             if conversation.is_ai_enabled and not attachment:
-                logger.info(f"Generating AI response for {platform} conversation {conversation.id}")
+                logger.info("Generating AI response:\n%s", pretty_log({
+                    "platform": platform,
+                    "conversation_id": conversation.id,
+                }))
                 ai_response_text = await generate_ai_response(
                     db=db,
                     conversation=conversation,
                     user_message=message_text,
                 )
-                logger.info(f"AI response: {ai_response_text[:100] if ai_response_text else 'None'}")
+                logger.info("AI response preview:\n%s", pretty_log({
+                    "conversation_id": conversation.id,
+                    "preview": ai_response_text[:200] if ai_response_text else None,
+                }))
 
                 if ai_response_text:
                     # Send AI reply back via platform

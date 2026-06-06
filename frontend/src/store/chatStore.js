@@ -160,6 +160,11 @@ export const useChatStore = create((set, get) => ({
     }
     set({
       activeConversationId: conversationId,
+      conversations: get().conversations.map((conversation) =>
+        String(conversation.id) === String(conversationId)
+          ? { ...conversation, unread_count: 0 }
+          : conversation,
+      ),
       messages: [],
       messagesHasMore: false,
       messagesNextCursor: null,
@@ -177,10 +182,27 @@ export const useChatStore = create((set, get) => ({
         messagesHasMore: page.has_more,
         messagesNextCursor: page.next_cursor,
       })
+      await get().markConversationRead(conversationId)
     } catch (err) {
       console.error('Failed to fetch messages:', err)
     } finally {
       set({ loading: false })
+    }
+  },
+
+  markConversationRead: async (conversationId) => {
+    if (!conversationId) return
+    try {
+      await client.post(`/api/conversations/${conversationId}/read`)
+      set((state) => ({
+        conversations: state.conversations.map((conversation) =>
+          String(conversation.id) === String(conversationId)
+            ? { ...conversation, unread_count: 0 }
+            : conversation,
+        ),
+      }))
+    } catch (err) {
+      console.error('Failed to mark conversation read:', err)
     }
   },
 
@@ -268,12 +290,26 @@ export const useChatStore = create((set, get) => ({
       if (String(message.conversation_id) === String(state.activeConversationId)) {
         // Avoid duplicates (use String() to safely compare UUIDs from different sources)
         const exists = state.messages.some((m) => String(m.id) === String(message.id))
+        const conversations = message.sender_type === 'contact'
+          ? state.conversations.map((conversation) =>
+              String(conversation.id) === String(message.conversation_id)
+                ? { ...conversation, unread_count: 0 }
+                : conversation,
+            )
+          : state.conversations
         if (!exists) {
-          return { messages: [...state.messages, message] }
+          return { messages: [...state.messages, message], conversations }
         }
+        return { conversations }
       }
       return state
     })
+    if (
+      String(message.conversation_id) === String(get().activeConversationId) &&
+      message.sender_type === 'contact'
+    ) {
+      get().markConversationRead(message.conversation_id)
+    }
   },
 
   toggleAI: async (conversationId, isEnabled) => {

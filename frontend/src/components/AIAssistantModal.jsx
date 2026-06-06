@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Avatar, Button, Empty, Input, Modal, Spin, Tooltip, Typography, message, theme } from "antd";
 import { RobotOutlined, SendOutlined, UserOutlined } from "@ant-design/icons";
 import client from "../api/client";
@@ -41,6 +41,7 @@ export default function AIAssistantModal() {
   const historyContainerRef = useRef(null);
   const historyEndRef = useRef(null);
   const restoreScrollHeightRef = useRef(null);
+  const initialScrollDoneRef = useRef(false);
 
   const canUseAssistant = user?.role === "business" || user?.role === "employee";
 
@@ -96,11 +97,19 @@ export default function AIAssistantModal() {
     }
   };
 
+  const openAssistant = () => {
+    initialScrollDoneRef.current = false;
+    setLoadingHistory(true);
+    setOpen(true);
+  };
+
   useEffect(() => {
     if (open) fetchHistory();
   }, [open]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (!open || loadingHistory) return;
+
     if (restoreScrollHeightRef.current != null) {
       const previousScrollHeight = restoreScrollHeightRef.current;
       const frameId = window.requestAnimationFrame(() => {
@@ -113,8 +122,11 @@ export default function AIAssistantModal() {
       return () => window.cancelAnimationFrame(frameId);
     }
 
-    historyEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [history, asking]);
+    historyEndRef.current?.scrollIntoView({
+      behavior: initialScrollDoneRef.current ? "smooth" : "auto",
+    });
+    initialScrollDoneRef.current = true;
+  }, [open, loadingHistory, history, asking]);
 
   const askAssistant = async () => {
     const trimmedQuestion = question.trim();
@@ -141,7 +153,7 @@ export default function AIAssistantModal() {
   return (
     <>
       <Tooltip title={t("aiAssistant.title")}>
-        <Button icon={<RobotOutlined />} onClick={() => setOpen(true)}>
+        <Button icon={<RobotOutlined />} onClick={openAssistant}>
           {t("aiAssistant.button")}
         </Button>
       </Tooltip>

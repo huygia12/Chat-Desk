@@ -4,6 +4,7 @@ No local Docker or pgvector needed.
 """
 
 import logging
+import time
 from pymilvus import MilvusClient
 from app.config import get_settings
 
@@ -29,6 +30,7 @@ def connect_milvus() -> None:
         token=settings.MILVUS_TOKEN or None,
     )
     _ensure_collection()
+    _client.load_collection(COLLECTION_NAME)
     logger.info(f"Connected to Milvus Cloud: {settings.MILVUS_URI[:50]}...")
 
 
@@ -130,17 +132,53 @@ def search_similar(
     Search for the most similar product embeddings scoped to a business.
     Returns list of product_id strings ordered by similarity.
     """
+    return [item["id"] for item in search_similar_with_scores(business_id, query_embedding, top_k)]
+
+
+def search_similar_with_scores(
+    business_id: str,
+    query_embedding: list[float],
+    top_k: int = 5,
+) -> list[dict[str, str | float]]:
+    """
+    Search for similar products and return product IDs with Milvus scores.
+    For the COSINE metric used by this collection, higher scores are better.
+    """
     client = _get_client()
-    results = client.search(
-        collection_name=COLLECTION_NAME,
-        data=[query_embedding],
-        anns_field="embedding",
-        search_params={"metric_type": "COSINE"},
-        limit=top_k,
-        filter=f'business_id == "{business_id}"',
-        output_fields=["id"],
-    )
-    product_ids: list[str] = []
+    results = None
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            results = client.search(
+                collection_name=COLLECTION_NAME,
+                data=[query_embedding],
+                anns_field="embedding",
+                search_params={"metric_type": "COSINE"},
+                limit=top_k,
+                filter=f'business_id == "{business_id}"',
+                output_fields=["id"],
+                consistency_level="Eventually",
+                timeout=10,
+            )
+            break
+        except Exception as exc:
+            last_error = exc
+            if "Timestamp lag too large" not in str(exc) or attempt == 2:
+                raise
+            logger.warning("Milvus search timestamp lag; retrying attempt %s/3", attempt + 2)
+            try:
+                client.load_collection(COLLECTION_NAME)
+            except Exception as load_error:
+                logger.warning("Failed to reload Milvus collection before retry: %s", load_error)
+            time.sleep(0.5 * (attempt + 1))
+
+    if results is None:
+        raise last_error or RuntimeError("Milvus search returned no results")
+
+    hits: list[dict[str, str | float]] = []
     for hit in results[0]:
-        product_ids.append(hit["id"])
-    return product_ids
+        product_id = hit.get("id") or (hit.get("entity") or {}).get("id")
+        score = hit.get("distance", hit.get("score", 0.0))
+        if product_id:
+            hits.append({"id": str(product_id), "score": float(score)})
+    return hits

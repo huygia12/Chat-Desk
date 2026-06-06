@@ -40,6 +40,15 @@ class Settings(BaseSettings):
     # Embedding
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
 
+    # Customer AI retrieval/rewrite controls
+    AI_REWRITE_ENABLED: bool = True
+    AI_REWRITE_CONFIDENCE_THRESHOLD: float = 0.6
+    AI_REWRITE_TIMEOUT_SECONDS: float = 2.0
+    AI_RETRIEVAL_HIGH_CONFIDENCE_THRESHOLD: float = 0.58
+    AI_RETRIEVAL_MIN_SCORE: float = 0.55
+    AI_RETRIEVAL_SCORE_MARGIN: float = 0.05
+    AI_RETRIEVAL_MIN_MESSAGE_LENGTH: int = 12
+
     # Milvus Cloud (Zilliz)
     MILVUS_URI: str = ""
     MILVUS_TOKEN: str = ""

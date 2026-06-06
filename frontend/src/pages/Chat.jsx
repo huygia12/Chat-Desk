@@ -87,15 +87,92 @@ const resolveAttachmentUrl = (url) => {
 
 function AttachmentImage({ alt, onClick, onLoad, src, style }) {
   const fileUrl = useFileObjectUrl(src)
+  const imageSrc = fileUrl || src
+  const [status, setStatus] = useState(imageSrc ? 'loading' : 'idle')
+  const isLoading = status === 'loading'
+
+  useEffect(() => {
+    setStatus(imageSrc ? 'loading' : 'idle')
+  }, [imageSrc])
+
+  const handleLoad = (event) => {
+    setStatus('loaded')
+    onLoad?.(event)
+  }
+
+  const handleError = () => {
+    setStatus('error')
+  }
 
   return (
-    <img
-      src={fileUrl || src}
-      alt={alt}
+    <span
       onClick={onClick}
-      onLoad={onLoad}
-      style={style}
-    />
+      style={{
+        position: 'relative',
+        display: style?.display === 'block' ? 'block' : 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: style?.width,
+        maxWidth: style?.maxWidth,
+        maxHeight: style?.maxHeight,
+        minWidth: isLoading ? 120 : undefined,
+        minHeight: isLoading ? 120 : undefined,
+        aspectRatio: isLoading && (style?.height === 'auto' || !style?.height) ? '4 / 3' : undefined,
+        borderRadius: style?.borderRadius,
+        overflow: 'hidden',
+        background: isLoading ? 'rgba(22, 119, 255, 0.08)' : 'transparent',
+        cursor: onClick ? 'zoom-in' : undefined,
+        verticalAlign: 'top',
+      }}
+    >
+      {isLoading ? (
+        <span
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1,
+          }}
+        >
+          <Spin size="small" />
+        </span>
+      ) : null}
+      {status === 'error' ? (
+        <span
+          style={{
+            width: '100%',
+            minHeight: 120,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#8c8c8c',
+            background: 'rgba(0, 0, 0, 0.04)',
+            borderRadius: style?.borderRadius,
+          }}
+        >
+          <FileOutlined />
+        </span>
+      ) : null}
+      {imageSrc && status !== 'error' ? (
+        <img
+          src={imageSrc}
+          alt={alt}
+          onLoad={handleLoad}
+          onError={handleError}
+          style={{
+            ...style,
+            position: isLoading ? 'absolute' : style?.position,
+            inset: isLoading ? 0 : style?.inset,
+            width: style?.width || '100%',
+            height: isLoading ? '100%' : style?.height,
+            opacity: isLoading || status === 'error' ? 0 : 1,
+            pointerEvents: 'none',
+          }}
+        />
+      ) : null}
+    </span>
   )
 }
 
@@ -1246,37 +1323,62 @@ export default function Chat() {
           <List
             style={{ flex: 1, overflowY: 'auto' }}
             dataSource={visibleConversations}
-            renderItem={(conv) => (
-              <List.Item
-                onClick={() => setActiveConversation(conv.id)}
-                style={{
-                  padding: '12px 16px',
-                  cursor: 'pointer',
-                  background: conv.id === activeConversationId ? token.controlItemBgActive : 'transparent',
-                  borderBottom: `1px solid ${token.colorSplit}`,
-                }}
-              >
-                <List.Item.Meta
-                  avatar={
-                    <Badge dot={conv.is_ai_enabled} color="green">
-                      {getConversationAvatar(conv)}
-                    </Badge>
-                  }
-                  title={conv.contact?.display_name || t('chat.unknown')}
-                  description={
-                    <div>
-                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                        {conv.platform} &middot;{' '}
-                        {conv.last_message_at
-                          ? dayjs(conv.last_message_at).format('HH:mm DD/MM')
-                          : t('chat.new')}
-                      </Typography.Text>
-                      {renderConversationLabels(conv)}
-                    </div>
-                  }
-                />
-              </List.Item>
-            )}
+            renderItem={(conv) => {
+              const unreadCount = Number(conv.unread_count || 0)
+
+              return (
+                <List.Item
+                  onClick={() => setActiveConversation(conv.id)}
+                  style={{
+                    padding: '12px 16px',
+                    cursor: 'pointer',
+                    background: conv.id === activeConversationId ? token.controlItemBgActive : 'transparent',
+                    borderBottom: `1px solid ${token.colorSplit}`,
+                  }}
+                >
+                  <List.Item.Meta
+                    avatar={
+                      <Badge dot={conv.is_ai_enabled} color="green">
+                        {getConversationAvatar(conv)}
+                      </Badge>
+                    }
+                    title={
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                        <Typography.Text
+                          strong={unreadCount > 0}
+                          ellipsis={{ tooltip: conv.contact?.display_name || t('chat.unknown') }}
+                          style={{ flex: 1, minWidth: 0 }}
+                        >
+                          {conv.contact?.display_name || t('chat.unknown')}
+                        </Typography.Text>
+                        {unreadCount > 0 ? (
+                          <Badge
+                            count={unreadCount}
+                            overflowCount={99}
+                            style={{
+                              backgroundColor: token.colorError,
+                              boxShadow: 'none',
+                              fontWeight: 700,
+                            }}
+                          />
+                        ) : null}
+                      </div>
+                    }
+                    description={
+                      <div>
+                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                          {conv.platform} &middot;{' '}
+                          {conv.last_message_at
+                            ? dayjs(conv.last_message_at).format('HH:mm DD/MM')
+                            : t('chat.new')}
+                        </Typography.Text>
+                        {renderConversationLabels(conv)}
+                      </div>
+                    }
+                  />
+                </List.Item>
+              )
+            }}
           />
         )}
       </div>

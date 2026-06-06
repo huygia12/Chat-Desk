@@ -23,7 +23,7 @@ async def get_embedding(text: str) -> list[float]:
     """Generate embedding vector for text using sentence-transformers (runs in thread pool)."""
     loop = asyncio.get_event_loop()
     model = _get_model()
-    embedding = await loop.run_in_executor(None, lambda: model.encode(text).tolist())
+    embedding = await loop.run_in_executor(None, lambda: model.encode(text, show_progress_bar=False).tolist())
     return embedding
 
 
@@ -31,5 +31,5 @@ async def get_embeddings_batch(texts: list[str]) -> list[list[float]]:
     """Generate embeddings for multiple texts at once."""
     loop = asyncio.get_event_loop()
     model = _get_model()
-    embeddings = await loop.run_in_executor(None, lambda: model.encode(texts).tolist())
+    embeddings = await loop.run_in_executor(None, lambda: model.encode(texts, show_progress_bar=False).tolist())
     return embeddings

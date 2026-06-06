@@ -35,7 +35,7 @@ export default function Layout() {
   const location = useLocation();
   const { user, token: authToken, logout } = useAuthStore();
   const addMessage = useChatStore((s) => s.addMessage);
-  const fetchConversations = useChatStore((s) => s.fetchConversations);
+  const setAiTyping = useChatStore((s) => s.setAiTyping);
   const resetChatState = useChatStore((s) => s.resetChatState);
   const { language, t } = useI18n();
   const toggleLanguage = useLanguageStore((s) => s.toggleLanguage);
@@ -86,13 +86,16 @@ export default function Layout() {
           addMessage({
             ...data.message,
             conversation_id: data.conversation_id,
+          }, {
+            contact: data.contact,
           });
-          fetchConversations();
+        } else if (data.type === "ai_typing") {
+          setAiTyping(data.conversation_id, Boolean(data.is_typing));
         }
       });
       return () => disconnectWebSocket();
     }
-  }, [addMessage, authToken, fetchConversations, isAdmin]);
+  }, [addMessage, authToken, isAdmin, setAiTyping]);
 
   const handleLogout = () => {
     resetChatState();

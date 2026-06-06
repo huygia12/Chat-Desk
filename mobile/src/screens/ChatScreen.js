@@ -3,6 +3,7 @@ import { FlatList, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View 
 import {
   ActivityIndicator,
   Appbar,
+  Avatar,
   Button,
   Chip,
   Dialog,
@@ -33,6 +34,7 @@ export default function ChatScreen({ navigation, route }) {
     messagesLoading,
     olderMessagesLoading,
     messagesHasMore,
+    aiTypingConversationIds,
     sending,
     loadOlderMessages,
     sendMessage,
@@ -55,12 +57,6 @@ export default function ChatScreen({ navigation, route }) {
   const [detailError, setDetailError] = useState('')
 
   useEffect(() => {
-    if (messages.length) {
-      requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }))
-    }
-  }, [messages.length])
-
-  useEffect(() => {
     if (activeConversation?.id) {
       markConversationRead(activeConversation.id)
     }
@@ -79,6 +75,15 @@ export default function ChatScreen({ navigation, route }) {
     activeConversation?.assigned_to?.full_name ||
     activeConversation?.assigned_to?.email ||
     (activeConversation?.assigned_to_business ? t('chat.businessShop') : t('chat.unassigned'))
+  const isAiTyping = aiTypingConversationIds.some(
+    (id) => String(id) === String(activeConversation?.id),
+  )
+
+  useEffect(() => {
+    if (messages.length || isAiTyping) {
+      requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }))
+    }
+  }, [isAiTyping, messages.length])
 
   const fetchHistory = useCallback(async () => {
     if (!activeConversation?.id) return
@@ -404,6 +409,15 @@ export default function ChatScreen({ navigation, route }) {
           }}
           scrollEventThrottle={200}
           ListHeaderComponent={olderMessagesLoading ? <ActivityIndicator style={styles.older} /> : null}
+          ListFooterComponent={isAiTyping ? (
+            <View style={styles.aiTypingWrap}>
+              <View style={styles.aiTypingBubble}>
+                <Avatar.Icon size={30} icon="robot-outline" style={styles.aiTypingAvatar} />
+                <ActivityIndicator size="small" color="#fff" />
+                <Text style={styles.aiTypingText}>{t('chat.aiTyping')}</Text>
+              </View>
+            </View>
+          ) : null}
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.emptyText}>{t('chat.empty')}</Text>
@@ -440,6 +454,29 @@ const createStyles = (colors) => StyleSheet.create({
   },
   emptyText: {
     color: colors.muted,
+  },
+  aiTypingWrap: {
+    alignItems: 'flex-end',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+  },
+  aiTypingBubble: {
+    maxWidth: '82%',
+    minHeight: 42,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    backgroundColor: colors.primary,
+  },
+  aiTypingAvatar: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  aiTypingText: {
+    color: '#fff',
+    fontWeight: '600',
   },
   detailDialog: {
     maxHeight: '92%',

@@ -27,7 +27,7 @@ export default function ConversationListScreen({ navigation }) {
     refreshConversations,
     openConversation,
     addMessage,
-    markConversationRead,
+    setAiTyping,
   } = useChatStore()
 
   useEffect(() => {
@@ -43,15 +43,16 @@ export default function ConversationListScreen({ navigation }) {
     if (!token) return undefined
     connectChatSocket(token, (data) => {
       if (data.type === 'new_message') {
-        addMessage({ ...data.message, conversation_id: data.conversation_id })
-        if (useChatStore.getState().activeConversation?.id === data.conversation_id) {
-          markConversationRead(data.conversation_id)
-        }
-        refreshConversations()
+        addMessage(
+          { ...data.message, conversation_id: data.conversation_id },
+          { contact: data.contact },
+        )
+      } else if (data.type === 'ai_typing') {
+        setAiTyping(data.conversation_id, Boolean(data.is_typing))
       }
     })
     return () => disconnectChatSocket()
-  }, [addMessage, markConversationRead, refreshConversations, token])
+  }, [addMessage, setAiTyping, token])
 
   const handleOpen = useCallback(async (conversation) => {
     await openConversation(conversation)

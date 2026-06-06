@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { List, Avatar, Typography, Input, Button, Spin, Switch, Badge, Empty, Select, message, Segmented, theme, Space, Tooltip, Popover, Modal } from 'antd'
 import {
   SendOutlined,
@@ -228,6 +228,7 @@ export default function Chat() {
     activeConversationId,
     messages,
     messagesHasMore,
+    aiTypingConversationIds,
     loading,
     loadingOlderMessages,
     fetchConversations,
@@ -367,6 +368,8 @@ export default function Chat() {
     selectedPlatforms,
   ])
 
+  const isAiTyping = aiTypingConversationIds.some((id) => String(id) === String(activeConversationId))
+
   const handleMessagesScroll = () => {
     const container = messagesContainerRef.current
     if (!container || !activeConversationId || loading || loadingOlderMessages || !messagesHasMore) return
@@ -377,7 +380,9 @@ export default function Chat() {
     }
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (loading) return
+
     const firstMessageId = messages[0]?.id || null
     const lastMessageId = messages[messages.length - 1]?.id || null
     const activeConversationChanged = activeConversationRef.current !== activeConversationId
@@ -410,7 +415,7 @@ export default function Chat() {
       window.cancelAnimationFrame(frameId)
       window.clearTimeout(timeoutId)
     }
-  }, [activeConversationId, messages.length, messages[messages.length - 1]?.id])
+  }, [activeConversationId, isAiTyping, loading, messages.length, messages[messages.length - 1]?.id])
 
   useEffect(() => {
     activeConversationRef.current = activeConversationId
@@ -969,6 +974,50 @@ export default function Chat() {
       </div>
     )
   }
+
+  const renderAiTypingIndicator = () => (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'flex-end',
+        marginTop: 2,
+        marginBottom: 10,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          gap: 4,
+          width: '100%',
+          maxWidth: '100%',
+          minWidth: 0,
+          flexDirection: 'row-reverse',
+        }}
+      >
+        <Avatar size="small" icon={<RobotOutlined />} style={{ background: '#722ed1' }} />
+        <div
+          aria-label={t('chat.aiTyping')}
+          style={{
+            maxWidth: '60%',
+            minWidth: 0,
+            padding: '8px 12px',
+            borderRadius: 18,
+            color: token.colorTextSecondary,
+            background: token.colorPrimaryBg,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <Spin size="small" />
+          <Typography.Text type="secondary" style={{ fontSize: 13 }}>
+            {t('chat.aiTyping')}
+          </Typography.Text>
+        </div>
+      </div>
+    </div>
+  )
 
   const getMessageBubbleStyle = (msg) => {
     const isImageAttachment = isImageAttachmentMessage(msg)
@@ -1548,6 +1597,7 @@ export default function Chat() {
                       </div>
                     </div>
                   ))}
+                  {isAiTyping && renderAiTypingIndicator()}
                 </>
               )}
               <div ref={messagesEndRef} />

@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import client from '../api/client'
 
 const MESSAGE_PAGE_SIZE = 50
+const MESSAGE_CACHE_TTL_MS = 2 * 60 * 1000
+const MESSAGE_CACHE_MAX_CONVERSATIONS = 30
 const DEFAULT_CONVERSATION_FILTERS = {
   search: '',
   assignment: 'all',
@@ -18,9 +20,11 @@ const initialState = {
   assignees: [],
   assignmentSettings: null,
   activeConversationId: null,
+  messageCache: {},
   messages: [],
   messagesHasMore: false,
   messagesNextCursor: null,
+  aiTypingConversationIds: [],
   loading: false,
   loadingOlderMessages: false,
   labelsLoading: false,
@@ -43,6 +47,65 @@ const normalizeMessagePage = (payload) => {
   }
 }
 
+const messageSortTime = (message) => new Date(message.created_at || 0).getTime()
+
+const sortMessagesByTime = (messages) =>
+  [...messages].sort((a, b) => {
+    const timeDiff = messageSortTime(a) - messageSortTime(b)
+    if (timeDiff !== 0) return timeDiff
+    return String(a.id).localeCompare(String(b.id))
+  })
+
+const mergeMessages = (currentMessages = [], incomingMessages = []) => {
+  if (incomingMessages.length === 0) return currentMessages
+
+  const byId = new Map(currentMessages.map((message) => [String(message.id), message]))
+  let changed = false
+
+  incomingMessages.forEach((message) => {
+    const id = String(message.id)
+    if (!byId.has(id)) {
+      changed = true
+      byId.set(id, message)
+    }
+  })
+
+  if (!changed) return currentMessages
+  return sortMessagesByTime(Array.from(byId.values()))
+}
+
+const touchMessageCache = (cache, conversationId, patch) => {
+  const key = String(conversationId)
+  const now = Date.now()
+  const existing = cache[key] || {
+    items: [],
+    hasMore: false,
+    nextCursor: null,
+    loadedAt: 0,
+    lastAccessedAt: 0,
+  }
+  const nextCache = {
+    ...cache,
+    [key]: {
+      ...existing,
+      ...patch,
+      lastAccessedAt: now,
+    },
+  }
+
+  const entries = Object.entries(nextCache)
+  if (entries.length <= MESSAGE_CACHE_MAX_CONVERSATIONS) return nextCache
+
+  return Object.fromEntries(
+    entries
+      .sort(([, a], [, b]) => Number(b.lastAccessedAt || 0) - Number(a.lastAccessedAt || 0))
+      .slice(0, MESSAGE_CACHE_MAX_CONVERSATIONS),
+  )
+}
+
+const isMessageCacheStale = (entry) =>
+  !entry?.loadedAt || Date.now() - Number(entry.loadedAt) > MESSAGE_CACHE_TTL_MS
+
 const normalizeConversationFilters = (filters = {}) => ({
   search: typeof filters.search === 'string' ? filters.search : '',
   assignment: filters.assignment || filters.queue || 'all',
@@ -62,6 +125,77 @@ const buildConversationParams = (filters) => {
   filters.platforms.forEach((platform) => params.append('platforms', platform))
 
   return params
+}
+
+const conversationSortTime = (conversation) =>
+  new Date(conversation.last_message_at || conversation.created_at || 0).getTime()
+
+const sortConversationsByActivity = (conversations) =>
+  [...conversations].sort((a, b) => {
+    const timeDiff = conversationSortTime(b) - conversationSortTime(a)
+    if (timeDiff !== 0) return timeDiff
+    return String(b.id).localeCompare(String(a.id))
+  })
+
+const mergeIncomingContact = (conversation, contact) => {
+  if (!contact) return conversation
+  return {
+    ...conversation,
+    contact_id: contact.id || conversation.contact_id,
+    contact: conversation.contact ? { ...conversation.contact, ...contact } : contact,
+  }
+}
+
+const conversationMatchesFilters = (conversation, filters = DEFAULT_CONVERSATION_FILTERS) => {
+  const normalized = normalizeConversationFilters(filters)
+  const search = normalized.search.trim().toLowerCase()
+
+  if (normalized.platforms.length > 0 && !normalized.platforms.includes(conversation.platform)) {
+    return false
+  }
+
+  if (normalized.assignment === 'unassigned') {
+    if (conversation.assigned_to_id || conversation.assigned_to_business) return false
+  } else if (normalized.assignment === 'assigned') {
+    if (!conversation.assigned_to_id && !conversation.assigned_to_business) return false
+  }
+
+  if (normalized.labelIds.length > 0) {
+    const assignedLabelIds = new Set((conversation.contact?.labels || []).map((label) => String(label.id)))
+    if (!normalized.labelIds.every((labelId) => assignedLabelIds.has(String(labelId)))) return false
+  }
+
+  if (search) {
+    const contact = conversation.contact || {}
+    const haystack = [
+      contact.display_name,
+      contact.platform_user_id,
+      contact.visitor_email,
+      contact.visitor_phone,
+    ].filter(Boolean).join(' ').toLowerCase()
+    if (!haystack.includes(search)) return false
+  }
+
+  return true
+}
+
+const applyMessageToConversation = (conversation, message, activeConversationId, contact) => {
+  const isActive = String(conversation.id) === String(activeConversationId)
+  const incomingFromContact = message.sender_type === 'contact'
+  const unreadCount = isActive
+    ? 0
+    : incomingFromContact
+      ? Number(conversation.unread_count || 0) + 1
+      : Number(conversation.unread_count || 0)
+
+  return mergeIncomingContact(
+    {
+      ...conversation,
+      last_message_at: message.created_at || conversation.last_message_at,
+      unread_count: unreadCount,
+    },
+    contact,
+  )
 }
 
 export const useChatStore = create((set, get) => ({
@@ -147,6 +281,84 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
+  fetchConversation: async (conversationId, options = {}) => {
+    if (!conversationId) return null
+    try {
+      const res = await client.get(`/api/conversations/${conversationId}`)
+      const conversation = res.data
+      set((state) => {
+        if (options.respectFilters && !conversationMatchesFilters(conversation, state.conversationFilters)) {
+          return state
+        }
+
+        const exists = state.conversations.some((item) => String(item.id) === String(conversation.id))
+        return {
+          conversations: sortConversationsByActivity(
+            exists
+              ? state.conversations.map((item) =>
+                  String(item.id) === String(conversation.id) ? conversation : item,
+                )
+              : [conversation, ...state.conversations],
+          ),
+        }
+      })
+      return conversation
+    } catch (err) {
+      console.error('Failed to fetch conversation:', err)
+      return null
+    }
+  },
+
+  fetchLatestMessages: async (conversationId, options = {}) => {
+    if (!conversationId) return null
+    const cacheKey = String(conversationId)
+    if (!options.silent) set({ loading: true })
+
+    try {
+      const res = await client.get(`/api/conversations/${conversationId}/messages`, {
+        params: { limit: MESSAGE_PAGE_SIZE },
+      })
+      const page = normalizeMessagePage(res.data)
+      const now = Date.now()
+
+      set((state) => {
+        const existingEntry = state.messageCache[cacheKey]
+        const existingItems = existingEntry?.items || []
+        const nextItems = options.mergeWithCache
+          ? mergeMessages(existingItems, page.items)
+          : page.items
+        const nextCache = touchMessageCache(state.messageCache, cacheKey, {
+          items: nextItems,
+          hasMore: page.has_more,
+          nextCursor: existingEntry?.items?.length > page.items.length && existingEntry?.nextCursor
+            ? existingEntry.nextCursor
+            : page.next_cursor,
+          loadedAt: now,
+        })
+
+        if (String(state.activeConversationId) !== cacheKey) {
+          return { messageCache: nextCache }
+        }
+
+        return {
+          messageCache: nextCache,
+          messages: nextItems,
+          messagesHasMore: nextCache[cacheKey]?.hasMore || false,
+          messagesNextCursor: nextCache[cacheKey]?.nextCursor || null,
+        }
+      })
+
+      return page
+    } catch (err) {
+      console.error('Failed to fetch messages:', err)
+      return null
+    } finally {
+      if (!options.silent && String(get().activeConversationId) === cacheKey) {
+        set({ loading: false })
+      }
+    }
+  },
+
   setActiveConversation: async (conversationId) => {
     if (!conversationId) {
       set({
@@ -158,6 +370,10 @@ export const useChatStore = create((set, get) => ({
       })
       return
     }
+    const cacheKey = String(conversationId)
+    const cached = get().messageCache[cacheKey]
+    const hasCache = Boolean(cached)
+
     set({
       activeConversationId: conversationId,
       conversations: get().conversations.map((conversation) =>
@@ -165,28 +381,25 @@ export const useChatStore = create((set, get) => ({
           ? { ...conversation, unread_count: 0 }
           : conversation,
       ),
-      messages: [],
-      messagesHasMore: false,
-      messagesNextCursor: null,
+      messageCache: cached
+        ? touchMessageCache(get().messageCache, cacheKey, {})
+        : get().messageCache,
+      messages: hasCache ? cached.items : [],
+      messagesHasMore: hasCache ? cached.hasMore : false,
+      messagesNextCursor: hasCache ? cached.nextCursor : null,
       loadingOlderMessages: false,
-      loading: true,
+      loading: !hasCache,
     })
-    try {
-      const res = await client.get(`/api/conversations/${conversationId}/messages`, {
-        params: { limit: MESSAGE_PAGE_SIZE },
-      })
-      const page = normalizeMessagePage(res.data)
-      if (String(get().activeConversationId) !== String(conversationId)) return
-      set({
-        messages: page.items,
-        messagesHasMore: page.has_more,
-        messagesNextCursor: page.next_cursor,
-      })
-      await get().markConversationRead(conversationId)
-    } catch (err) {
-      console.error('Failed to fetch messages:', err)
-    } finally {
-      set({ loading: false })
+
+    get().markConversationRead(conversationId)
+
+    if (!hasCache) {
+      await get().fetchLatestMessages(conversationId)
+      return
+    }
+
+    if (isMessageCacheStale(cached)) {
+      get().fetchLatestMessages(conversationId, { silent: true, mergeWithCache: true })
     }
   },
 
@@ -230,11 +443,18 @@ export const useChatStore = create((set, get) => ({
       }
 
       set((state) => {
-        const existingIds = new Set(state.messages.map((msg) => String(msg.id)))
-        const olderMessages = page.items.filter((msg) => !existingIds.has(String(msg.id)))
+        const cacheKey = String(conversationId)
+        const currentItems = state.messageCache[cacheKey]?.items || state.messages
+        const nextItems = mergeMessages(currentItems, page.items)
+        const nextCache = touchMessageCache(state.messageCache, cacheKey, {
+          items: nextItems,
+          hasMore: page.has_more,
+          nextCursor: page.next_cursor,
+        })
 
         return {
-          messages: [...olderMessages, ...state.messages],
+          messageCache: nextCache,
+          messages: nextItems,
           messagesHasMore: page.has_more,
           messagesNextCursor: page.next_cursor,
           loadingOlderMessages: false,
@@ -251,14 +471,7 @@ export const useChatStore = create((set, get) => ({
   sendMessage: async (conversationId, content) => {
     try {
       const res = await client.post(`/api/conversations/${conversationId}/messages`, { content })
-      // Dedup check: WS push from backend may have already added this message
-      set((state) => {
-        const exists = state.messages.some((m) => String(m.id) === String(res.data.id))
-        if (exists) return state
-        return { messages: [...state.messages, res.data] }
-      })
-      // Refresh conversations to update last_message_at
-      get().fetchConversations(undefined, { silent: true })
+      get().addMessage(res.data)
     } catch (err) {
       console.error('Failed to send message:', err)
       throw err
@@ -271,12 +484,7 @@ export const useChatStore = create((set, get) => ({
       formData.append('file', file)
       formData.append('content', content)
       const res = await client.post(`/api/conversations/${conversationId}/messages/upload`, formData)
-      set((state) => {
-        const exists = state.messages.some((m) => String(m.id) === String(res.data.id))
-        if (exists) return state
-        return { messages: [...state.messages, res.data] }
-      })
-      get().fetchConversations(undefined, { silent: true })
+      get().addMessage(res.data)
       return res.data
     } catch (err) {
       console.error('Failed to upload message file:', err)
@@ -284,32 +492,89 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  addMessage: (message) => {
+  addMessage: (message, options = {}) => {
+    const conversationId = message.conversation_id
+    const hasConversation = get().conversations.some(
+      (conversation) => String(conversation.id) === String(conversationId),
+    )
+
     set((state) => {
-      // Only add if it's for the active conversation
-      if (String(message.conversation_id) === String(state.activeConversationId)) {
-        // Avoid duplicates (use String() to safely compare UUIDs from different sources)
-        const exists = state.messages.some((m) => String(m.id) === String(message.id))
-        const conversations = message.sender_type === 'contact'
-          ? state.conversations.map((conversation) =>
-              String(conversation.id) === String(message.conversation_id)
-                ? { ...conversation, unread_count: 0 }
+      const nextTypingConversationIds = message.sender_type === 'ai'
+        ? state.aiTypingConversationIds.filter((id) => String(id) !== String(message.conversation_id))
+        : state.aiTypingConversationIds
+      const belongsToActive = String(conversationId) === String(state.activeConversationId)
+      const exists = state.messages.some((m) => String(m.id) === String(message.id))
+      const cacheKey = String(conversationId)
+      const existingCacheEntry = state.messageCache[cacheKey]
+      const shouldUpdateCache = Boolean(existingCacheEntry) || belongsToActive
+      const nextCacheItems = shouldUpdateCache
+        ? mergeMessages(existingCacheEntry?.items || state.messages, [message])
+        : null
+      const nextMessageCache = shouldUpdateCache
+        ? touchMessageCache(state.messageCache, cacheKey, {
+            items: nextCacheItems,
+            hasMore: existingCacheEntry?.hasMore ?? state.messagesHasMore,
+            nextCursor: existingCacheEntry?.nextCursor ?? state.messagesNextCursor,
+            loadedAt: Date.now(),
+          })
+        : state.messageCache
+      const nextMessages = belongsToActive
+        ? (nextMessageCache[cacheKey]?.items || (exists ? state.messages : [...state.messages, message]))
+        : state.messages
+      const nextConversations = state.conversations.some((conversation) => String(conversation.id) === String(conversationId))
+        ? sortConversationsByActivity(
+            state.conversations.map((conversation) =>
+              String(conversation.id) === String(conversationId)
+                ? applyMessageToConversation(conversation, message, state.activeConversationId, options.contact)
                 : conversation,
-            )
-          : state.conversations
-        if (!exists) {
-          return { messages: [...state.messages, message], conversations }
+            ),
+          )
+        : state.conversations
+
+      if (
+        nextMessages !== state.messages ||
+        nextConversations !== state.conversations ||
+        nextMessageCache !== state.messageCache ||
+        nextTypingConversationIds !== state.aiTypingConversationIds
+      ) {
+        return {
+          messageCache: nextMessageCache,
+          messages: nextMessages,
+          conversations: nextConversations,
+          aiTypingConversationIds: nextTypingConversationIds,
         }
-        return { conversations }
       }
       return state
     })
+
+    if (!hasConversation) {
+      get().fetchConversation(conversationId, { respectFilters: true })
+    }
+
     if (
-      String(message.conversation_id) === String(get().activeConversationId) &&
+      String(conversationId) === String(get().activeConversationId) &&
       message.sender_type === 'contact'
     ) {
-      get().markConversationRead(message.conversation_id)
+      get().markConversationRead(conversationId)
     }
+  },
+
+  setAiTyping: (conversationId, isTyping) => {
+    if (!conversationId) return
+    set((state) => {
+      const exists = state.aiTypingConversationIds.some((id) => String(id) === String(conversationId))
+      if (isTyping && !exists) {
+        return { aiTypingConversationIds: [...state.aiTypingConversationIds, String(conversationId)] }
+      }
+      if (!isTyping && exists) {
+        return {
+          aiTypingConversationIds: state.aiTypingConversationIds.filter(
+            (id) => String(id) !== String(conversationId),
+          ),
+        }
+      }
+      return state
+    })
   },
 
   toggleAI: async (conversationId, isEnabled) => {

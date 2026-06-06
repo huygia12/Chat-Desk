@@ -5,6 +5,62 @@ import client from '../api/client'
 const CONVERSATION_LIMIT = 25
 const MESSAGE_LIMIT = 50
 
+const conversationSortTime = (conversation) =>
+  new Date(conversation.last_message_at || conversation.created_at || 0).getTime()
+
+const sortConversationsByActivity = (conversations) =>
+  [...conversations].sort((a, b) => {
+    const timeDiff = conversationSortTime(b) - conversationSortTime(a)
+    if (timeDiff !== 0) return timeDiff
+    return String(b.id).localeCompare(String(a.id))
+  })
+
+const mergeIncomingContact = (conversation, contact) => {
+  if (!contact) return conversation
+  return {
+    ...conversation,
+    contact_id: contact.id || conversation.contact_id,
+    contact: conversation.contact ? { ...conversation.contact, ...contact } : contact,
+  }
+}
+
+const conversationMatchesFilters = (conversation, filters = {}) => {
+  if (filters.platform && conversation.platform !== filters.platform) return false
+
+  const search = filters.search?.trim().toLowerCase()
+  if (search) {
+    const contact = conversation.contact || {}
+    const haystack = [
+      contact.display_name,
+      contact.platform_user_id,
+      contact.visitor_email,
+      contact.visitor_phone,
+    ].filter(Boolean).join(' ').toLowerCase()
+    if (!haystack.includes(search)) return false
+  }
+
+  return true
+}
+
+const applyMessageToConversation = (conversation, message, activeConversationId, contact) => {
+  const isActive = String(conversation.id) === String(activeConversationId)
+  const incomingFromContact = message.sender_type === 'contact'
+  const unreadCount = isActive
+    ? 0
+    : incomingFromContact
+      ? Number(conversation.unread_count || 0) + 1
+      : Number(conversation.unread_count || 0)
+
+  return mergeIncomingContact(
+    {
+      ...conversation,
+      last_message_at: message.created_at || conversation.last_message_at,
+      unread_count: unreadCount,
+    },
+    contact,
+  )
+}
+
 export const useChatStore = create((set, get) => ({
   conversations: [],
   conversationsCursor: null,
@@ -23,6 +79,7 @@ export const useChatStore = create((set, get) => ({
   messagesLoading: false,
   olderMessagesLoading: false,
   sending: false,
+  aiTypingConversationIds: [],
 
   setFilters: (filters) => set((state) => ({ filters: { ...state.filters, ...filters } })),
 
@@ -54,15 +111,19 @@ export const useChatStore = create((set, get) => ({
     await get().fetchConversations({ reset: true, refreshing: true })
   },
 
-  getConversation: async (conversationId) => {
+  getConversation: async (conversationId, options = {}) => {
     const res = await client.get(`/api/conversations/${conversationId}`)
     const conversation = res.data
     set((state) => {
+      if (options.respectFilters && !conversationMatchesFilters(conversation, state.filters)) {
+        return state
+      }
+
       const exists = state.conversations.some((item) => String(item.id) === String(conversation.id))
       return {
-        conversations: exists
+        conversations: sortConversationsByActivity(exists
           ? state.conversations.map((item) => String(item.id) === String(conversation.id) ? conversation : item)
-          : [conversation, ...state.conversations],
+          : [conversation, ...state.conversations]),
       }
     })
     return conversation
@@ -262,7 +323,6 @@ export const useChatStore = create((set, get) => ({
         content: content.trim(),
       })
       get().addMessage(res.data)
-      get().refreshConversations()
     } finally {
       set({ sending: false })
     }
@@ -284,35 +344,81 @@ export const useChatStore = create((set, get) => ({
     try {
       const res = await client.post(`/api/conversations/${conversation.id}/messages/upload`, formData)
       get().addMessage(res.data)
-      get().refreshConversations()
     } finally {
       set({ sending: false })
     }
   },
 
-  addMessage: (message) => {
+  addMessage: (message, options = {}) => {
+    const conversationId = message.conversation_id
+    const hasConversation = get().conversations.some(
+      (conversation) => String(conversation.id) === String(conversationId),
+    )
+
     set((state) => {
       const belongsToActive =
-        state.activeConversation && String(message.conversation_id) === String(state.activeConversation.id)
+        state.activeConversation && String(conversationId) === String(state.activeConversation.id)
       const exists = state.messages.some((item) => String(item.id) === String(message.id))
-      return {
-        messages: belongsToActive && !exists ? [...state.messages, message] : state.messages,
-        conversations: belongsToActive && message.sender_type === 'contact'
-          ? state.conversations.map((conversation) =>
-              String(conversation.id) === String(message.conversation_id)
-                ? { ...conversation, unread_count: 0 }
+      const nextTypingConversationIds = message.sender_type === 'ai'
+        ? state.aiTypingConversationIds.filter((id) => String(id) !== String(conversationId))
+        : state.aiTypingConversationIds
+      const nextMessages = belongsToActive && !exists ? [...state.messages, message] : state.messages
+      const nextActiveConversation = belongsToActive
+        ? applyMessageToConversation(state.activeConversation, message, state.activeConversation.id, options.contact)
+        : state.activeConversation
+      const nextConversations = state.conversations.some((conversation) => String(conversation.id) === String(conversationId))
+        ? sortConversationsByActivity(
+            state.conversations.map((conversation) =>
+              String(conversation.id) === String(conversationId)
+                ? applyMessageToConversation(
+                    conversation,
+                    message,
+                    state.activeConversation?.id,
+                    options.contact,
+                  )
                 : conversation,
-            )
-          : state.conversations,
+            ),
+          )
+        : state.conversations
+      return {
+        messages: nextMessages,
+        activeConversation: nextActiveConversation,
+        conversations: nextConversations,
+        aiTypingConversationIds: nextTypingConversationIds,
       }
     })
+
+    if (!hasConversation) {
+      get().getConversation(conversationId, { respectFilters: true }).catch((error) => {
+        console.warn('Failed to fetch incoming conversation:', error)
+      })
+    }
+
     const activeConversation = get().activeConversation
     if (
       activeConversation &&
-      String(activeConversation.id) === String(message.conversation_id) &&
+      String(activeConversation.id) === String(conversationId) &&
       message.sender_type === 'contact'
     ) {
       get().markConversationRead(activeConversation.id)
     }
+  },
+
+  setAiTyping: (conversationId, isTyping) => {
+    if (!conversationId) return
+    set((state) => {
+      const exists = state.aiTypingConversationIds.some((id) => String(id) === String(conversationId))
+      if (isTyping && !exists) {
+        return { aiTypingConversationIds: [...state.aiTypingConversationIds, String(conversationId)] }
+      }
+      if (!isTyping && exists) {
+        return {
+          aiTypingConversationIds: state.aiTypingConversationIds.filter(
+            (id) => String(id) !== String(conversationId),
+          ),
+        }
+      }
+      return state
+    })
   },
 }))

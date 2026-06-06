@@ -325,65 +325,83 @@ async def _process_incoming_message(
                     "platform": platform,
                     "conversation_id": conversation.id,
                 }))
-                ai_response_text = await generate_ai_response(
-                    db=db,
-                    conversation=conversation,
-                    user_message=message_text,
+                await manager.send_message(
+                    str(channel.business_id),
+                    {
+                        "type": "ai_typing",
+                        "conversation_id": str(conversation.id),
+                        "is_typing": True,
+                    },
                 )
-                logger.info("AI response preview:\n%s", pretty_log({
-                    "conversation_id": conversation.id,
-                    "preview": ai_response_text[:200] if ai_response_text else None,
-                }))
-
-                if ai_response_text:
-                    # Send AI reply back via platform
-                    from app.services.facebook_service import send_facebook_message
-                    from app.services.instagram_service import send_instagram_message
-                    from app.services.telegram_service import send_telegram_message
-
-                    ai_platform_msg_id = None
-                    try:
-                        if platform == "facebook":
-                            ai_platform_msg_id = await send_facebook_message(
-                                page_access_token=channel.access_token,
-                                recipient_id=sender_id,
-                                message_text=ai_response_text,
-                            )
-                        elif platform == "instagram":
-                            ai_platform_msg_id = await send_instagram_message(
-                                page_access_token=channel.access_token,
-                                recipient_id=sender_id,
-                                message_text=ai_response_text,
-                            )
-                        elif platform == "telegram":
-                            ai_platform_msg_id = await send_telegram_message(
-                                bot_token=channel.access_token,
-                                chat_id=sender_id,
-                                message_text=ai_response_text,
-                            )
-                    except Exception as e:
-                        logger.error(f"Failed to send AI response via {platform}: {e}")
-
-                    # Save AI message
-                    ai_message = Message(
-                        conversation_id=conversation.id,
-                        sender_type="ai",
-                        content=ai_response_text,
-                        platform_message_id=ai_platform_msg_id,
+                try:
+                    ai_response_text = await generate_ai_response(
+                        db=db,
+                        conversation=conversation,
+                        user_message=message_text,
                     )
-                    db.add(ai_message)
-                    conversation.last_message_at = datetime.now(timezone.utc)
-                    await db.flush()
-                    await db.refresh(ai_message)
-                    await db.commit()
+                    logger.info("AI response preview:\n%s", pretty_log({
+                        "conversation_id": conversation.id,
+                        "preview": ai_response_text[:200] if ai_response_text else None,
+                    }))
 
-                    # Notify frontend after the AI message is committed.
+                    if ai_response_text:
+                        # Send AI reply back via platform
+                        from app.services.facebook_service import send_facebook_message
+                        from app.services.instagram_service import send_instagram_message
+                        from app.services.telegram_service import send_telegram_message
+
+                        ai_platform_msg_id = None
+                        try:
+                            if platform == "facebook":
+                                ai_platform_msg_id = await send_facebook_message(
+                                    page_access_token=channel.access_token,
+                                    recipient_id=sender_id,
+                                    message_text=ai_response_text,
+                                )
+                            elif platform == "instagram":
+                                ai_platform_msg_id = await send_instagram_message(
+                                    page_access_token=channel.access_token,
+                                    recipient_id=sender_id,
+                                    message_text=ai_response_text,
+                                )
+                            elif platform == "telegram":
+                                ai_platform_msg_id = await send_telegram_message(
+                                    bot_token=channel.access_token,
+                                    chat_id=sender_id,
+                                    message_text=ai_response_text,
+                                )
+                        except Exception as e:
+                            logger.error(f"Failed to send AI response via {platform}: {e}")
+
+                        # Save AI message
+                        ai_message = Message(
+                            conversation_id=conversation.id,
+                            sender_type="ai",
+                            content=ai_response_text,
+                            platform_message_id=ai_platform_msg_id,
+                        )
+                        db.add(ai_message)
+                        conversation.last_message_at = datetime.now(timezone.utc)
+                        await db.flush()
+                        await db.refresh(ai_message)
+                        await db.commit()
+
+                        # Notify frontend after the AI message is committed.
+                        await manager.send_message(
+                            str(channel.business_id),
+                            {
+                                "type": "new_message",
+                                "conversation_id": str(conversation.id),
+                                "message": _message_payload(ai_message),
+                            },
+                        )
+                finally:
                     await manager.send_message(
                         str(channel.business_id),
                         {
-                            "type": "new_message",
+                            "type": "ai_typing",
                             "conversation_id": str(conversation.id),
-                            "message": _message_payload(ai_message),
+                            "is_typing": False,
                         },
                     )
 

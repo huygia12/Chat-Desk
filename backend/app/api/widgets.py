@@ -407,6 +407,14 @@ async def send_widget_message(
     # Generate AI response
     ai_response_text = None
     if conversation.is_ai_enabled:
+        await manager.send_message(
+            str(business_id),
+            {
+                "type": "ai_typing",
+                "conversation_id": str(conversation.id),
+                "is_typing": True,
+            },
+        )
         try:
             ai_response_text = await generate_ai_response(
                 db=db,
@@ -438,6 +446,15 @@ async def send_widget_message(
                 )
         except Exception as e:
             logger.error(f"Failed to generate AI response: {e}", exc_info=True)
+        finally:
+            await manager.send_message(
+                str(business_id),
+                {
+                    "type": "ai_typing",
+                    "conversation_id": str(conversation.id),
+                    "is_typing": False,
+                },
+            )
 
     await db.commit()
     await send_conversation_push(db, conversation, message, contact)

@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -7,6 +8,7 @@ from pydantic import BaseModel, Field
 class AIAssistantAskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=4000)
     conversation_id: uuid.UUID | None = None
+    intent: Literal["ask", "summarize_conversation"] = "ask"
 
 
 class AIAssistantMessageOut(BaseModel):

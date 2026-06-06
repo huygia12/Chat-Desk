@@ -6,6 +6,7 @@ import {
   Modal,
   PanResponder,
   Platform,
+  Pressable,
   StyleSheet,
   TextInput,
   View,
@@ -63,6 +64,12 @@ export default function AIAssistantBubble() {
   const listRef = useRef(null)
 
   const canUseAssistant = user?.role === 'business' || user?.role === 'employee'
+  const activeCustomerName =
+    activeConversation?.contact?.display_name ||
+    activeConversation?.contact?.visitor_email ||
+    activeConversation?.contact?.visitor_phone ||
+    activeConversation?.contact?.platform_user_id ||
+    t('common.unknown')
 
   const clampPosition = (x, y) => ({
     x: Math.min(Math.max(EDGE_GAP, x), Math.max(EDGE_GAP, width - BUBBLE_SIZE - EDGE_GAP)),
@@ -167,25 +174,42 @@ export default function AIAssistantBubble() {
     }
   }
 
-  const askAssistant = async () => {
-    const trimmedQuestion = question.trim()
+  const submitAssistantQuestion = async (submittedQuestion, intent = 'ask', onError) => {
+    const trimmedQuestion = submittedQuestion.trim()
     if (!trimmedQuestion || asking) return
 
     setAsking(true)
     setError('')
-    setQuestion('')
     try {
       const res = await client.post('/api/ai-assistant/ask', {
         question: trimmedQuestion,
         conversation_id: activeConversation?.id || undefined,
+        intent,
       })
       setHistory((items) => [...items, res.data.user_message, res.data.assistant_message])
     } catch (err) {
-      setQuestion(trimmedQuestion)
+      onError?.()
       setError(err.response?.data?.detail || t('aiAssistant.askError'))
     } finally {
       setAsking(false)
     }
+  }
+
+  const askAssistant = async () => {
+    const trimmedQuestion = question.trim()
+    if (!trimmedQuestion || asking) return
+
+    setQuestion('')
+    submitAssistantQuestion(trimmedQuestion, 'ask', () => setQuestion(trimmedQuestion))
+  }
+
+  const summarizeActiveConversation = () => {
+    if (!activeConversation?.id || asking) return
+
+    submitAssistantQuestion(
+      t('aiAssistant.summaryPrompt', { customer: activeCustomerName }),
+      'summarize_conversation',
+    )
   }
 
   if (!canUseAssistant) return null
@@ -264,23 +288,43 @@ export default function AIAssistantBubble() {
           />
 
           <Surface elevation={3} style={styles.composer}>
-            <TextInput
-              value={question}
-              onChangeText={setQuestion}
-              placeholder={t('aiAssistant.placeholder')}
-              placeholderTextColor={colors.muted}
-              multiline
-              style={styles.input}
-              editable={!asking}
-            />
-            <IconButton
-              mode="contained"
-              icon="send"
-              size={22}
-              disabled={!question.trim() || asking}
-              onPress={askAssistant}
-              style={styles.sendButton}
-            />
+            {activeConversation?.id ? (
+              <Pressable
+                accessibilityRole="button"
+                disabled={asking}
+                onPress={summarizeActiveConversation}
+                style={({ pressed }) => [
+                  styles.summaryChip,
+                  asking ? styles.summaryChipDisabled : null,
+                  pressed ? styles.summaryChipPressed : null,
+                ]}
+              >
+                <MaterialCommunityIcons name="file-document-outline" size={17} color={colors.primary} />
+                <Text numberOfLines={2} style={styles.summaryChipText}>
+                  {t('aiAssistant.summaryAction', { customer: activeCustomerName })}
+                </Text>
+              </Pressable>
+            ) : null}
+
+            <View style={styles.inputRow}>
+              <TextInput
+                value={question}
+                onChangeText={setQuestion}
+                placeholder={t('aiAssistant.placeholder')}
+                placeholderTextColor={colors.muted}
+                multiline
+                style={styles.input}
+                editable={!asking}
+              />
+              <IconButton
+                mode="contained"
+                icon="send"
+                size={22}
+                disabled={!question.trim() || asking}
+                onPress={askAssistant}
+                style={styles.sendButton}
+              />
+            </View>
           </Surface>
         </KeyboardAvoidingView>
       </Modal>
@@ -423,13 +467,43 @@ const createStyles = (colors, insets) => StyleSheet.create({
     color: colors.muted,
   },
   composer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
     gap: 8,
     padding: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
     backgroundColor: colors.surface,
+  },
+  summaryChip: {
+    alignSelf: 'flex-start',
+    maxWidth: '100%',
+    minHeight: 34,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: colors.primary,
+    backgroundColor: colors.inputBg,
+  },
+  summaryChipPressed: {
+    opacity: 0.75,
+  },
+  summaryChipDisabled: {
+    opacity: 0.55,
+  },
+  summaryChipText: {
+    flexShrink: 1,
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 8,
   },
   input: {
     flex: 1,

@@ -124,6 +124,8 @@ async def ask_ai_assistant(
         raise HTTPException(status_code=422, detail="Question is required")
 
     conversation = await _get_accessible_conversation(data.conversation_id, current_user, business_id, db)
+    if data.intent == "summarize_conversation" and not conversation:
+        raise HTTPException(status_code=422, detail="Conversation is required for summary")
 
     try:
         answer = await generate_internal_assistant_answer(
@@ -132,6 +134,7 @@ async def ask_ai_assistant(
             user_id=current_user.id,
             question=question,
             conversation=conversation,
+            intent=data.intent,
         )
     except Exception as exc:
         logger.error("Internal AI assistant failed for user %s: %s", current_user.id, exc, exc_info=True)

@@ -121,6 +121,8 @@ export const dictionaries = {
       historyError: "Không thể tải lịch sử trợ lý AI.",
       activeConversationHint: "Đang dùng ngữ cảnh hội thoại hiện tại",
       generalHint: "Trợ lý nội bộ ChatDesk",
+      summaryAction: "Tóm tắt hội thoại với {customer}",
+      summaryPrompt: "Tóm tắt hội thoại khách hàng đang mở với {customer}.",
     },
     assignment: {
       title: "Assignment Center",
@@ -518,6 +520,8 @@ export const dictionaries = {
       historyError: "Unable to load AI assistant history.",
       activeConversationHint: "Using current conversation context",
       generalHint: "ChatDesk internal assistant",
+      summaryAction: "Summarize conversation with {customer}",
+      summaryPrompt: "Summarize the currently open customer conversation with {customer}.",
     },
     assignment: {
       title: "Assignment Center",

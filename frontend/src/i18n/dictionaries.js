@@ -290,6 +290,8 @@ export const dictionaries = {
       thinking: 'Đang suy nghĩ...',
       historyError: 'Không thể tải lịch sử trợ lý AI',
       askError: 'Trợ lý AI chưa trả lời được',
+      summaryAction: 'Tóm tắt hội thoại với {customer}',
+      summaryPrompt: 'Tóm tắt hội thoại khách hàng đang mở với {customer}.',
     },
     labelsPage: {
       loadError: 'Không thể tải danh sách label',
@@ -819,6 +821,8 @@ export const dictionaries = {
       thinking: 'Thinking...',
       historyError: 'Failed to load AI assistant history',
       askError: 'The AI assistant could not answer',
+      summaryAction: 'Summarize conversation with {customer}',
+      summaryPrompt: 'Summarize the currently open customer conversation with {customer}.',
     },
     labelsPage: {
       loadError: 'Could not load labels',

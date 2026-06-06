@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Avatar, Button, Empty, Input, Modal, Spin, Tooltip, Typography, message, theme } from "antd";
-import { RobotOutlined, SendOutlined, UserOutlined } from "@ant-design/icons";
+import { FileTextOutlined, RobotOutlined, SendOutlined, UserOutlined } from "@ant-design/icons";
 import client from "../api/client";
 import { useAuthStore } from "../store/authStore";
 import { useChatStore } from "../store/chatStore";
@@ -28,6 +28,7 @@ const normalizeHistoryPage = (payload) => {
 export default function AIAssistantModal() {
   const user = useAuthStore((state) => state.user);
   const activeConversationId = useChatStore((state) => state.activeConversationId);
+  const conversations = useChatStore((state) => state.conversations);
   const { t } = useI18n();
   const { token } = theme.useToken();
   const [open, setOpen] = useState(false);
@@ -44,6 +45,15 @@ export default function AIAssistantModal() {
   const initialScrollDoneRef = useRef(false);
 
   const canUseAssistant = user?.role === "business" || user?.role === "employee";
+  const activeConversation = conversations.find(
+    (conversation) => String(conversation.id) === String(activeConversationId),
+  );
+  const activeCustomerName =
+    activeConversation?.contact?.display_name ||
+    activeConversation?.contact?.visitor_email ||
+    activeConversation?.contact?.visitor_phone ||
+    activeConversation?.contact?.platform_user_id ||
+    t("chat.unknown");
 
   const fetchHistory = async () => {
     setLoadingHistory(true);
@@ -128,24 +138,40 @@ export default function AIAssistantModal() {
     initialScrollDoneRef.current = true;
   }, [open, loadingHistory, history, asking]);
 
-  const askAssistant = async () => {
-    const trimmedQuestion = question.trim();
+  const submitAssistantQuestion = async (submittedQuestion, intent = "ask", onError) => {
+    const trimmedQuestion = submittedQuestion.trim();
     if (!trimmedQuestion || asking) return;
-
     setAsking(true);
-    setQuestion("");
     try {
       const res = await client.post("/api/ai-assistant/ask", {
         question: trimmedQuestion,
         conversation_id: activeConversationId || undefined,
+        intent,
       });
       setHistory((items) => [...items, res.data.user_message, res.data.assistant_message]);
     } catch (err) {
       message.error(err.response?.data?.detail || t("aiAssistant.askError"));
-      setQuestion(trimmedQuestion);
+      onError?.();
     } finally {
       setAsking(false);
     }
+  };
+
+  const askAssistant = async () => {
+    const trimmedQuestion = question.trim();
+    if (!trimmedQuestion || asking) return;
+
+    setQuestion("");
+    submitAssistantQuestion(trimmedQuestion, "ask", () => setQuestion(trimmedQuestion));
+  };
+
+  const summarizeActiveConversation = () => {
+    if (!activeConversationId || asking) return;
+
+    submitAssistantQuestion(
+      t("aiAssistant.summaryPrompt", { customer: activeCustomerName }),
+      "summarize_conversation",
+    );
   };
 
   if (!canUseAssistant) return null;
@@ -241,6 +267,26 @@ export default function AIAssistantModal() {
           )}
           <div ref={historyEndRef} />
         </div>
+        {activeConversationId && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
+            <Button
+              icon={<FileTextOutlined />}
+              onClick={summarizeActiveConversation}
+              disabled={asking}
+              style={{
+                borderStyle: "dashed",
+                borderRadius: 999,
+                maxWidth: "100%",
+                whiteSpace: "normal",
+                height: "auto",
+                minHeight: 32,
+                textAlign: "left",
+              }}
+            >
+              {t("aiAssistant.summaryAction", { customer: activeCustomerName })}
+            </Button>
+          </div>
+        )}
         <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
           <Input.TextArea
             value={question}

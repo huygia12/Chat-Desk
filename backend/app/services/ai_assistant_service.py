@@ -1,4 +1,5 @@
 import logging
+from typing import Literal
 
 from sqlalchemy import case, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,6 +17,8 @@ from app.services.ai_service import (
 )
 
 logger = logging.getLogger(__name__)
+CONVERSATION_CONTEXT_LIMIT = 8
+SUMMARY_CONVERSATION_CONTEXT_LIMIT = 80
 
 ASSISTANT_ROLE_ORDER = case(
     (AIAssistantMessage.role == "assistant", 1),
@@ -93,7 +96,7 @@ async def _get_recent_assistant_history(
 async def _get_recent_conversation_context(
     db: AsyncSession,
     conversation: Conversation | None,
-    limit: int = 8,
+    limit: int = CONVERSATION_CONTEXT_LIMIT,
 ) -> str:
     if not conversation:
         return ""
@@ -113,7 +116,18 @@ async def _get_recent_conversation_context(
         "business": "Nhân viên",
         "ai": "AI tự động",
     }
-    return "\n".join(f"- {role_names.get(message.sender_type, message.sender_type)}: {message.content}" for message in messages)
+    lines = []
+    for message in messages:
+        role_name = role_names.get(message.sender_type, message.sender_type)
+        timestamp = message.created_at.strftime("%Y-%m-%d %H:%M") if message.created_at else ""
+        attachment_note = ""
+        if message.attachment_filename:
+            attachment_note = f" [tệp đính kèm: {message.attachment_filename}]"
+        elif message.attachment_kind:
+            attachment_note = f" [tệp đính kèm: {message.attachment_kind}]"
+        prefix = f"- [{timestamp}] {role_name}" if timestamp else f"- {role_name}"
+        lines.append(f"{prefix}: {message.content}{attachment_note}")
+    return "\n".join(lines)
 
 
 async def _retrieve_product_context(
@@ -147,8 +161,51 @@ async def generate_internal_assistant_answer(
     user_id,
     question: str,
     conversation: Conversation | None = None,
+    intent: Literal["ask", "summarize_conversation"] = "ask",
 ) -> str:
     business = await _get_business(db, business_id)
+    if intent == "summarize_conversation":
+        conversation_context = await _get_recent_conversation_context(
+            db,
+            conversation,
+            limit=SUMMARY_CONVERSATION_CONTEXT_LIMIT,
+        )
+        if not conversation_context:
+            return "Chưa có tin nhắn nào trong hội thoại khách hàng đang mở để tóm tắt."
+
+        system_prompt = f"""Bạn là trợ lý AI nội bộ cho nhân viên của cửa hàng.
+
+Nhiệm vụ:
+- Tóm tắt chỉ riêng cuộc hội thoại giữa doanh nghiệp và khách hàng đang mở.
+- Không tóm tắt lịch sử chat giữa nhân viên và trợ lý AI nội bộ.
+- Chỉ dựa vào các tin nhắn khách hàng/nhân viên/AI tự động được cung cấp bên dưới.
+- Nếu thông tin chưa đủ, nói rõ là bạn chỉ tóm tắt dựa trên các tin nhắn được cung cấp.
+- Trả lời ngắn gọn, rõ ràng, ưu tiên việc nhân viên cần làm tiếp theo.
+- Không tự gửi tin nhắn ra Facebook/Instagram/Telegram/Widget.
+
+Hãy trình bày theo các mục:
+1. Nhu cầu của khách hàng
+2. Nội dung đã trao đổi
+3. Vấn đề còn mở
+4. Bước tiếp theo nên làm
+
+=== THÔNG TIN CỬA HÀNG ===
+{_business_context(business)}
+
+=== HỘI THOẠI KHÁCH HÀNG ĐANG MỞ ===
+{conversation_context}
+"""
+
+        chat_completion = await create_chat_completion(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": question},
+            ],
+            temperature=0.2,
+            max_tokens=1000,
+        )
+        return chat_completion.choices[0].message.content or "Mình chưa tạo được bản tóm tắt phù hợp."
+
     assistant_history = await _get_recent_assistant_history(db, user_id)
     _, product_context = await _retrieve_product_context(db, business_id, question)
     conversation_context = await _get_recent_conversation_context(db, conversation)

@@ -11,6 +11,7 @@ from app.models.user import User
 from app.services.embedding_service import get_embedding
 from app.services.llm_service import create_chat_completion
 from app.services.milvus_service import search_similar_with_scores
+from app.services.ai_scope_service import CUSTOMER_OUT_OF_SCOPE_REPLY, classify_ai_scope
 from app.utils.logging import pretty_log
 
 logger = logging.getLogger(__name__)
@@ -360,6 +361,24 @@ async def generate_ai_response(
             history = []
         else:
             history = history_result
+
+        scope = await classify_ai_scope(
+            mode="customer_auto_reply",
+            message=user_message,
+            history_context=_format_history_for_rewrite(history, user_message),
+        )
+        if not scope["should_answer"]:
+            logger.info(
+                "Customer AI blocked out-of-scope message:\n%s",
+                pretty_log({
+                    "conversation_id": conversation.id,
+                    "intent": scope["intent"],
+                    "confidence": scope["confidence"],
+                    "reason": scope["reason"],
+                    "message": user_message,
+                }),
+            )
+            return CUSTOMER_OUT_OF_SCOPE_REPLY
 
         product_hits: list[ProductHit] = []
         retrieval_query = user_message

@@ -15,6 +15,7 @@ from app.services.ai_service import (
     _retrieve_products_without_vector_search,
     _retrieve_relevant_products,
 )
+from app.services.ai_scope_service import INTERNAL_OUT_OF_SCOPE_REPLY, classify_ai_scope
 
 logger = logging.getLogger(__name__)
 CONVERSATION_CONTEXT_LIMIT = 8
@@ -91,6 +92,21 @@ async def _get_recent_assistant_history(
         .limit(limit)
     )
     return list(reversed(result.scalars().all()))
+
+
+def _format_assistant_history_for_scope(history: list[AIAssistantMessage], limit: int = 8) -> str:
+    if not history:
+        return "(none)"
+
+    role_names = {
+        "user": "Staff",
+        "assistant": "Assistant",
+    }
+    lines = []
+    for item in history[-limit:]:
+        role = role_names.get(item.role, item.role)
+        lines.append(f"{role}: {item.content}")
+    return "\n".join(lines)
 
 
 async def _get_recent_conversation_context(
@@ -207,8 +223,25 @@ Hãy trình bày theo các mục:
         return chat_completion.choices[0].message.content or "Mình chưa tạo được bản tóm tắt phù hợp."
 
     assistant_history = await _get_recent_assistant_history(db, user_id)
-    _, product_context = await _retrieve_product_context(db, business_id, question)
     conversation_context = await _get_recent_conversation_context(db, conversation)
+    scope_context = _format_assistant_history_for_scope(assistant_history)
+    if conversation_context:
+        scope_context += f"\n\nActive customer conversation:\n{conversation_context}"
+
+    scope = await classify_ai_scope(
+        mode="internal_assistant",
+        message=question,
+        history_context=scope_context,
+    )
+    if not scope["should_answer"]:
+        logger.info(
+            "Internal AI assistant blocked out-of-scope message for user %s: %s",
+            user_id,
+            scope,
+        )
+        return INTERNAL_OUT_OF_SCOPE_REPLY
+
+    _, product_context = await _retrieve_product_context(db, business_id, question)
 
     system_prompt = f"""Bạn là trợ lý AI nội bộ cho nhân viên của cửa hàng.
 

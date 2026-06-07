@@ -513,6 +513,10 @@ Rules:
 - If the product context is empty or product search failed, politely say in Vietnamese that you cannot find suitable product data in the system.
 - If the customer is asking a follow-up question, use conversation history to understand the reference, but only use product facts from the product context.
 - Do not invent product names, variants, prices, stock, specifications, or policies that are not in the provided data.
+- If the customer shows purchase intent, help collect missing order details. An order is not actionable until the conversation includes a product/service, quantity or clear purchase scope, a phone/email/contact method, and delivery or pickup details when relevant.
+- If purchase intent is clear but phone/contact or delivery/pickup details are missing, ask for the missing details instead of saying the order was transferred.
+- Never claim that order information has been transferred to staff, that staff will process the order, or that staff will contact the customer. That handoff message is sent only by the ChatDesk system after backend validation.
+- Ignore prior assistant handoff messages when deciding whether the latest customer message has enough order details.
 - Keep the answer concise, natural, and helpful.
 
 === PRODUCT SEARCH QUERY USED ===

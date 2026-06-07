@@ -7,12 +7,14 @@ class LabelCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=80)
     color: str = Field("#d8d800", pattern=r"^#[0-9a-fA-F]{6}$")
     internal_note: str | None = None
+    ai_auto_apply_trigger: str | None = Field(None, max_length=40)
 
 
 class LabelUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=80)
     color: str | None = Field(None, pattern=r"^#[0-9a-fA-F]{6}$")
     internal_note: str | None = None
+    ai_auto_apply_trigger: str | None = Field(None, max_length=40)
 
 
 class LabelOut(BaseModel):
@@ -21,6 +23,7 @@ class LabelOut(BaseModel):
     name: str
     color: str
     internal_note: str | None = None
+    ai_auto_apply_trigger: str | None = None
     created_at: datetime
     updated_at: datetime
 

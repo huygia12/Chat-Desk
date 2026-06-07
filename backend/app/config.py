@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     AI_RETRIEVAL_MIN_SCORE: float = 0.55
     AI_RETRIEVAL_SCORE_MARGIN: float = 0.05
     AI_RETRIEVAL_MIN_MESSAGE_LENGTH: int = 12
+    AI_ORDER_READY_DETECTION_ENABLED: bool = True
+    AI_ORDER_READY_CONFIDENCE_THRESHOLD: float = 0.8
+    AI_ORDER_READY_TIMEOUT_SECONDS: float = 8.0
 
     # Milvus Cloud (Zilliz)
     MILVUS_URI: str = ""

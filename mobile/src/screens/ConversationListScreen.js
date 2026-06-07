@@ -28,6 +28,7 @@ export default function ConversationListScreen({ navigation }) {
     openConversation,
     addMessage,
     setAiTyping,
+    setContactLabels,
   } = useChatStore()
 
   useEffect(() => {
@@ -49,10 +50,12 @@ export default function ConversationListScreen({ navigation }) {
         )
       } else if (data.type === 'ai_typing') {
         setAiTyping(data.conversation_id, Boolean(data.is_typing))
+      } else if (data.type === 'contact_labels_updated') {
+        setContactLabels(data.contact_id, data.labels || [])
       }
     })
     return () => disconnectChatSocket()
-  }, [addMessage, setAiTyping, token])
+  }, [addMessage, setAiTyping, setContactLabels, token])
 
   const handleOpen = useCallback(async (conversation) => {
     await openConversation(conversation)

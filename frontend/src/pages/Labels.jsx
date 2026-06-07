@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, Card, Form, Input, Modal, Popconfirm, Space, Table, Typography, message } from 'antd'
+import { Button, Card, Form, Input, Modal, Popconfirm, Space, Switch, Table, Tag, Typography, message } from 'antd'
 import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import client from '../api/client'
@@ -43,7 +43,7 @@ export default function Labels() {
 
   const openCreateModal = () => {
     setEditingLabel(null)
-    form.setFieldsValue({ name: '', color: DEFAULT_COLOR, internal_note: '' })
+    form.setFieldsValue({ name: '', color: DEFAULT_COLOR, internal_note: '', ai_auto_apply_order_ready: false })
     setModalOpen(true)
   }
 
@@ -53,6 +53,7 @@ export default function Labels() {
       name: label.name,
       color: label.color || DEFAULT_COLOR,
       internal_note: label.internal_note || '',
+      ai_auto_apply_order_ready: label.ai_auto_apply_trigger === 'order_ready',
     })
     setModalOpen(true)
   }
@@ -62,8 +63,10 @@ export default function Labels() {
     try {
       const values = await form.validateFields()
       const payload = {
-        ...values,
+        name: values.name,
+        color: values.color,
         internal_note: values.internal_note?.trim() || null,
+        ai_auto_apply_trigger: values.ai_auto_apply_order_ready ? 'order_ready' : null,
       }
       if (editingLabel) {
         await client.put(`/api/labels/${editingLabel.id}`, payload)
@@ -153,6 +156,16 @@ export default function Labels() {
       render: (value) => value || '-',
     },
     {
+      title: t('labelsPage.aiAutoApply'),
+      dataIndex: 'ai_auto_apply_trigger',
+      width: 190,
+      render: (value) => (
+        value === 'order_ready'
+          ? <Tag color="blue">{t('labelsPage.orderReadyTrigger')}</Tag>
+          : '-'
+      ),
+    },
+    {
       title: t('common.updatedAt'),
       dataIndex: 'updated_at',
       width: 150,
@@ -237,7 +250,7 @@ export default function Labels() {
         cancelText={t('common.cancel')}
         confirmLoading={submitting}
       >
-        <Form form={form} layout="vertical" initialValues={{ color: DEFAULT_COLOR }}>
+        <Form form={form} layout="vertical" initialValues={{ color: DEFAULT_COLOR, ai_auto_apply_order_ready: false }}>
           <Form.Item
             name="name"
             label={t('labelsPage.name')}
@@ -271,6 +284,16 @@ export default function Labels() {
               showCount
             />
           </Form.Item>
+          <Form.Item
+            name="ai_auto_apply_order_ready"
+            label={t('labelsPage.aiAutoApply')}
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+          <Typography.Text type="secondary" style={{ display: 'block', marginTop: -12 }}>
+            {t('labelsPage.orderReadyTriggerHelp')}
+          </Typography.Text>
         </Form>
       </Modal>
     </div>

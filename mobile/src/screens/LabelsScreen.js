@@ -9,6 +9,7 @@ import {
   Portal,
   Searchbar,
   Surface,
+  Switch,
   Text,
   TextInput,
   TouchableRipple,
@@ -28,6 +29,7 @@ const emptyForm = {
   name: '',
   color: DEFAULT_COLOR,
   internal_note: '',
+  ai_auto_apply_order_ready: false,
 }
 
 export default function LabelsScreen({ navigation }) {
@@ -105,6 +107,7 @@ export default function LabelsScreen({ navigation }) {
       name: label.name || '',
       color: label.color || DEFAULT_COLOR,
       internal_note: label.internal_note || '',
+      ai_auto_apply_order_ready: label.ai_auto_apply_trigger === 'order_ready',
     })
     setDialogOpen(true)
   }
@@ -133,6 +136,7 @@ export default function LabelsScreen({ navigation }) {
       name: form.name.trim(),
       color: form.color.trim(),
       internal_note: form.internal_note.trim() || null,
+      ai_auto_apply_trigger: form.ai_auto_apply_order_ready ? 'order_ready' : null,
     }
 
     setSubmitting(true)
@@ -196,6 +200,11 @@ export default function LabelsScreen({ navigation }) {
       </View>
       {item.internal_note ? (
         <Text variant="bodySmall" style={styles.note}>{item.internal_note}</Text>
+      ) : null}
+      {item.ai_auto_apply_trigger === 'order_ready' ? (
+        <View style={styles.triggerPill}>
+          <Text variant="bodySmall" style={styles.triggerText}>{t('labelsPage.orderReadyTrigger')}</Text>
+        </View>
       ) : null}
     </Surface>
   )
@@ -310,6 +319,16 @@ export default function LabelsScreen({ navigation }) {
                 multiline
                 numberOfLines={4}
               />
+              <View style={styles.switchRow}>
+                <View style={styles.switchText}>
+                  <Text variant="titleSmall" style={styles.switchTitle}>{t('labelsPage.aiAutoApply')}</Text>
+                  <Text variant="bodySmall" style={styles.helper}>{t('labelsPage.orderReadyTriggerHelp')}</Text>
+                </View>
+                <Switch
+                  value={Boolean(form.ai_auto_apply_order_ready)}
+                  onValueChange={(value) => updateForm('ai_auto_apply_order_ready', value)}
+                />
+              </View>
             </ScrollView>
           </Dialog.ScrollArea>
           <Dialog.Actions>
@@ -467,6 +486,18 @@ const createStyles = (colors) => StyleSheet.create({
     lineHeight: 18,
     marginTop: 8,
   },
+  triggerPill: {
+    alignSelf: 'flex-start',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginTop: 10,
+    backgroundColor: colors.primarySoft,
+  },
+  triggerText: {
+    color: colors.primary,
+    fontWeight: '700',
+  },
   empty: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -494,6 +525,21 @@ const createStyles = (colors) => StyleSheet.create({
   },
   helper: {
     color: colors.muted,
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingVertical: 4,
+  },
+  switchText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  switchTitle: {
+    color: colors.text,
+    fontWeight: '700',
   },
   swatchRow: {
     flexDirection: 'row',

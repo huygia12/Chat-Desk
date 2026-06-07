@@ -26,6 +26,7 @@ class Label(Base):
     name: Mapped[str] = mapped_column(String(80), nullable=False)
     color: Mapped[str] = mapped_column(String(7), nullable=False, default="#d8d800")
     internal_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ai_auto_apply_trigger: Mapped[str | None] = mapped_column(String(40), nullable=True)
     created_by_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     updated_by_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

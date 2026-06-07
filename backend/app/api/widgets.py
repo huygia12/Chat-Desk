@@ -14,6 +14,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from app.database import get_db, async_session
+from app.i18n import t
 from app.models.user import User
 from app.models.channel import Channel
 from app.models.contact import Contact
@@ -23,6 +24,7 @@ from app.api.deps import get_current_business
 from app.services.widget_service import generate_widget_id, generate_widget_secret, validate_widget_request
 from app.services.file_storage import save_upload_file
 from app.services.assignment_service import auto_assign_conversation
+from app.services.ai_order_label_service import apply_order_ready_labels_if_needed
 from app.services.ai_service import generate_ai_response
 from app.services.push_service import send_conversation_push
 from app.websocket.manager import manager
@@ -406,6 +408,7 @@ async def send_widget_message(
 
     # Generate AI response
     ai_response_text = None
+    ai_response_messages = []
     if conversation.is_ai_enabled:
         await manager.send_message(
             str(business_id),
@@ -444,6 +447,36 @@ async def send_widget_message(
                         "message": _message_payload(ai_message),
                     },
                 )
+                ai_response_messages.append(_message_payload(ai_message))
+
+                order_label_result = await apply_order_ready_labels_if_needed(
+                    db=db,
+                    conversation=conversation,
+                    contact_id=contact.id,
+                    user_message=body.message_text.strip(),
+                )
+                if order_label_result.get("should_send_handoff"):
+                    handoff_text = t("Order ready handoff message")
+                    handoff_message = Message(
+                        conversation_id=conversation.id,
+                        sender_type="ai",
+                        content=handoff_text,
+                    )
+                    db.add(handoff_message)
+                    conversation.last_message_at = datetime.now(timezone.utc)
+                    await db.flush()
+                    await db.refresh(handoff_message)
+                    handoff_payload = _message_payload(handoff_message)
+                    ai_response_messages.append(handoff_payload)
+
+                    await manager.send_message(
+                        str(business_id),
+                        {
+                            "type": "new_message",
+                            "conversation_id": str(conversation.id),
+                            "message": handoff_payload,
+                        },
+                    )
         except Exception as e:
             logger.error(f"Failed to generate AI response: {e}", exc_info=True)
         finally:
@@ -468,6 +501,8 @@ async def send_widget_message(
 
     if ai_response_text:
         response["ai_response"] = ai_response_text
+    if ai_response_messages:
+        response["ai_messages"] = ai_response_messages
 
     return response
 

@@ -294,6 +294,28 @@ export const useChatStore = create((set, get) => ({
     return res.data
   },
 
+  setContactLabels: (contactId, labels) => {
+    set((state) => ({
+      activeConversation:
+        state.activeConversation && String(state.activeConversation.contact_id) === String(contactId)
+          ? {
+              ...state.activeConversation,
+              contact: state.activeConversation.contact
+                ? { ...state.activeConversation.contact, labels }
+                : state.activeConversation.contact,
+            }
+          : state.activeConversation,
+      conversations: state.conversations.map((item) =>
+        String(item.contact_id) === String(contactId)
+          ? {
+              ...item,
+              contact: item.contact ? { ...item.contact, labels } : item.contact,
+            }
+          : item,
+      ),
+    }))
+  },
+
   loadOlderMessages: async () => {
     const state = get()
     if (!state.activeConversation || !state.messagesHasMore || !state.messagesCursor || state.olderMessagesLoading) return

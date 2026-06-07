@@ -327,6 +327,9 @@ export const dictionaries = {
       preview: 'Xem trước',
       notePlaceholder: 'Ghi chú nội bộ về cách dùng label này...',
       removeLabel: 'Bỏ label {name}',
+      aiAutoApply: 'Phân loại đặt hàng',
+      orderReadyTrigger: 'Khách muốn đặt hàng',
+      orderReadyTriggerHelp: 'Dùng label này để phân loại khách hàng đang muốn đặt hàng. AI cũng sẽ dùng label này khi nhận thấy khách đã cung cấp đủ thông tin đặt hàng.',
     },
     employees: {
       loadError: 'Không thể tải danh sách nhân viên',
@@ -865,6 +868,9 @@ export const dictionaries = {
       preview: 'Preview',
       notePlaceholder: 'Internal notes about how to use this label...',
       removeLabel: 'Remove label {name}',
+      aiAutoApply: 'Order intent label',
+      orderReadyTrigger: 'Ordering customer',
+      orderReadyTriggerHelp: 'Use this label to classify customers who want to place an order. AI will also use it when the customer has provided enough order information.',
     },
     employees: {
       loadError: 'Could not load employees',

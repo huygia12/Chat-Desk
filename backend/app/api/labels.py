@@ -11,6 +11,18 @@ from app.models.user import User
 from app.schemas.label import LabelCreate, LabelOut, LabelUpdate
 
 router = APIRouter(prefix="/api/labels", tags=["labels"])
+AI_AUTO_APPLY_TRIGGERS = {None, "order_ready"}
+
+
+def _normalize_ai_auto_apply_trigger(value: str | None) -> str | None:
+    if value is None:
+        return None
+    trigger = value.strip().lower()
+    if not trigger:
+        return None
+    if trigger not in AI_AUTO_APPLY_TRIGGERS:
+        raise HTTPException(status_code=422, detail=t("Invalid AI auto-apply trigger"))
+    return trigger
 
 
 @router.get("", response_model=list[LabelOut])
@@ -41,6 +53,7 @@ async def create_label(
         name=data.name.strip(),
         color=data.color,
         internal_note=data.internal_note,
+        ai_auto_apply_trigger=_normalize_ai_auto_apply_trigger(data.ai_auto_apply_trigger),
         created_by_id=current_user.id,
         updated_by_id=current_user.id,
     )
@@ -80,6 +93,8 @@ async def update_label(
         label.color = data.color
     if "internal_note" in data.model_fields_set:
         label.internal_note = data.internal_note
+    if "ai_auto_apply_trigger" in data.model_fields_set:
+        label.ai_auto_apply_trigger = _normalize_ai_auto_apply_trigger(data.ai_auto_apply_trigger)
     label.updated_by_id = current_user.id
 
     try:

@@ -229,6 +229,9 @@ export const dictionaries = {
       colorLabel: "Màu label",
       colorInvalid: "Màu label phải có dạng #RRGGBB.",
       preview: "Xem trước",
+      aiAutoApply: "Phân loại đặt hàng",
+      orderReadyTrigger: "Khách muốn đặt hàng",
+      orderReadyTriggerHelp: "Dùng label này để phân loại khách hàng đang muốn đặt hàng. AI cũng sẽ dùng label này khi nhận thấy khách đã cung cấp đủ thông tin đặt hàng.",
     },
     statistics: {
       title: "Thống kê",
@@ -636,6 +639,9 @@ export const dictionaries = {
       colorLabel: "Label color",
       colorInvalid: "Label color must use #RRGGBB.",
       preview: "Preview",
+      aiAutoApply: "Order intent label",
+      orderReadyTrigger: "Ordering customer",
+      orderReadyTriggerHelp: "Use this label to classify customers who want to place an order. AI will also use it when the customer has provided enough order information.",
     },
     statistics: {
       title: "Statistics",

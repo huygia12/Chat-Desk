@@ -267,7 +267,22 @@ export default function WidgetChat({
         },
       ]);
 
-      if (result.ai_response) {
+      if (Array.isArray(result.ai_messages) && result.ai_messages.length > 0) {
+        setMessages((prev) => [
+          ...prev,
+          ...result.ai_messages.map((item) => ({
+            id: item.id,
+            content: item.content,
+            sender: item.sender_type === "contact" ? "customer" : item.sender_type,
+            timestamp: new Date(item.created_at),
+            attachment_url: item.attachment_url,
+            attachment_filename: item.attachment_filename,
+            attachment_mime_type: item.attachment_mime_type,
+            attachment_size: item.attachment_size,
+            attachment_kind: item.attachment_kind,
+          })),
+        ]);
+      } else if (result.ai_response) {
         setMessages((prev) => [
           ...prev,
           {

@@ -36,6 +36,7 @@ export default function Layout() {
   const { user, token: authToken, logout } = useAuthStore();
   const addMessage = useChatStore((s) => s.addMessage);
   const setAiTyping = useChatStore((s) => s.setAiTyping);
+  const setContactLabels = useChatStore((s) => s.setContactLabels);
   const resetChatState = useChatStore((s) => s.resetChatState);
   const { language, t } = useI18n();
   const toggleLanguage = useLanguageStore((s) => s.toggleLanguage);
@@ -91,11 +92,13 @@ export default function Layout() {
           });
         } else if (data.type === "ai_typing") {
           setAiTyping(data.conversation_id, Boolean(data.is_typing));
+        } else if (data.type === "contact_labels_updated") {
+          setContactLabels(data.contact_id, data.labels || []);
         }
       });
       return () => disconnectWebSocket();
     }
-  }, [addMessage, authToken, isAdmin, setAiTyping]);
+  }, [addMessage, authToken, isAdmin, setAiTyping, setContactLabels]);
 
   const handleLogout = () => {
     resetChatState();

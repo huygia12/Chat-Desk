@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Avatar, Button, Empty, Input, Modal, Spin, Tooltip, Typography, message, theme } from "antd";
-import { FileTextOutlined, RobotOutlined, SendOutlined, UserOutlined } from "@ant-design/icons";
+import { DeleteOutlined, FileTextOutlined, RobotOutlined, SendOutlined, UserOutlined } from "@ant-design/icons";
 import client from "../api/client";
 import { useAuthStore } from "../store/authStore";
 import { useChatStore } from "../store/chatStore";
@@ -39,6 +39,7 @@ export default function AIAssistantModal() {
   const [historyHasMore, setHistoryHasMore] = useState(false);
   const [historyNextCursor, setHistoryNextCursor] = useState(null);
   const [asking, setAsking] = useState(false);
+  const [clearingHistory, setClearingHistory] = useState(false);
   const historyContainerRef = useRef(null);
   const historyEndRef = useRef(null);
   const restoreScrollHeightRef = useRef(null);
@@ -139,12 +140,12 @@ export default function AIAssistantModal() {
   }, [open, loadingHistory, history, asking]);
 
   const submitAssistantQuestion = async (submittedQuestion, intent = "ask", onError) => {
-    const trimmedQuestion = submittedQuestion.trim();
-    if (!trimmedQuestion || asking) return;
+    const trimmedQuestion = (submittedQuestion || "").trim();
+    if ((intent === "ask" && !trimmedQuestion) || asking) return;
     setAsking(true);
     try {
       const res = await client.post("/api/ai-assistant/ask", {
-        question: trimmedQuestion,
+        question: trimmedQuestion || undefined,
         conversation_id: activeConversationId || undefined,
         intent,
       });
@@ -165,13 +166,38 @@ export default function AIAssistantModal() {
     submitAssistantQuestion(trimmedQuestion, "ask", () => setQuestion(trimmedQuestion));
   };
 
+  const clearAssistantHistory = () => {
+    if (clearingHistory || loadingHistory || asking || history.length === 0) return;
+
+    Modal.confirm({
+      title: t("aiAssistant.clearTitle"),
+      content: t("aiAssistant.clearDescription"),
+      okText: t("aiAssistant.clearConfirm"),
+      cancelText: t("common.cancel"),
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        setClearingHistory(true);
+        try {
+          await client.delete("/api/ai-assistant/history");
+          setHistory([]);
+          setHistoryHasMore(false);
+          setHistoryNextCursor(null);
+          restoreScrollHeightRef.current = null;
+          initialScrollDoneRef.current = false;
+          message.success(t("aiAssistant.clearSuccess"));
+        } catch (err) {
+          message.error(err.response?.data?.detail || t("aiAssistant.clearError"));
+        } finally {
+          setClearingHistory(false);
+        }
+      },
+    });
+  };
+
   const summarizeActiveConversation = () => {
     if (!activeConversationId || asking) return;
 
-    submitAssistantQuestion(
-      t("aiAssistant.summaryPrompt", { customer: activeCustomerName }),
-      "summarize_conversation",
-    );
+    submitAssistantQuestion("", "summarize_conversation");
   };
 
   if (!canUseAssistant) return null;
@@ -185,10 +211,24 @@ export default function AIAssistantModal() {
       </Tooltip>
       <Modal
         title={
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-            <RobotOutlined />
-            {t("aiAssistant.title")}
-          </span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <RobotOutlined />
+              {t("aiAssistant.title")}
+            </span>
+            <Tooltip title={t("aiAssistant.clearAction")}>
+              <Button
+                danger
+                size="small"
+                icon={<DeleteOutlined />}
+                onClick={clearAssistantHistory}
+                loading={clearingHistory}
+                disabled={loadingHistory || asking || history.length === 0}
+              >
+                {t("aiAssistant.clearAction")}
+              </Button>
+            </Tooltip>
+          </div>
         }
         open={open}
         onCancel={() => setOpen(false)}
@@ -227,6 +267,8 @@ export default function AIAssistantModal() {
               )}
               {history.map((item) => {
                 const isAssistant = item.role === "assistant";
+                const content =
+                  item.content === "summarize_conversation" ? t("aiAssistant.summaryHistoryLabel") : item.content;
                 return (
                   <div
                     key={item.id}
@@ -251,7 +293,7 @@ export default function AIAssistantModal() {
                         border: `1px solid ${token.colorBorderSecondary}`,
                       }}
                     >
-                      <MessageMarkdown>{item.content}</MessageMarkdown>
+                      <MessageMarkdown>{content}</MessageMarkdown>
                     </div>
                   </div>
                 );

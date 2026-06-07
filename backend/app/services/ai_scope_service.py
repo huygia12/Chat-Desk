@@ -32,6 +32,18 @@ def _extract_json_object(text: str) -> dict:
     return json.loads(cleaned)
 
 
+def _classify_scope_locally(message: str, _mode: AIScopeMode) -> dict | None:
+    if not any(char.isalnum() for char in message or ""):
+        return {
+            "intent": "greeting",
+            "should_answer": True,
+            "confidence": 1.0,
+            "reason": "empty or punctuation-only message",
+        }
+
+    return None
+
+
 def _parse_bool(value, default: bool = False) -> bool:
     if isinstance(value, bool):
         return value
@@ -119,6 +131,10 @@ async def classify_ai_scope(
     history_context: str = "",
 ) -> dict:
     settings = get_settings()
+    local_scope = _classify_scope_locally(message, mode)
+    if local_scope:
+        return local_scope
+
     messages = [
         {"role": "system", "content": _scope_system_prompt(mode)},
         {

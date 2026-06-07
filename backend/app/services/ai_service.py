@@ -185,6 +185,27 @@ def _format_history_for_rewrite(history: list[Message], user_message: str, limit
     return "\n".join(lines) if lines else "(no previous conversation)"
 
 
+def _history_without_current_message(history: list[Message], user_message: str) -> list[Message]:
+    if history and history[-1].sender_type == "contact" and history[-1].content == user_message:
+        return history[:-1]
+    return history
+
+
+def _should_attempt_query_rewrite(user_message: str, history: list[Message]) -> bool:
+    if not get_settings().AI_REWRITE_ENABLED:
+        return False
+
+    prior_history = _history_without_current_message(history, user_message)
+    if not prior_history:
+        return False
+
+    normalized = " ".join((user_message or "").lower().split())
+    if not normalized:
+        return False
+
+    return True
+
+
 def _extract_json_object(text: str) -> dict:
     cleaned = (text or "").strip()
     if cleaned.startswith("```"):
@@ -337,30 +358,16 @@ async def generate_ai_response(
 ) -> str | None:
     """Generate a customer-facing AI response with selective query rewrite."""
     try:
-        # Run history lookup in parallel with embedding + Milvus search. The
-        # vector search path does not use the SQL session, so this avoids
-        # concurrent DB operations on the same AsyncSession.
-        history_task = asyncio.create_task(_get_chat_history(db, conversation.id))
-        current_search_task = asyncio.create_task(
-            _search_relevant_product_refs(conversation.business_id, user_message)
-        )
-
-        history_result, current_search_result = await asyncio.gather(
-            history_task,
-            current_search_task,
-            return_exceptions=True,
-        )
-
-        if isinstance(history_result, Exception):
+        try:
+            history = await _get_chat_history(db, conversation.id)
+        except Exception as history_error:
             logger.warning(
                 "Customer AI history lookup failed for conversation %s: %s",
                 conversation.id,
-                history_result,
+                history_error,
                 exc_info=True,
             )
             history = []
-        else:
-            history = history_result
 
         scope = await classify_ai_scope(
             mode="customer_auto_reply",
@@ -379,6 +386,16 @@ async def generate_ai_response(
                 }),
             )
             return CUSTOMER_OUT_OF_SCOPE_REPLY
+        if scope["intent"] == "greeting":
+            return "Chào bạn! Shop có thể hỗ trợ bạn thông tin sản phẩm, tồn kho, giá hoặc chính sách mua hàng ạ."
+
+        try:
+            current_search_result = await _search_relevant_product_refs(
+                conversation.business_id,
+                user_message,
+            )
+        except Exception as search_error:
+            current_search_result = search_error
 
         product_hits: list[ProductHit] = []
         retrieval_query = user_message
@@ -406,14 +423,21 @@ async def generate_ai_response(
             )
         else:
             logger.info(
-                "Customer AI current product search not confident; using rewrite:\n%s",
+                "Customer AI current product search not confident; considering rewrite:\n%s",
                 pretty_log({
                     "conversation_id": conversation.id,
                     "scores": _score_summary(current_search_result),
                     "top_hits": current_search_result[:5],
                 }),
             )
-            rewrite = await _rewrite_product_query(user_message, history)
+            rewrite = None
+            if _should_attempt_query_rewrite(user_message, history):
+                rewrite = await _rewrite_product_query(user_message, history)
+            else:
+                logger.info(
+                    "Customer AI rewrite skipped for conversation %s; latest message does not look context-dependent",
+                    conversation.id,
+                )
             if rewrite and rewrite["confidence"] >= get_settings().AI_REWRITE_CONFIDENCE_THRESHOLD:
                 retrieval_mode = "rewrite"
                 retrieval_query = rewrite["standalone_query"]

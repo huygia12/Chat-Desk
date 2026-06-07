@@ -123,7 +123,13 @@ export const dictionaries = {
       activeConversationHint: "Đang dùng ngữ cảnh hội thoại hiện tại",
       generalHint: "Trợ lý nội bộ ChatDesk",
       summaryAction: "Tóm tắt hội thoại với {customer}",
-      summaryPrompt: "Tóm tắt hội thoại khách hàng đang mở với {customer}.",
+      summaryHistoryLabel: "Tóm tắt hội thoại",
+      clearAction: "Xóa lịch sử",
+      clearTitle: "Xóa lịch sử trợ lý AI?",
+      clearDescription:
+        "Toàn bộ hội thoại trước đó của bạn với trợ lý AI nội bộ sẽ bị xóa. Thao tác này không thể hoàn tác.",
+      clearConfirm: "Xóa lịch sử",
+      clearError: "Xóa lịch sử trợ lý AI thất bại.",
     },
     assignment: {
       title: "Assignment Center",
@@ -523,7 +529,13 @@ export const dictionaries = {
       activeConversationHint: "Using current conversation context",
       generalHint: "ChatDesk internal assistant",
       summaryAction: "Summarize conversation with {customer}",
-      summaryPrompt: "Summarize the currently open customer conversation with {customer}.",
+      summaryHistoryLabel: "Summarize conversation",
+      clearAction: "Clear history",
+      clearTitle: "Clear AI assistant history?",
+      clearDescription:
+        "Your previous conversation with the internal AI assistant will be deleted. This action cannot be undone.",
+      clearConfirm: "Clear history",
+      clearError: "Failed to clear AI assistant history.",
     },
     assignment: {
       title: "Assignment Center",

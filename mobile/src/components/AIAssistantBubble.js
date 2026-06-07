@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Animated,
+  Alert,
   FlatList,
   KeyboardAvoidingView,
   Modal,
@@ -60,6 +61,7 @@ export default function AIAssistantBubble() {
   const [historyHasMore, setHistoryHasMore] = useState(false)
   const [historyNextCursor, setHistoryNextCursor] = useState(null)
   const [asking, setAsking] = useState(false)
+  const [clearingHistory, setClearingHistory] = useState(false)
   const [error, setError] = useState('')
   const listRef = useRef(null)
 
@@ -175,14 +177,14 @@ export default function AIAssistantBubble() {
   }
 
   const submitAssistantQuestion = async (submittedQuestion, intent = 'ask', onError) => {
-    const trimmedQuestion = submittedQuestion.trim()
-    if (!trimmedQuestion || asking) return
+    const trimmedQuestion = (submittedQuestion || '').trim()
+    if ((intent === 'ask' && !trimmedQuestion) || asking) return
 
     setAsking(true)
     setError('')
     try {
       const res = await client.post('/api/ai-assistant/ask', {
-        question: trimmedQuestion,
+        question: trimmedQuestion || undefined,
         conversation_id: activeConversation?.id || undefined,
         intent,
       })
@@ -203,13 +205,36 @@ export default function AIAssistantBubble() {
     submitAssistantQuestion(trimmedQuestion, 'ask', () => setQuestion(trimmedQuestion))
   }
 
+  const clearAssistantHistory = () => {
+    if (clearingHistory || loadingHistory || asking || history.length === 0) return
+
+    Alert.alert(t('aiAssistant.clearTitle'), t('aiAssistant.clearDescription'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('aiAssistant.clearConfirm'),
+        style: 'destructive',
+        onPress: async () => {
+          setClearingHistory(true)
+          setError('')
+          try {
+            await client.delete('/api/ai-assistant/history')
+            setHistory([])
+            setHistoryHasMore(false)
+            setHistoryNextCursor(null)
+          } catch (err) {
+            setError(err.response?.data?.detail || t('aiAssistant.clearError'))
+          } finally {
+            setClearingHistory(false)
+          }
+        },
+      },
+    ])
+  }
+
   const summarizeActiveConversation = () => {
     if (!activeConversation?.id || asking) return
 
-    submitAssistantQuestion(
-      t('aiAssistant.summaryPrompt', { customer: activeCustomerName }),
-      'summarize_conversation',
-    )
+    submitAssistantQuestion('', 'summarize_conversation')
   }
 
   if (!canUseAssistant) return null
@@ -241,6 +266,12 @@ export default function AIAssistantBubble() {
                   ? t('aiAssistant.activeConversationHint')
                   : t('aiAssistant.generalHint')
               }
+            />
+            <Appbar.Action
+              icon="delete-outline"
+              disabled={loadingHistory || asking || clearingHistory || history.length === 0}
+              accessibilityLabel={t('aiAssistant.clearAction')}
+              onPress={clearAssistantHistory}
             />
             <Appbar.Action icon="close" onPress={() => setOpen(false)} />
           </Appbar.Header>
@@ -275,7 +306,7 @@ export default function AIAssistantBubble() {
                 </View>
               )
             }
-            renderItem={({ item }) => <AssistantMessage item={item} styles={styles} />}
+            renderItem={({ item }) => <AssistantMessage item={item} styles={styles} t={t} />}
             ListFooterComponent={
               asking ? (
                 <View style={styles.thinkingRow}>
@@ -332,8 +363,9 @@ export default function AIAssistantBubble() {
   )
 }
 
-function AssistantMessage({ item, styles }) {
+function AssistantMessage({ item, styles, t }) {
   const isAssistant = item.role === 'assistant'
+  const content = item.content === 'summarize_conversation' ? t('aiAssistant.summaryHistoryLabel') : item.content
 
   return (
     <View style={[styles.messageRow, isAssistant ? styles.assistantRow : styles.userRow]}>
@@ -342,7 +374,7 @@ function AssistantMessage({ item, styles }) {
       ) : null}
       <View style={[styles.messageBubble, isAssistant ? styles.assistantMessage : styles.userMessage]}>
         <Text style={[styles.messageText, isAssistant ? styles.assistantText : styles.userText]}>
-          {item.content}
+          {content}
         </Text>
       </View>
       {!isAssistant ? (

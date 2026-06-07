@@ -49,10 +49,6 @@ async def facebook_verify(
 async def facebook_webhook(request: Request):
     """Receive Meta webhooks on the legacy Facebook callback URL."""
     body = await request.json()
-    logger.info("Meta webhook received on /facebook:\n%s", pretty_log({
-        "object": body.get("object"),
-        "body": body,
-    }))
     return await _handle_meta_webhook_body(body)
 
 
@@ -73,10 +69,6 @@ async def instagram_verify(
 async def instagram_webhook(request: Request):
     """Receive Meta webhooks on the Instagram callback URL."""
     body = await request.json()
-    logger.info("Meta webhook received on /instagram:\n%s", pretty_log({
-        "object": body.get("object"),
-        "body": body,
-    }))
     return await _handle_meta_webhook_body(body)
 
 
@@ -94,10 +86,6 @@ async def meta_verify(
 async def meta_webhook(request: Request):
     """Receive Facebook and Instagram webhooks on one callback URL."""
     body = await request.json()
-    logger.info("Meta webhook received on /meta:\n%s", pretty_log({
-        "object": body.get("object"),
-        "body": body,
-    }))
     return await _handle_meta_webhook_body(body)
 
 
@@ -121,8 +109,31 @@ async def _process_messaging_entries(body: dict, platform: str):
             message_text = message_data.get("text")
             attachment = await _meta_attachment(message_data)
 
-            if (not message_text and not attachment) or sender_id == channel_platform_id:
+            if not message_text and not attachment:
                 continue
+
+            if message_data.get("is_echo") or sender_id == channel_platform_id:
+                logger.info("Meta outgoing message echo:\n%s", pretty_log({
+                    "platform": platform,
+                    "page_id": channel_platform_id,
+                    "recipient_id": messaging_event.get("recipient", {}).get("id"),
+                    "message_id": message_data.get("mid"),
+                    "text": message_text,
+                    "has_attachment": bool(attachment),
+                    "attachment_kind": attachment.get("attachment_kind") if attachment else None,
+                    "is_echo": bool(message_data.get("is_echo")),
+                }))
+                continue
+
+            logger.info("Meta message received:\n%s", pretty_log({
+                "platform": platform,
+                "page_id": channel_platform_id,
+                "sender_id": sender_id,
+                "message_id": message_data.get("mid"),
+                "text": message_text,
+                "has_attachment": bool(attachment),
+                "attachment_kind": attachment.get("attachment_kind") if attachment else None,
+            }))
 
             await _process_incoming_message(
                 platform=platform,

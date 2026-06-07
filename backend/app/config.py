@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
 
-    # LLM provider: "groq" or "openai"
+    # LLM provider: "groq", "openai", or "gemini"
     LLM_PROVIDER: str = "groq"
 
     # Groq LLM
@@ -37,13 +37,18 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-5.5"
 
+    # Google Gemini LLM
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-2.5-flash-lite"
+    GEMINI_FALLBACK_TO_GROQ: bool = True
+
     # Embedding
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
 
     # Customer AI retrieval/rewrite controls
     AI_REWRITE_ENABLED: bool = True
     AI_REWRITE_CONFIDENCE_THRESHOLD: float = 0.6
-    AI_REWRITE_TIMEOUT_SECONDS: float = 2.0
+    AI_REWRITE_TIMEOUT_SECONDS: float = 8.0
     AI_RETRIEVAL_HIGH_CONFIDENCE_THRESHOLD: float = 0.58
     AI_RETRIEVAL_MIN_SCORE: float = 0.55
     AI_RETRIEVAL_SCORE_MARGIN: float = 0.05

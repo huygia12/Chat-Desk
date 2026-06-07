@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import and_, case, or_, select
+from sqlalchemy import and_, case, delete, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_business_or_employee, get_effective_business_id
@@ -112,6 +112,22 @@ async def get_ai_assistant_history(
     }
 
 
+@router.delete("/history")
+async def clear_ai_assistant_history(
+    current_user: User = Depends(get_current_business_or_employee),
+    db: AsyncSession = Depends(get_db),
+):
+    business_id = get_effective_business_id(current_user)
+    result = await db.execute(
+        delete(AIAssistantMessage).where(
+            AIAssistantMessage.business_id == business_id,
+            AIAssistantMessage.user_id == current_user.id,
+        )
+    )
+
+    return {"deleted_count": result.rowcount or 0}
+
+
 @router.post("/ask", response_model=AIAssistantAskResponse)
 async def ask_ai_assistant(
     data: AIAssistantAskRequest,
@@ -119,20 +135,21 @@ async def ask_ai_assistant(
     db: AsyncSession = Depends(get_db),
 ):
     business_id = get_effective_business_id(current_user)
-    question = data.question.strip()
-    if not question:
+    question = (data.question or "").strip()
+    if data.intent == "ask" and not question:
         raise HTTPException(status_code=422, detail="Question is required")
 
     conversation = await _get_accessible_conversation(data.conversation_id, current_user, business_id, db)
     if data.intent == "summarize_conversation" and not conversation:
         raise HTTPException(status_code=422, detail="Conversation is required for summary")
+    assistant_input = question or data.intent
 
     try:
         answer = await generate_internal_assistant_answer(
             db=db,
             business_id=business_id,
             user_id=current_user.id,
-            question=question,
+            question=assistant_input,
             conversation=conversation,
             intent=data.intent,
         )
@@ -145,7 +162,7 @@ async def ask_ai_assistant(
         user_id=current_user.id,
         conversation_id=data.conversation_id,
         role="user",
-        content=question,
+        content=assistant_input,
     )
     assistant_message = AIAssistantMessage(
         business_id=business_id,

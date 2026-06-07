@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class AIAssistantAskRequest(BaseModel):
-    question: str = Field(min_length=1, max_length=4000)
+    question: str | None = Field(None, max_length=4000)
     conversation_id: uuid.UUID | None = None
     intent: Literal["ask", "summarize_conversation"] = "ask"
 

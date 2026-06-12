@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Image, StyleSheet, View } from 'react-native'
 import { Avatar, Badge, Text, TouchableRipple } from 'react-native-paper'
 import dayjs from 'dayjs'
@@ -13,6 +13,41 @@ const platformColors = {
   widget: '#1677ff',
 }
 
+const platformIcons = {
+  facebook: 'facebook',
+  instagram: 'instagram',
+  telegram: 'telegram',
+  widget: 'web',
+}
+
+function CustomerAvatar({ imageUrl, platform, colors, styles }) {
+  const [imageFailed, setImageFailed] = useState(false)
+  const icon = platformIcons[platform] || 'account-outline'
+
+  useEffect(() => {
+    setImageFailed(false)
+  }, [imageUrl])
+
+  if (imageUrl && !imageFailed) {
+    return (
+      <Image
+        source={{ uri: imageUrl }}
+        style={styles.avatarImage}
+        onError={() => setImageFailed(true)}
+      />
+    )
+  }
+
+  return (
+    <Avatar.Icon
+      size={44}
+      icon={icon}
+      color="#fff"
+      style={[styles.avatar, { backgroundColor: platformColors[platform] || colors.primary }]}
+    />
+  )
+}
+
 export default function ConversationItem({ conversation, onPress }) {
   const { t } = useI18n()
   const colors = useThemeStore((state) => state.colors)
@@ -20,22 +55,17 @@ export default function ConversationItem({ conversation, onPress }) {
   const contact = conversation.contact || {}
   const displayName = contact.display_name || contact.visitor_email || `${t('conversations.guest')} ${String(contact.platform_user_id || '').slice(-6)}`
   const platform = conversation.platform || contact.platform
-  const label = platform ? platform[0]?.toUpperCase() : '?'
   const unreadCount = Number(conversation.unread_count || 0)
 
   return (
     <TouchableRipple onPress={onPress} rippleColor="rgba(22, 119, 255, 0.08)">
       <View style={styles.container}>
-        {contact.profile_pic_url ? (
-          <Image source={{ uri: contact.profile_pic_url }} style={styles.avatarImage} />
-        ) : (
-          <Avatar.Text
-            size={44}
-            label={label}
-            color="#fff"
-            style={[styles.avatar, { backgroundColor: platformColors[platform] || colors.primary }]}
-          />
-        )}
+        <CustomerAvatar
+          imageUrl={contact.profile_pic_url}
+          platform={platform}
+          colors={colors}
+          styles={styles}
+        />
         <View style={styles.content}>
           <View style={styles.row}>
             <Text numberOfLines={1} variant="titleMedium" style={styles.name}>

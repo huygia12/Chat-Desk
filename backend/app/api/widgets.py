@@ -14,7 +14,6 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from app.database import get_db, async_session
-from app.i18n import t
 from app.models.user import User
 from app.models.channel import Channel
 from app.models.contact import Contact
@@ -25,7 +24,7 @@ from app.services.widget_service import generate_widget_id, generate_widget_secr
 from app.services.file_storage import save_upload_file
 from app.services.assignment_service import auto_assign_conversation
 from app.services.ai_order_label_service import apply_order_ready_labels_if_needed
-from app.services.ai_service import generate_ai_response
+from app.services.ai_service import generate_ai_response_result
 from app.services.push_service import send_conversation_push
 from app.websocket.manager import manager
 from app.config import get_settings
@@ -45,6 +44,7 @@ class SendMessageRequest(BaseModel):
     visitor_name: str
     visitor_email: Optional[str] = None
     visitor_phone: Optional[str] = None
+    visitor_address: Optional[str] = None
     message_text: str
 
 
@@ -332,6 +332,7 @@ async def send_widget_message(
             profile_pic_url=widget_profile_pic_url,
             visitor_email=body.visitor_email,
             visitor_phone=body.visitor_phone,
+            visitor_address=body.visitor_address,
         )
         db.add(contact)
         await db.flush()
@@ -341,6 +342,7 @@ async def send_widget_message(
             visitor_name=body.visitor_name,
             visitor_email=body.visitor_email,
             visitor_phone=body.visitor_phone,
+            visitor_address=body.visitor_address,
             profile_pic_url=widget_profile_pic_url,
         )
 
@@ -402,6 +404,8 @@ async def send_widget_message(
                 "profile_pic_url": contact.profile_pic_url,
                 "platform": contact.platform,
                 "visitor_email": contact.visitor_email,
+                "visitor_phone": contact.visitor_phone,
+                "visitor_address": contact.visitor_address,
             },
         },
     )
@@ -419,14 +423,25 @@ async def send_widget_message(
             },
         )
         try:
-            ai_response_text = await generate_ai_response(
+            ai_response = await generate_ai_response_result(
                 db=db,
                 conversation=conversation,
                 user_message=body.message_text.strip(),
+                contact=contact,
             )
+            ai_response_text = ai_response.get("text")
+            order_detection = ai_response.get("order_detection") or {}
             logger.info(f"AI response generated: {ai_response_text[:100] if ai_response_text else 'None'}")
 
             if ai_response_text:
+                if order_detection.get("is_order_ready"):
+                    await apply_order_ready_labels_if_needed(
+                        db=db,
+                        conversation=conversation,
+                        contact_id=contact.id,
+                        order_detection=order_detection,
+                    )
+
                 # Save AI message
                 ai_message = Message(
                     conversation_id=conversation.id,
@@ -449,34 +464,6 @@ async def send_widget_message(
                 )
                 ai_response_messages.append(_message_payload(ai_message))
 
-                order_label_result = await apply_order_ready_labels_if_needed(
-                    db=db,
-                    conversation=conversation,
-                    contact_id=contact.id,
-                    user_message=body.message_text.strip(),
-                )
-                if order_label_result.get("should_send_handoff"):
-                    handoff_text = t("Order ready handoff message")
-                    handoff_message = Message(
-                        conversation_id=conversation.id,
-                        sender_type="ai",
-                        content=handoff_text,
-                    )
-                    db.add(handoff_message)
-                    conversation.last_message_at = datetime.now(timezone.utc)
-                    await db.flush()
-                    await db.refresh(handoff_message)
-                    handoff_payload = _message_payload(handoff_message)
-                    ai_response_messages.append(handoff_payload)
-
-                    await manager.send_message(
-                        str(business_id),
-                        {
-                            "type": "new_message",
-                            "conversation_id": str(conversation.id),
-                            "message": handoff_payload,
-                        },
-                    )
         except Exception as e:
             logger.error(f"Failed to generate AI response: {e}", exc_info=True)
         finally:
@@ -513,6 +500,7 @@ async def send_widget_file(
     visitor_name: str = Form(...),
     visitor_email: str | None = Form(None),
     visitor_phone: str | None = Form(None),
+    visitor_address: str | None = Form(None),
     message_text: str = Form(""),
     file: UploadFile = File(...),
     widget_id: str = Header(...),
@@ -547,6 +535,7 @@ async def send_widget_file(
             profile_pic_url=widget_profile_pic_url,
             visitor_email=visitor_email,
             visitor_phone=visitor_phone,
+            visitor_address=visitor_address,
         )
         db.add(contact)
         await db.flush()
@@ -556,6 +545,7 @@ async def send_widget_file(
             visitor_name=visitor_name,
             visitor_email=visitor_email,
             visitor_phone=visitor_phone,
+            visitor_address=visitor_address,
             profile_pic_url=widget_profile_pic_url,
         )
 
@@ -617,6 +607,8 @@ async def send_widget_file(
                 "profile_pic_url": contact.profile_pic_url,
                 "platform": contact.platform,
                 "visitor_email": contact.visitor_email,
+                "visitor_phone": contact.visitor_phone,
+                "visitor_address": contact.visitor_address,
             },
         },
     )
@@ -673,6 +665,7 @@ def _apply_widget_contact_updates(
     visitor_name: str,
     visitor_email: str | None,
     visitor_phone: str | None,
+    visitor_address: str | None,
     profile_pic_url: str | None,
 ) -> None:
     if visitor_name and (not contact.display_name or contact.display_name.startswith("Visitor ")):
@@ -684,6 +677,9 @@ def _apply_widget_contact_updates(
 
     if visitor_phone and not contact.visitor_phone:
         contact.visitor_phone = visitor_phone
+
+    if visitor_address and not contact.visitor_address:
+        contact.visitor_address = visitor_address
 
     if profile_pic_url and not contact.profile_pic_url:
         contact.profile_pic_url = profile_pic_url

@@ -9,10 +9,9 @@ from app.models.channel import Channel
 from app.models.contact import Contact
 from app.models.conversation import Conversation
 from app.models.message import Message
-from app.i18n import t
 from app.services.assignment_service import auto_assign_conversation
 from app.services.ai_order_label_service import apply_order_ready_labels_if_needed
-from app.services.ai_service import generate_ai_response
+from app.services.ai_service import generate_ai_response_result
 from app.services.file_storage import save_remote_file
 from app.services.push_service import send_conversation_push
 from app.services.telegram_service import get_telegram_file_url, get_telegram_user_profile_photo_url
@@ -347,17 +346,28 @@ async def _process_incoming_message(
                     },
                 )
                 try:
-                    ai_response_text = await generate_ai_response(
+                    ai_response = await generate_ai_response_result(
                         db=db,
                         conversation=conversation,
                         user_message=message_text,
+                        contact=contact,
                     )
+                    ai_response_text = ai_response.get("text")
+                    order_detection = ai_response.get("order_detection") or {}
                     logger.info("AI response preview:\n%s", pretty_log({
                         "conversation_id": conversation.id,
                         "preview": ai_response_text[:200] if ai_response_text else None,
                     }))
 
                     if ai_response_text:
+                        if order_detection.get("is_order_ready"):
+                            await apply_order_ready_labels_if_needed(
+                                db=db,
+                                conversation=conversation,
+                                contact_id=contact.id,
+                                order_detection=order_detection,
+                            )
+
                         # Send AI reply back via platform
                         from app.services.facebook_service import send_facebook_message
                         from app.services.instagram_service import send_instagram_message
@@ -409,55 +419,6 @@ async def _process_incoming_message(
                             },
                         )
 
-                        order_label_result = await apply_order_ready_labels_if_needed(
-                            db=db,
-                            conversation=conversation,
-                            contact_id=contact.id,
-                            user_message=message_text,
-                        )
-                        if order_label_result.get("should_send_handoff"):
-                            handoff_text = t("Order ready handoff message")
-                            handoff_platform_msg_id = None
-                            try:
-                                if platform == "facebook":
-                                    handoff_platform_msg_id = await send_facebook_message(
-                                        page_access_token=channel.access_token,
-                                        recipient_id=sender_id,
-                                        message_text=handoff_text,
-                                    )
-                                elif platform == "instagram":
-                                    handoff_platform_msg_id = await send_instagram_message(
-                                        page_access_token=channel.access_token,
-                                        recipient_id=sender_id,
-                                        message_text=handoff_text,
-                                    )
-                                elif platform == "telegram":
-                                    handoff_platform_msg_id = await send_telegram_message(
-                                        bot_token=channel.access_token,
-                                        chat_id=sender_id,
-                                        message_text=handoff_text,
-                                    )
-                            except Exception as e:
-                                logger.error(f"Failed to send order handoff via {platform}: {e}")
-
-                            handoff_message = Message(
-                                conversation_id=conversation.id,
-                                sender_type="ai",
-                                content=handoff_text,
-                                platform_message_id=handoff_platform_msg_id,
-                            )
-                            db.add(handoff_message)
-                            conversation.last_message_at = datetime.now(timezone.utc)
-                            await db.flush()
-                            await db.refresh(handoff_message)
-                            await manager.send_message(
-                                str(channel.business_id),
-                                {
-                                    "type": "new_message",
-                                    "conversation_id": str(conversation.id),
-                                    "message": _message_payload(handoff_message),
-                                },
-                            )
                 finally:
                     await manager.send_message(
                         str(channel.business_id),

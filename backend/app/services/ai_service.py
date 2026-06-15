@@ -1,9 +1,11 @@
 import asyncio
 import logging
 import json
+import re
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.config import get_settings
+from app.models.contact import Contact
 from app.models.conversation import Conversation
 from app.models.message import Message
 from app.models.product import Product
@@ -18,6 +20,55 @@ logger = logging.getLogger(__name__)
 
 
 ProductHit = tuple[Product, float]
+ORDER_READY_HANDOFF_TEXT = (
+    "Tôi đã xác nhận yêu cầu đặt hàng của bạn và đã chuyển hội thoại sang cho nhân viên CSKH, vui lòng đợi"
+)
+PHONE_PATTERN = re.compile(r"(?<!\d)(?:\+?84|0)(?:[\s.-]?\d){8,10}(?!\d)")
+EMAIL_PATTERN = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", flags=re.IGNORECASE)
+CONTACT_METHOD_MISSING_FIELDS = {
+    "phone",
+    "email",
+    "phone_or_email",
+    "contact_method",
+}
+ADDRESS_MISSING_FIELDS = {
+    "address",
+    "delivery_address",
+    "delivery_or_pickup_details",
+    "fulfillment",
+}
+ADDRESS_DETECTED_FIELD_KEYS = {
+    "address",
+    "delivery_address",
+    "shipping_address",
+}
+
+
+def _empty_order_detection() -> dict:
+    return {
+        "is_order_intent": False,
+        "is_order_ready": False,
+        "missing_fields": [],
+        "detected_fields": {},
+        "reply": "",
+    }
+
+
+def _response_result(text: str | None, scope: dict | None = None) -> dict:
+    scope = scope or {}
+    order_detection = dict(scope.get("order") or _empty_order_detection())
+    order_detection.setdefault("is_order_intent", False)
+    order_detection.setdefault("is_order_ready", False)
+    order_detection.setdefault("missing_fields", [])
+    order_detection.setdefault("detected_fields", {})
+    order_detection.setdefault("reply", "")
+    order_detection["confidence"] = scope.get("confidence", order_detection.get("confidence", 0.0))
+    order_detection["reason"] = scope.get("reason", order_detection.get("reason", ""))
+    return {
+        "text": text,
+        "scope": scope,
+        "order_detection": order_detection,
+    }
 
 
 async def _retrieve_relevant_products(
@@ -138,6 +189,197 @@ def _format_business_context_for_customer_ai(business: User | None) -> str:
     ]
     lines = [f"- {label}: {value}" for label, value in rows if value]
     return "\n".join(lines)
+
+
+def _format_contact_context_for_customer_ai(contact: Contact | None) -> str:
+    if not contact:
+        return ""
+
+    rows = [
+        ("display_name", contact.display_name),
+    ]
+    return "\n".join(f"- {label}: {value}" for label, value in rows if value)
+
+
+def _recent_customer_text(user_message: str, history: list[Message]) -> str:
+    return "\n".join(
+        [
+            *(message.content or "" for message in history[-12:] if message.sender_type == "contact"),
+            user_message or "",
+        ]
+    )
+
+
+def _extract_phone_from_text(text: str) -> str | None:
+    match = PHONE_PATTERN.search(text or "")
+    if not match:
+        return None
+    return re.sub(r"\D", "", match.group(0))
+
+
+def _extract_email_from_text(text: str) -> str | None:
+    match = EMAIL_PATTERN.search(text or "")
+    return match.group(0).strip().lower() if match else None
+
+
+def _build_deterministic_order_facts(
+    *,
+    contact: Contact | None,
+    user_message: str,
+    history: list[Message],
+) -> dict:
+    customer_text = _recent_customer_text(user_message, history)
+    phone = (contact.visitor_phone or "").strip() if contact and contact.visitor_phone else ""
+    email = (contact.visitor_email or "").strip().lower() if contact and contact.visitor_email else ""
+    address = (contact.visitor_address or "").strip() if contact and contact.visitor_address else ""
+
+    if not phone:
+        phone = _extract_phone_from_text(customer_text) or ""
+    if not email:
+        email = _extract_email_from_text(customer_text) or ""
+
+    return {
+        "phone": phone,
+        "email": email,
+        "delivery_address": address,
+        "has_contact_method": bool(phone or email),
+        "has_delivery_address": bool(address),
+    }
+
+
+def _format_order_facts_for_classifier(facts: dict) -> str:
+    contact_status = "known" if facts.get("has_contact_method") else "missing"
+    lines = [f"- contact_method: {contact_status}"]
+    if facts.get("phone"):
+        lines.append(f"- phone: {facts['phone']}")
+    if facts.get("email"):
+        lines.append(f"- email: {facts['email']}")
+    address_status = "known" if facts.get("has_delivery_address") else "unknown"
+    lines.append(f"- delivery_address: {address_status}")
+    if facts.get("delivery_address"):
+        lines.append(f"- delivery_address_value: {facts['delivery_address']}")
+    return "\n".join(lines)
+
+
+def _apply_contact_fact_updates(contact: Contact | None, facts: dict) -> None:
+    if not contact:
+        return
+    if facts.get("phone") and not contact.visitor_phone:
+        contact.visitor_phone = facts["phone"]
+    if facts.get("email") and not contact.visitor_email:
+        contact.visitor_email = facts["email"]
+    if facts.get("delivery_address") and not contact.visitor_address:
+        contact.visitor_address = facts["delivery_address"]
+
+
+def _first_detected_address(detected_fields: dict) -> str:
+    for key in ADDRESS_DETECTED_FIELD_KEYS:
+        value = detected_fields.get(key)
+        if value:
+            return str(value).strip()
+    return ""
+
+
+def _has_fulfillment_detail(detected_fields: dict, facts: dict) -> bool:
+    return bool(
+        facts.get("has_delivery_address")
+        or _first_detected_address(detected_fields)
+        or detected_fields.get("pickup_preference")
+    )
+
+
+def _apply_order_address_contact_update(contact: Contact | None, order: dict) -> None:
+    if not contact or contact.visitor_address:
+        return
+    detected_fields = order.get("detected_fields")
+    if not isinstance(detected_fields, dict):
+        return
+    address = _first_detected_address(detected_fields)
+    if address:
+        contact.visitor_address = address
+
+
+def _apply_deterministic_order_facts(scope: dict, facts: dict) -> dict:
+    order = dict(scope.get("order") or _empty_order_detection())
+    if not order.get("is_order_intent"):
+        return scope
+
+    detected_fields = dict(order.get("detected_fields") or {})
+    if facts.get("phone"):
+        detected_fields["phone"] = facts["phone"]
+    if facts.get("email"):
+        detected_fields["email"] = facts["email"]
+    if facts.get("has_contact_method"):
+        detected_fields["contact_method"] = "known"
+    if facts.get("delivery_address"):
+        detected_fields["delivery_address"] = facts["delivery_address"]
+    else:
+        detected_address = _first_detected_address(detected_fields)
+        if detected_address:
+            detected_fields["delivery_address"] = detected_address
+
+    original_missing_fields = [
+        str(field).strip()
+        for field in (order.get("missing_fields") or [])
+        if str(field).strip()
+    ]
+    missing_fields = [
+        field
+        for field in original_missing_fields
+        if field.lower() not in CONTACT_METHOD_MISSING_FIELDS
+    ]
+    if facts.get("has_delivery_address"):
+        missing_fields = [
+            field
+            for field in missing_fields
+            if field.lower() not in ADDRESS_MISSING_FIELDS
+        ]
+
+    if not facts.get("has_contact_method"):
+        missing_fields = [
+            *missing_fields,
+            *([] if any(field.lower() in CONTACT_METHOD_MISSING_FIELDS for field in missing_fields) else ["phone_or_email"]),
+        ]
+        order["is_order_ready"] = False
+    elif original_missing_fields and not missing_fields:
+        order["is_order_ready"] = True
+
+    if order.get("is_order_ready") and not _has_fulfillment_detail(detected_fields, facts):
+        missing_fields = [
+            *missing_fields,
+            *([] if any(field.lower() in ADDRESS_MISSING_FIELDS for field in missing_fields) else ["delivery_address"]),
+        ]
+        order["is_order_ready"] = False
+
+    order["missing_fields"] = missing_fields
+    order["detected_fields"] = detected_fields
+    if missing_fields:
+        order["is_order_ready"] = False
+
+    updated_scope = dict(scope)
+    updated_scope["order"] = order
+    return updated_scope
+
+
+def _order_missing_info_reply(missing_fields: list[str]) -> str:
+    normalized = {str(field).strip().lower() for field in missing_fields}
+    questions = []
+    if normalized.intersection({"product", "product_or_service", "item", "service"}):
+        questions.append("sản phẩm bạn muốn đặt")
+    if normalized.intersection({"quantity", "purchase_scope", "scope"}):
+        questions.append("số lượng")
+    if normalized.intersection({"phone", "email", "phone_or_email", "contact_method"}):
+        questions.append("số điện thoại liên hệ")
+    if normalized.intersection({"address", "delivery_address", "delivery_or_pickup_details", "fulfillment"}):
+        questions.append("địa chỉ nhận hàng hoặc hình thức nhận hàng")
+
+    if not questions:
+        questions = ["thông tin còn thiếu để hoàn tất đơn hàng"]
+
+    if len(questions) == 1:
+        return f"Bạn vui lòng cho shop xin {questions[0]} để hoàn tất đơn hàng nhé."
+
+    return "Bạn vui lòng cho shop xin " + ", ".join(questions[:-1]) + f" và {questions[-1]} để hoàn tất đơn hàng nhé."
 
 
 def _score_summary(product_refs: list[dict[str, str | float]]) -> str:
@@ -351,12 +593,13 @@ Nhiệm vụ:
         return None
 
 
-async def generate_ai_response(
+async def generate_ai_response_result(
     db: AsyncSession,
     conversation: Conversation,
     user_message: str,
-) -> str | None:
-    """Generate a customer-facing AI response with selective query rewrite."""
+    contact: Contact | None = None,
+) -> dict:
+    """Generate a customer-facing AI response and reusable intent metadata."""
     try:
         try:
             history = await _get_chat_history(db, conversation.id)
@@ -369,11 +612,21 @@ async def generate_ai_response(
             )
             history = []
 
+        deterministic_order_facts = _build_deterministic_order_facts(
+            contact=contact,
+            user_message=user_message,
+            history=history,
+        )
+        _apply_contact_fact_updates(contact, deterministic_order_facts)
         scope = await classify_ai_scope(
             mode="customer_auto_reply",
             message=user_message,
             history_context=_format_history_for_rewrite(history, user_message),
+            contact_context=_format_contact_context_for_customer_ai(contact),
+            order_facts_context=_format_order_facts_for_classifier(deterministic_order_facts),
         )
+        scope = _apply_deterministic_order_facts(scope, deterministic_order_facts)
+        _apply_order_address_contact_update(contact, scope.get("order") or {})
         if not scope["should_answer"]:
             logger.info(
                 "Customer AI blocked out-of-scope message:\n%s",
@@ -385,9 +638,39 @@ async def generate_ai_response(
                     "message": user_message,
                 }),
             )
-            return CUSTOMER_OUT_OF_SCOPE_REPLY
+            return _response_result(CUSTOMER_OUT_OF_SCOPE_REPLY, scope)
+        order_detection = scope.get("order") or {}
+        if order_detection.get("is_order_intent"):
+            if order_detection.get("is_order_ready"):
+                logger.info(
+                    "Customer AI order ready from scope classifier:\n%s",
+                    pretty_log({
+                        "conversation_id": conversation.id,
+                        "confidence": scope.get("confidence"),
+                        "detected_fields": order_detection.get("detected_fields"),
+                    }),
+                )
+                return _response_result(ORDER_READY_HANDOFF_TEXT, scope)
+
+            reply = order_detection.get("reply") or _order_missing_info_reply(
+                order_detection.get("missing_fields") or []
+            )
+            logger.info(
+                "Customer AI order missing details from scope classifier:\n%s",
+                pretty_log({
+                    "conversation_id": conversation.id,
+                    "confidence": scope.get("confidence"),
+                    "missing_fields": order_detection.get("missing_fields"),
+                    "reply": reply,
+                }),
+            )
+            return _response_result(reply, scope)
+
         if scope["intent"] == "greeting":
-            return "Chào bạn! Shop có thể hỗ trợ bạn thông tin sản phẩm, tồn kho, giá hoặc chính sách mua hàng ạ."
+            return _response_result(
+                "Chào bạn! Shop có thể hỗ trợ bạn thông tin sản phẩm, giá hoặc chính sách mua hàng ạ.",
+                scope,
+            )
 
         try:
             current_search_result = await _search_relevant_product_refs(
@@ -550,8 +833,24 @@ Rules:
             "conversation_id": conversation.id,
             "preview": ai_text[:200],
         }))
-        return ai_text
+        return _response_result(ai_text, scope)
 
     except Exception as e:
         logger.error("Error generating AI response: %s", e, exc_info=True)
-        return None
+        return _response_result(None)
+
+
+async def generate_ai_response(
+    db: AsyncSession,
+    conversation: Conversation,
+    user_message: str,
+    contact: Contact | None = None,
+) -> str | None:
+    """Backward-compatible text-only customer AI response."""
+    result = await generate_ai_response_result(
+        db=db,
+        conversation=conversation,
+        user_message=user_message,
+        contact=contact,
+    )
+    return result.get("text")

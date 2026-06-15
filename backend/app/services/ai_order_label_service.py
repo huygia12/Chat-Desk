@@ -9,13 +9,12 @@ from app.models.contact import Contact
 from app.models.conversation import Conversation
 from app.models.conversation_assignment import ConversationLabelHistory
 from app.models.label import Label
-from app.models.message import Message
 from app.services.assignment_service import auto_assign_conversation
-from app.services.order_readiness_service import ORDER_READY_TRIGGER, detect_order_readiness
 from app.utils.logging import pretty_log
 from app.websocket.manager import manager
 
 logger = logging.getLogger(__name__)
+ORDER_READY_TRIGGER = "order_ready"
 
 
 def _label_payload(label: Label) -> dict:
@@ -46,18 +45,23 @@ async def get_order_ready_auto_labels(
     return result.scalars().all()
 
 
-async def _get_recent_messages(
-    db: AsyncSession,
-    conversation_id: uuid.UUID,
-    limit: int = 12,
-) -> list[Message]:
-    result = await db.execute(
-        select(Message)
-        .where(Message.conversation_id == conversation_id)
-        .order_by(Message.created_at.desc())
-        .limit(limit)
-    )
-    return list(reversed(result.scalars().all()))
+def _normalize_order_detection(order_detection: dict | None) -> dict:
+    order_detection = order_detection if isinstance(order_detection, dict) else {}
+    missing_fields = order_detection.get("missing_fields")
+    if not isinstance(missing_fields, list):
+        missing_fields = []
+    detected_fields = order_detection.get("detected_fields")
+    if not isinstance(detected_fields, dict):
+        detected_fields = {}
+
+    return {
+        "is_order_intent": bool(order_detection.get("is_order_intent")),
+        "is_order_ready": bool(order_detection.get("is_order_ready")),
+        "confidence": order_detection.get("confidence", 0.0),
+        "missing_fields": [str(item)[:80] for item in missing_fields],
+        "detected_fields": detected_fields,
+        "reason": str(order_detection.get("reason") or "").strip()[:500],
+    }
 
 
 async def apply_order_ready_labels_if_needed(
@@ -65,8 +69,26 @@ async def apply_order_ready_labels_if_needed(
     db: AsyncSession,
     conversation: Conversation,
     contact_id: uuid.UUID,
-    user_message: str,
+    order_detection: dict | None = None,
 ) -> dict:
+    detection = _normalize_order_detection(order_detection)
+    if not detection["is_order_ready"]:
+        logger.info(
+            "Order readiness not confirmed:\n%s",
+            pretty_log({
+                "conversation_id": conversation.id,
+                "confidence": detection["confidence"],
+                "missing_fields": detection["missing_fields"],
+                "reason": detection["reason"],
+            }),
+        )
+        return {
+            "applied": False,
+            "should_send_handoff": False,
+            "reason": detection["reason"] or "order is not ready",
+            "detection": detection,
+        }
+
     labels = await get_order_ready_auto_labels(db, conversation.business_id)
     if not labels:
         return {
@@ -89,29 +111,6 @@ async def apply_order_ready_labels_if_needed(
             "applied": False,
             "should_send_handoff": False,
             "reason": "contact not found",
-        }
-
-    history = await _get_recent_messages(db, conversation.id)
-    detection = await detect_order_readiness(
-        user_message=user_message,
-        history=history,
-        contact=contact,
-    )
-    if not detection["is_order_ready"]:
-        logger.info(
-            "Order readiness not confirmed:\n%s",
-            pretty_log({
-                "conversation_id": conversation.id,
-                "confidence": detection["confidence"],
-                "missing_fields": detection["missing_fields"],
-                "reason": detection["reason"],
-            }),
-        )
-        return {
-            "applied": False,
-            "should_send_handoff": False,
-            "reason": detection["reason"],
-            "detection": detection,
         }
 
     existing_label_ids = {label.id for label in contact.labels}

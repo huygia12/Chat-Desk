@@ -89,12 +89,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "en": "Invalid AI auto-apply trigger",
     },
     "Order ready handoff message": {
-        "vi": (
-            "Th\u00f4ng tin \u0111\u1eb7t h\u00e0ng c\u1ee7a b\u1ea1n \u0111\u00e3 "
-            "\u0111\u01b0\u1ee3c chuy\u1ec3n cho nh\u00e2n vi\u00ean, "
-            "ch\u00fang t\u00f4i s\u1ebd x\u1eed l\u00fd v\u00e0 li\u00ean "
-            "l\u1ea1c l\u1ea1i ngay."
-        ),
+        "vi": "Tôi đã xác nhận yêu cầu đặt hàng của bạn và đã chuyển hội thoại sang cho nhân viên CSKH, vui lòng đợi",
         "en": (
             "Your order information has been sent to our staff. "
             "We will process it and contact you shortly."

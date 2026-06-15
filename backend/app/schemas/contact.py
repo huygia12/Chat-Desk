@@ -13,6 +13,7 @@ class ContactOut(BaseModel):
     profile_pic_url: str | None = None
     visitor_email: str | None = None
     visitor_phone: str | None = None
+    visitor_address: str | None = None
     labels: list[LabelOut] = Field(default_factory=list)
     created_at: datetime
 

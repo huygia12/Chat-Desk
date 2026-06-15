@@ -54,6 +54,24 @@ const WIDGET_AVATAR_STYLE = {
   color: '#1677ff',
   border: '1px solid #b7d8ff',
 }
+const PLATFORM_AVATAR_STYLES = {
+  facebook: {
+    background: '#eef5ff',
+    color: '#1877F2',
+    border: '1px solid #bfd7ff',
+  },
+  instagram: {
+    background: '#fff0f6',
+    color: '#E4405F',
+    border: '1px solid #ffd6e7',
+  },
+  telegram: {
+    background: '#e6f7ff',
+    color: '#0088cc',
+    border: '1px solid #b5e7ff',
+  },
+  widget: WIDGET_AVATAR_STYLE,
+}
 
 const PLATFORM_LABELS = {
   facebook: 'Facebook',
@@ -676,16 +694,20 @@ export default function Chat() {
     })),
   ]
 
-  const getPlatformIcon = (platform) =>
-    platform === 'facebook' ? (
-      <FacebookOutlined style={{ color: '#1877F2' }} />
-    ) : platform === 'telegram' ? (
-      <SendOutlined style={{ color: '#0088cc' }} />
-    ) : platform === 'widget' ? (
-      <ShopOutlined style={{ color: '#1677ff' }} />
-    ) : (
-      <InstagramOutlined style={{ color: '#E4405F' }} />
-    )
+  const getPlatformIcon = (platform) => {
+    switch (platform) {
+      case 'facebook':
+        return <FacebookOutlined />
+      case 'instagram':
+        return <InstagramOutlined />
+      case 'telegram':
+        return <SendOutlined />
+      case 'widget':
+        return <ShopOutlined />
+      default:
+        return <UserOutlined />
+    }
+  }
 
   const parseAllowedOrigins = (value) => {
     if (!value) return []
@@ -715,14 +737,14 @@ export default function Chat() {
   const getConversationAvatar = (conv, size = 'default') => {
     const widgetFaviconUrl = getWidgetFaviconUrl(conv)
     const avatarSrc = conv?.contact?.profile_pic_url || widgetFaviconUrl || undefined
-    const isDefaultWidgetAvatar = conv?.platform === 'widget' && !avatarSrc
+    const avatarStyle = PLATFORM_AVATAR_STYLES[conv?.platform]
 
     return (
       <Avatar
         size={size}
         src={avatarSrc}
-        icon={avatarSrc ? undefined : getPlatformIcon(conv?.platform)}
-        style={isDefaultWidgetAvatar ? WIDGET_AVATAR_STYLE : undefined}
+        icon={getPlatformIcon(conv?.platform)}
+        style={avatarStyle}
       />
     )
   }

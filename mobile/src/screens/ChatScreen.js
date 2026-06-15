@@ -25,6 +25,7 @@ import dayjs from 'dayjs'
 export default function ChatScreen({ navigation, route }) {
   const { t } = useI18n()
   const listRef = useRef(null)
+  const pendingBottomConversationIdRef = useRef(null)
   const user = useAuthStore((state) => state.user)
   const colors = useThemeStore((state) => state.colors)
   const styles = useMemo(() => createStyles(colors), [colors])
@@ -78,12 +79,42 @@ export default function ChatScreen({ navigation, route }) {
   const isAiTyping = aiTypingConversationIds.some(
     (id) => String(id) === String(activeConversation?.id),
   )
+  const displayedMessages = useMemo(() => [...messages].reverse(), [messages])
+  const latestMessageId = messages[messages.length - 1]?.id
+
+  const scrollToConversationBottom = useCallback((animated = true) => {
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToOffset({ offset: 0, animated })
+    })
+  }, [])
 
   useEffect(() => {
-    if (messages.length || isAiTyping) {
-      requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }))
+    pendingBottomConversationIdRef.current = activeConversation?.id || null
+  }, [activeConversation?.id])
+
+  useEffect(() => {
+    if (
+      !messagesLoading &&
+      pendingBottomConversationIdRef.current &&
+      String(pendingBottomConversationIdRef.current) === String(activeConversation?.id) &&
+      (messages.length || isAiTyping)
+    ) {
+      pendingBottomConversationIdRef.current = null
+      scrollToConversationBottom(false)
     }
-  }, [isAiTyping, messages.length])
+  }, [activeConversation?.id, isAiTyping, messages.length, messagesLoading, scrollToConversationBottom])
+
+  useEffect(() => {
+    if (
+      messagesLoading ||
+      pendingBottomConversationIdRef.current ||
+      (!latestMessageId && !isAiTyping)
+    ) {
+      return
+    }
+
+    scrollToConversationBottom(true)
+  }, [isAiTyping, latestMessageId, messagesLoading, scrollToConversationBottom])
 
   const fetchHistory = useCallback(async () => {
     if (!activeConversation?.id) return
@@ -398,18 +429,18 @@ export default function ChatScreen({ navigation, route }) {
       ) : (
         <FlatList
           ref={listRef}
-          data={messages}
+          data={displayedMessages}
+          inverted
           keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => <MessageBubble message={item} />}
           contentContainerStyle={styles.messages}
-          onScroll={({ nativeEvent }) => {
-            if (nativeEvent.contentOffset.y < 32 && messagesHasMore && !olderMessagesLoading) {
+          onEndReached={() => {
+            if (messagesHasMore && !olderMessagesLoading) {
               loadOlderMessages()
             }
           }}
-          scrollEventThrottle={200}
-          ListHeaderComponent={olderMessagesLoading ? <ActivityIndicator style={styles.older} /> : null}
-          ListFooterComponent={isAiTyping ? (
+          onEndReachedThreshold={0.2}
+          ListHeaderComponent={isAiTyping ? (
             <View style={styles.aiTypingWrap}>
               <View style={styles.aiTypingBubble}>
                 <Avatar.Icon size={30} icon="robot-outline" style={styles.aiTypingAvatar} />
@@ -418,6 +449,7 @@ export default function ChatScreen({ navigation, route }) {
               </View>
             </View>
           ) : null}
+          ListFooterComponent={olderMessagesLoading ? <ActivityIndicator style={styles.older} /> : null}
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.emptyText}>{t('chat.empty')}</Text>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Animated,
   Alert,
@@ -64,6 +64,7 @@ export default function AIAssistantBubble() {
   const [clearingHistory, setClearingHistory] = useState(false)
   const [error, setError] = useState('')
   const listRef = useRef(null)
+  const pendingBottomScrollRef = useRef(false)
 
   const canUseAssistant = user?.role === 'business' || user?.role === 'employee'
   const activeCustomerName =
@@ -72,6 +73,14 @@ export default function AIAssistantBubble() {
     activeConversation?.contact?.visitor_phone ||
     activeConversation?.contact?.platform_user_id ||
     t('common.unknown')
+  const displayedHistory = useMemo(() => [...history].reverse(), [history])
+  const latestHistoryId = history[history.length - 1]?.id
+
+  const scrollToAssistantBottom = useCallback((animated = true) => {
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToOffset({ offset: 0, animated })
+    })
+  }, [])
 
   const clampPosition = (x, y) => ({
     x: Math.min(Math.max(EDGE_GAP, x), Math.max(EDGE_GAP, width - BUBBLE_SIZE - EDGE_GAP)),
@@ -124,15 +133,35 @@ export default function AIAssistantBubble() {
 
   useEffect(() => {
     if (open) {
+      pendingBottomScrollRef.current = true
       fetchHistory()
     }
   }, [open])
 
   useEffect(() => {
-    if (open && history.length) {
-      requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }))
+    if (
+      open &&
+      !loadingHistory &&
+      pendingBottomScrollRef.current &&
+      history.length
+    ) {
+      pendingBottomScrollRef.current = false
+      scrollToAssistantBottom(false)
     }
-  }, [history.length, open])
+  }, [history.length, loadingHistory, open, scrollToAssistantBottom])
+
+  useEffect(() => {
+    if (
+      !open ||
+      loadingHistory ||
+      pendingBottomScrollRef.current ||
+      (!latestHistoryId && !asking)
+    ) {
+      return
+    }
+
+    scrollToAssistantBottom(true)
+  }, [asking, latestHistoryId, loadingHistory, open, scrollToAssistantBottom])
 
   const fetchHistory = async () => {
     setLoadingHistory(true)
@@ -284,16 +313,25 @@ export default function AIAssistantBubble() {
 
           <FlatList
             ref={listRef}
-            data={history}
+            data={displayedHistory}
+            inverted
             keyExtractor={(item) => String(item.id)}
             contentContainerStyle={styles.history}
-            onScroll={({ nativeEvent }) => {
-              if (nativeEvent.contentOffset.y < 36) {
+            onEndReached={() => {
+              if (historyHasMore && !loadingOlderHistory) {
                 loadOlderHistory()
               }
             }}
-            scrollEventThrottle={200}
-            ListHeaderComponent={loadingOlderHistory ? <ActivityIndicator style={styles.olderLoader} /> : null}
+            onEndReachedThreshold={0.2}
+            ListHeaderComponent={
+              asking ? (
+                <View style={styles.thinkingRow}>
+                  <Avatar.Icon size={30} icon="robot-outline" style={styles.assistantAvatar} />
+                  <ActivityIndicator size="small" />
+                  <Text style={styles.thinkingText}>{t('aiAssistant.thinking')}</Text>
+                </View>
+              ) : null
+            }
             ListEmptyComponent={
               loadingHistory ? (
                 <View style={styles.center}>
@@ -307,15 +345,7 @@ export default function AIAssistantBubble() {
               )
             }
             renderItem={({ item }) => <AssistantMessage item={item} styles={styles} t={t} />}
-            ListFooterComponent={
-              asking ? (
-                <View style={styles.thinkingRow}>
-                  <Avatar.Icon size={30} icon="robot-outline" style={styles.assistantAvatar} />
-                  <ActivityIndicator size="small" />
-                  <Text style={styles.thinkingText}>{t('aiAssistant.thinking')}</Text>
-                </View>
-              ) : null
-            }
+            ListFooterComponent={loadingOlderHistory ? <ActivityIndicator style={styles.olderLoader} /> : null}
           />
 
           <Surface elevation={3} style={styles.composer}>

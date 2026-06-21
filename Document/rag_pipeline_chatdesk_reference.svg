@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1f2933"/>
+    </marker>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.14"/>
+    </filter>
+    <style>
+      .page { fill: #ffffff; }
+      .panel { fill: #f7f8fa; stroke: #1f2933; stroke-width: 2.4; }
+      .tab { fill: #f7f8fa; stroke: #1f2933; stroke-width: 2.4; }
+      .box-green { fill: #d9f3ec; stroke: #6b948a; stroke-width: 1.7; }
+      .box-blue { fill: #e1f3fb; stroke: #7898a6; stroke-width: 1.7; }
+      .box-yellow { fill: #fff4c9; stroke: #9b8951; stroke-width: 1.7; }
+      .box-purple { fill: #eee7ff; stroke: #8f7ac8; stroke-width: 1.7; }
+      .box-gray { fill: #e5e9ed; stroke: #8b949e; stroke-width: 1.7; }
+      .box-red { fill: #fde0dc; stroke: #b48c85; stroke-width: 1.7; }
+      .box-result { fill: #e5f3e4; stroke: #8fa28e; stroke-width: 1.7; }
+      .db { fill: #fff4c9; stroke: #9a8d5b; stroke-width: 1.7; }
+      .db-blue { fill: #e7f0ff; stroke: #8c9ab6; stroke-width: 1.7; }
+      .line { stroke: #1f2933; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .line-soft { stroke: #4b5563; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .line-dashed { stroke: #4b5563; stroke-width: 2; stroke-dasharray: 9 8; fill: none; marker-end: url(#arrow); }
+      .title { fill: #1f2933; font-family: Arial, Helvetica, sans-serif; font-size: 28px; font-weight: 700; }
+      .subtitle { fill: #1f2933; font-family: Arial, Helvetica, sans-serif; font-size: 24px; font-weight: 700; }
+      .boxtext { fill: #1f2933; font-family: Arial, Helvetica, sans-serif; font-size: 24px; }
+      .subtext { fill: #374151; font-family: Arial, Helvetica, sans-serif; font-size: 20px; }
+      .tag { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.2; }
+      .tagtext { fill: #1f2933; font-family: Arial, Helvetica, sans-serif; font-size: 18px; }
+      .note { fill: #374151; font-family: Arial, Helvetica, sans-serif; font-size: 19px; }
+      .num { fill: #ffffff; stroke: #1f2933; stroke-width: 1.6; }
+      .numtext { fill: #1f2933; font-family: Arial, Helvetica, sans-serif; font-size: 17px; font-weight: 700; }
+    </style>
+  </defs>
+
+  <rect class="page" x="0" y="0" width="1600" height="900"/>
+
+  <!-- Stage 1 -->
+  <path class="tab" d="M 36 34 H 390 Q 401 34 405 45 L 418 96 H 36 Z"/>
+  <text class="title" x="64" y="73">GĐ 1: Index tri thức</text>
+  <rect class="panel" x="36" y="96" width="456" height="790" rx="10"/>
+
+  <rect class="box-green" x="92" y="132" width="344" height="82" rx="8" filter="url(#softShadow)"/>
+  <circle class="num" cx="118" cy="156" r="16"/>
+  <text class="numtext" x="118" y="162" text-anchor="middle">1</text>
+  <text class="boxtext" x="264" y="166" text-anchor="middle">Dữ liệu sản phẩm</text>
+  <text class="subtext" x="264" y="194" text-anchor="middle">CRUD / Import JSON</text>
+
+  <line class="line" x1="264" y1="214" x2="264" y2="268"/>
+
+  <path class="db-blue" d="M 92 294 C 92 270, 436 270, 436 294 L 436 366 C 436 392, 92 392, 92 366 Z"/>
+  <ellipse class="db-blue" cx="264" cy="294" rx="172" ry="24"/>
+  <circle class="num" cx="118" cy="322" r="16"/>
+  <text class="numtext" x="118" y="328" text-anchor="middle">2</text>
+  <text class="boxtext" x="264" y="326" text-anchor="middle">PostgreSQL</text>
+  <text class="subtext" x="264" y="354" text-anchor="middle">nguồn dữ liệu chính</text>
+
+  <line class="line" x1="264" y1="392" x2="264" y2="454"/>
+
+  <rect class="box-green" x="72" y="454" width="384" height="92" rx="8" filter="url(#softShadow)"/>
+  <circle class="num" cx="98" cy="480" r="16"/>
+  <text class="numtext" x="98" y="486" text-anchor="middle">3</text>
+  <text class="boxtext" x="264" y="492" text-anchor="middle">Text embedding</text>
+  <text class="subtext" x="264" y="520" text-anchor="middle">name, SKU, giá, tồn kho...</text>
+
+  <line class="line" x1="264" y1="546" x2="264" y2="606"/>
+
+  <rect class="box-purple" x="72" y="606" width="384" height="92" rx="8" filter="url(#softShadow)"/>
+  <circle class="num" cx="98" cy="632" r="16"/>
+  <text class="numtext" x="98" y="638" text-anchor="middle">4</text>
+  <text class="boxtext" x="264" y="644" text-anchor="middle">Embedding service</text>
+  <text class="subtext" x="264" y="672" text-anchor="middle">all-MiniLM-L6-v2, 384d</text>
+
+  <line class="line" x1="264" y1="698" x2="264" y2="744"/>
+
+  <path class="db" d="M 70 768 C 70 742, 458 742, 458 768 L 458 844 C 458 872, 70 872, 70 844 Z"/>
+  <ellipse class="db" cx="264" cy="768" rx="194" ry="26"/>
+  <circle class="num" cx="102" cy="798" r="16"/>
+  <text class="numtext" x="102" y="804" text-anchor="middle">5</text>
+  <text class="boxtext" x="264" y="804" text-anchor="middle">Milvus / Zilliz</text>
+  <text class="subtext" x="264" y="832" text-anchor="middle">product_embeddings</text>
+  <text class="note" x="264" y="858" text-anchor="middle">product_id + business_id + vector</text>
+
+  <!-- Stage 2 -->
+  <path class="tab" d="M 548 34 H 1100 Q 1111 34 1115 45 L 1128 96 H 548 Z"/>
+  <text class="title" x="578" y="73">GĐ 2: RAG trả lời khách</text>
+  <rect class="panel" x="548" y="96" width="580" height="790" rx="10"/>
+
+  <rect class="box-blue" x="638" y="132" width="400" height="82" rx="8" filter="url(#softShadow)"/>
+  <circle class="num" cx="664" cy="156" r="16"/>
+  <text class="numtext" x="664" y="162" text-anchor="middle">6</text>
+  <text class="boxtext" x="838" y="166" text-anchor="middle">Tin nhắn khách</text>
+  <text class="subtext" x="838" y="194" text-anchor="middle">FB / IG / Telegram / Widget</text>
+
+  <line class="line" x1="838" y1="214" x2="838" y2="268"/>
+
+  <rect class="box-yellow" x="638" y="268" width="400" height="90" rx="8" filter="url(#softShadow)"/>
+  <circle class="num" cx="664" cy="294" r="16"/>
+  <text class="numtext" x="664" y="300" text-anchor="middle">7</text>
+  <text class="boxtext" x="838" y="306" text-anchor="middle">Scope + History</text>
+  <text class="subtext" x="838" y="334" text-anchor="middle">classify_ai_scope()</text>
+
+  <line class="line" x1="838" y1="358" x2="838" y2="424"/>
+
+  <rect class="box-purple" x="638" y="424" width="400" height="90" rx="8" filter="url(#softShadow)"/>
+  <circle class="num" cx="664" cy="450" r="16"/>
+  <text class="numtext" x="664" y="456" text-anchor="middle">8</text>
+  <text class="boxtext" x="838" y="462" text-anchor="middle">Query embedding</text>
+  <text class="subtext" x="838" y="490" text-anchor="middle">search theo business_id</text>
+
+  <path class="line-soft" d="M 638 468 H 588 V 850 H 458"/>
+  <rect class="tag" x="598" y="536" width="126" height="32" rx="8"/>
+  <text class="tagtext" x="661" y="558" text-anchor="middle">query vector</text>
+  <path class="line-soft" d="M 458 768 H 530 V 492 H 638"/>
+  <rect class="tag" x="544" y="682" width="104" height="32" rx="8"/>
+  <text class="tagtext" x="596" y="704" text-anchor="middle">id + score</text>
+
+  <line class="line" x1="838" y1="514" x2="838" y2="582"/>
+
+  <rect class="box-yellow" x="638" y="582" width="400" height="90" rx="8" filter="url(#softShadow)"/>
+  <circle class="num" cx="664" cy="608" r="16"/>
+  <text class="numtext" x="664" y="614" text-anchor="middle">9</text>
+  <text class="boxtext" x="838" y="620" text-anchor="middle">Scoring gate</text>
+  <text class="subtext" x="838" y="648" text-anchor="middle">score, margin, độ dài câu hỏi</text>
+
+  <rect class="box-gray" x="1046" y="552" width="78" height="108" rx="8" filter="url(#softShadow)"/>
+  <text class="tagtext" x="1085" y="596" text-anchor="middle">rewrite</text>
+  <text class="tagtext" x="1085" y="626" text-anchor="middle">nếu cần</text>
+  <path class="line-dashed" d="M 1038 628 H 1046"/>
+  <path class="line-dashed" d="M 1085 552 V 522 H 1038"/>
+  <rect class="tag" x="1048" y="486" width="116" height="32" rx="8"/>
+  <text class="tagtext" x="1106" y="508" text-anchor="middle">search lại</text>
+
+  <line class="line" x1="838" y1="672" x2="838" y2="726"/>
+  <rect class="tag" x="862" y="692" width="104" height="32" rx="8"/>
+  <text class="tagtext" x="914" y="714" text-anchor="middle">lọc score</text>
+
+  <rect class="box-blue" x="638" y="726" width="400" height="90" rx="8" filter="url(#softShadow)"/>
+  <circle class="num" cx="664" cy="752" r="16"/>
+  <text class="numtext" x="664" y="758" text-anchor="middle">10</text>
+  <text class="boxtext" x="838" y="764" text-anchor="middle">Product context</text>
+  <text class="subtext" x="838" y="792" text-anchor="middle">không fallback khi Milvus lỗi</text>
+
+  <path class="line-soft" d="M 436 354 H 506 V 784 H 638"/>
+  <rect class="tag" x="548" y="822" width="134" height="32" rx="8"/>
+  <text class="tagtext" x="615" y="844" text-anchor="middle">fetch product</text>
+
+  <!-- Stage 3 -->
+  <path class="tab" d="M 1190 34 H 1540 Q 1551 34 1555 45 L 1568 96 H 1190 Z"/>
+  <text class="title" x="1220" y="73">GĐ 3: Sinh phản hồi</text>
+  <rect class="panel" x="1190" y="96" width="378" height="790" rx="10"/>
+
+  <rect class="box-gray" x="1230" y="166" width="298" height="110" rx="8" filter="url(#softShadow)"/>
+  <circle class="num" cx="1258" cy="194" r="16"/>
+  <text class="numtext" x="1258" y="200" text-anchor="middle">11</text>
+  <text class="boxtext" x="1379" y="208" text-anchor="middle">Prompt</text>
+  <text class="subtext" x="1379" y="238" text-anchor="middle">business + product + history</text>
+  <text class="subtext" x="1379" y="264" text-anchor="middle">+ query used</text>
+
+  <path class="line-soft" d="M 1038 770 H 1160 V 222 H 1230"/>
+  <rect class="tag" x="1046" y="818" width="120" height="32" rx="8"/>
+  <text class="tagtext" x="1106" y="840" text-anchor="middle">build prompt</text>
+  <path class="line-soft" d="M 436 326 H 520 V 112 H 1164 V 222 H 1230"/>
+  <rect class="tag" x="1048" y="132" width="122" height="32" rx="8"/>
+  <text class="tagtext" x="1109" y="154" text-anchor="middle">business info</text>
+
+  <line class="line" x1="1379" y1="276" x2="1379" y2="394"/>
+  <rect class="tag" x="1406" y="326" width="92" height="32" rx="8"/>
+  <text class="tagtext" x="1452" y="348" text-anchor="middle">call LLM</text>
+
+  <rect class="box-red" x="1230" y="394" width="298" height="98" rx="8" filter="url(#softShadow)"/>
+  <circle class="num" cx="1258" cy="422" r="16"/>
+  <text class="numtext" x="1258" y="428" text-anchor="middle">12</text>
+  <text class="boxtext" x="1379" y="434" text-anchor="middle">LLM provider</text>
+  <text class="subtext" x="1379" y="464" text-anchor="middle">Groq / Gemini / OpenAI</text>
+
+  <line class="line" x1="1379" y1="492" x2="1379" y2="616"/>
+
+  <rect class="box-result" x="1230" y="616" width="298" height="110" rx="8" filter="url(#softShadow)"/>
+  <circle class="num" cx="1258" cy="644" r="16"/>
+  <text class="numtext" x="1258" y="650" text-anchor="middle">13</text>
+  <text class="boxtext" x="1379" y="660" text-anchor="middle">Phản hồi khách</text>
+  <text class="subtext" x="1379" y="690" text-anchor="middle">lưu + gửi đúng kênh</text>
+</svg>

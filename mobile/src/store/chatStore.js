@@ -15,6 +15,24 @@ const sortConversationsByActivity = (conversations) =>
     return String(b.id).localeCompare(String(a.id))
   })
 
+const sortMessagesByTime = (messages) =>
+  [...messages].sort((a, b) => {
+    const timeDiff = new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+    if (timeDiff !== 0) return timeDiff
+    return String(a.id).localeCompare(String(b.id))
+  })
+
+const mergeMessages = (currentMessages, incomingMessages) => {
+  const byId = new Map()
+  currentMessages.forEach((message) => {
+    byId.set(String(message.id), message)
+  })
+  incomingMessages.forEach((message) => {
+    byId.set(String(message.id), message)
+  })
+  return sortMessagesByTime([...byId.values()])
+}
+
 const mergeIncomingContact = (conversation, contact) => {
   if (!contact) return conversation
   return {
@@ -192,6 +210,22 @@ export const useChatStore = create((set, get) => ({
       ),
     }))
     return refreshed
+  },
+
+  refreshActiveMessages: async () => {
+    const conversation = get().activeConversation
+    if (!conversation?.id) return
+
+    const res = await client.get(`/api/conversations/${conversation.id}/messages`, {
+      params: { limit: MESSAGE_LIMIT },
+    })
+    set((state) => ({
+      messages: mergeMessages(state.messages, res.data.items || []),
+      messagesCursor: state.messagesCursor || res.data.next_cursor,
+      messagesHasMore: state.messagesHasMore || Boolean(res.data.has_more),
+    }))
+
+    await get().markConversationRead(conversation.id)
   },
 
   toggleAI: async (isEnabled) => {

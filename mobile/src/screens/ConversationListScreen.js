@@ -5,14 +5,12 @@ import { Appbar, ActivityIndicator, Button, Searchbar, SegmentedButtons, Text } 
 import BottomNavBar from '../components/BottomNavBar'
 import ConversationItem from '../components/ConversationItem'
 import { useI18n } from '../i18n/useI18n'
-import { connectChatSocket, disconnectChatSocket } from '../realtime/websocket'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
 import { useThemeStore } from '../store/themeStore'
 
 export default function ConversationListScreen({ navigation }) {
   const { t } = useI18n()
-  const token = useAuthStore((state) => state.token)
   const user = useAuthStore((state) => state.user)
   const colors = useThemeStore((state) => state.colors)
   const styles = useMemo(() => createStyles(colors), [colors])
@@ -26,9 +24,6 @@ export default function ConversationListScreen({ navigation }) {
     fetchConversations,
     refreshConversations,
     openConversation,
-    addMessage,
-    setAiTyping,
-    setContactLabels,
   } = useChatStore()
 
   useEffect(() => {
@@ -39,23 +34,6 @@ export default function ConversationListScreen({ navigation }) {
     const timer = setTimeout(() => fetchConversations({ reset: true }), 350)
     return () => clearTimeout(timer)
   }, [fetchConversations, filters.search])
-
-  useEffect(() => {
-    if (!token) return undefined
-    connectChatSocket(token, (data) => {
-      if (data.type === 'new_message') {
-        addMessage(
-          { ...data.message, conversation_id: data.conversation_id },
-          { contact: data.contact },
-        )
-      } else if (data.type === 'ai_typing') {
-        setAiTyping(data.conversation_id, Boolean(data.is_typing))
-      } else if (data.type === 'contact_labels_updated') {
-        setContactLabels(data.contact_id, data.labels || [])
-      }
-    })
-    return () => disconnectChatSocket()
-  }, [addMessage, setAiTyping, setContactLabels, token])
 
   const handleOpen = useCallback(async (conversation) => {
     await openConversation(conversation)

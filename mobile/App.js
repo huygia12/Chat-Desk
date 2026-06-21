@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
+import { AppState } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { PaperProvider } from 'react-native-paper'
@@ -26,6 +27,7 @@ import AccountSettingsScreen from './src/screens/AccountSettingsScreen'
 import MenuScreen from './src/screens/MenuScreen'
 import AIAssistantBubble from './src/components/AIAssistantBubble'
 import { registerForPushNotifications } from './src/notifications'
+import { connectChatSocket, disconnectChatSocket } from './src/realtime/websocket'
 import { navigate, navigationRef } from './src/navigation/rootNavigation'
 
 const Stack = createNativeStackNavigator()
@@ -51,8 +53,12 @@ export default function App() {
   const themeBootstrapped = useThemeStore((state) => state.bootstrapped)
   const isDark = useThemeStore((state) => state.isDark)
   const loadTheme = useThemeStore((state) => state.loadTheme)
+  const addMessage = useChatStore((state) => state.addMessage)
+  const setAiTyping = useChatStore((state) => state.setAiTyping)
+  const setContactLabels = useChatStore((state) => state.setContactLabels)
   const paperTheme = useMemo(() => createTheme(isDark), [isDark])
   const navigationTheme = useMemo(() => createNavigationTheme(isDark), [isDark])
+  const appStateRef = useRef(AppState.currentState)
 
   useEffect(() => {
     loadSession()
@@ -72,6 +78,51 @@ export default function App() {
         console.warn('Push registration failed:', error)
       })
     }
+  }, [token, user])
+
+  useEffect(() => {
+    if (!token || !user || !['business', 'employee'].includes(user.role)) return undefined
+
+    connectChatSocket(token, (data) => {
+      if (data.type === 'new_message') {
+        addMessage(
+          { ...data.message, conversation_id: data.conversation_id },
+          { contact: data.contact },
+        )
+      } else if (data.type === 'ai_typing') {
+        setAiTyping(data.conversation_id, Boolean(data.is_typing))
+      } else if (data.type === 'contact_labels_updated') {
+        setContactLabels(data.contact_id, data.labels || [])
+      }
+    })
+
+    return () => disconnectChatSocket()
+  }, [addMessage, setAiTyping, setContactLabels, token, user])
+
+  useEffect(() => {
+    if (!token || !user || !['business', 'employee'].includes(user.role)) return undefined
+
+    const syncChatState = async () => {
+      try {
+        const chatStore = useChatStore.getState()
+        await chatStore.refreshConversations()
+        await chatStore.refreshActiveConversation()
+        await chatStore.refreshActiveMessages()
+      } catch (error) {
+        console.warn('Failed to sync chat state:', error)
+      }
+    }
+
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      const previousState = appStateRef.current
+      appStateRef.current = nextState
+
+      if (nextState === 'active' && previousState !== 'active') {
+        syncChatState()
+      }
+    })
+
+    return () => subscription.remove()
   }, [token, user])
 
   useEffect(() => {
